@@ -1,0 +1,121 @@
+[
+ {
+  "code": "ACF",
+  "name": "Agriculture, Conservation and Forestry",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "AFA",
+  "name": "Appropriations and Financial Affairs",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "CJP",
+  "name": "Criminal Justice and Public Safety",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "EDU",
+  "name": "Education and Cultural Affairs",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "EUT",
+  "name": "Energy, Utilities and Technology",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 2
+ },
+ {
+  "code": "ENR",
+  "name": "Environment and Natural Resources",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "HHS",
+  "name": "Health and Human Services",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "HCIFS",
+  "name": "Health Coverage, Insurance and Financial Services",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 1
+ },
+ {
+  "code": "HED",
+  "name": "Housing and Economic Development",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 1
+ },
+ {
+  "code": "IFW",
+  "name": "Inland Fisheries and Wildlife",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "JUD",
+  "name": "Judiciary",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 3
+ },
+ {
+  "code": "LAB",
+  "name": "Labor",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "MAR",
+  "name": "Marine Resources",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "SLG",
+  "name": "State and Local Government",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "TAX",
+  "name": "Taxation",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "TRA",
+  "name": "Transportation",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ },
+ {
+  "code": "VLA",
+  "name": "Veterans and Legal Affairs",
+  "chamber": "joint",
+  "members": [],
+  "bill_count": 0
+ }
+]

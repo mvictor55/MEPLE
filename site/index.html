@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEPLE — The Maine Platform for Legislative Engagement</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Ccircle cx='17' cy='17' r='16' fill='%2314503C'/%3E%3Cpath d='M17 6l1.8 4.2 4.4-1-2.4 3.8 3.7 2.4-4.3 1 .5 4.4-3.7-2.5-3.7 2.5.5-4.4-4.3-1 3.7-2.4-2.4-3.8 4.4 1L17 6z' fill='%23F3C98B'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --pine:#14503C; --pine-deep:#0E3B2C; --pine-soft:#EAF2EE; --pine-mid:#1B6A50;
+    --maple:#C9762B; --maple-soft:#FBF1E6;
+    --paper:#FAF9F6; --card:#FFFFFF; --ink:#1A1A17; --ink-2:#52514E; --ink-3:#898781;
+    --hairline:#E5E3DC; --hairline-2:#D8D5CC;
+    --support:#0CA30C; --support-ink:#066306; --support-soft:#E9F6E9;
+    --oppose:#D03B3B; --oppose-ink:#9E2323; --oppose-soft:#FBEBEB;
+    --neutral:#898781; --neutral-ink:#52514E; --neutral-soft:#F0EFEC;
+    --amber-ink:#8A5314; --amber-soft:#FBF1DE;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+    --sans:system-ui,-apple-system,'Segoe UI',sans-serif;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(20,40,30,.06),0 4px 16px rgba(20,40,30,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.55;font-size:16px}
+  a{color:var(--pine-mid);text-decoration:none}
+  a:hover{text-decoration:underline}
+  button{font-family:inherit;cursor:pointer}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+  .ribbon{background:var(--pine-deep);color:#DCEBE3;font-size:12.5px;text-align:center;padding:6px 16px;letter-spacing:.01em}
+  .ribbon strong{color:#fff;font-weight:600}
+
+  header.site{position:sticky;top:0;z-index:50;background:rgba(250,249,246,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--hairline)}
+  .site-inner{display:flex;align-items:center;gap:28px;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;color:var(--pine);text-decoration:none}
+  .brand:hover{text-decoration:none}
+  .brand svg{flex:none}
+  .brand .word{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1}
+  .brand .word em{font-style:normal;color:var(--maple)}
+  .brand .tag{display:block;font-family:var(--sans);font-size:10.5px;font-weight:500;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+  nav.main{display:flex;gap:4px;margin-left:auto}
+  nav.main a{padding:8px 13px;border-radius:8px;font-size:14.5px;font-weight:500;color:var(--ink-2)}
+  nav.main a:hover{background:var(--pine-soft);color:var(--pine);text-decoration:none}
+  nav.main a.active{background:var(--pine-soft);color:var(--pine);font-weight:600}
+  .hdr-cta{background:var(--pine);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14.5px;font-weight:600;white-space:nowrap}
+  .hdr-cta:hover{background:var(--pine-deep)}
+
+  .hero{position:relative;background:linear-gradient(180deg,var(--pine-deep) 0%,var(--pine) 100%);color:#fff;overflow:hidden}
+  .hero .wrap{position:relative;padding-top:72px;padding-bottom:64px}
+  .hero h1{font-family:var(--serif);font-size:clamp(34px,5vw,52px);line-height:1.12;letter-spacing:-.015em;max-width:640px}
+  .hero h1 em{font-style:italic;color:#F3C98B}
+  .hero p.lede{margin-top:18px;font-size:18px;max-width:560px;color:#D9E6DF}
+  .hero .leafbg{position:absolute;right:-40px;top:-30px;opacity:.10;pointer-events:none}
+  .searchbar{margin-top:30px;display:flex;max-width:600px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+  .searchbar input{flex:1;min-width:0;border:none;outline:none;padding:16px 18px;font-size:16px;color:var(--ink)}
+  .searchbar button{border:none;background:var(--maple);color:#fff;font-weight:600;font-size:15px;padding:0 24px}
+  .searchbar button:hover{background:#B3661F}
+  .hero .hint{margin-top:12px;font-size:13px;color:#A9C4B7}
+  .hero .hint a{color:#E9D9A8;text-decoration:underline}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:-34px;position:relative;z-index:5}
+  .stat{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+  .stat .n{font-size:30px;font-weight:700;letter-spacing:-.02em;color:var(--pine)}
+  .stat .l{font-size:13px;color:var(--ink-2);margin-top:2px}
+
+  section.block{padding:52px 0 8px}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px}
+  .sec-head h2{font-family:var(--serif);font-size:27px;letter-spacing:-.01em;color:var(--ink)}
+  .sec-head .more{font-size:14px;font-weight:600}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+
+  .bill-card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .15s,border-color .15s;cursor:pointer}
+  .bill-card:hover{box-shadow:var(--shadow);border-color:var(--hairline-2)}
+  .ld{font-size:12.5px;font-weight:700;letter-spacing:.05em;color:var(--maple)}
+  .bill-card h3{font-family:var(--serif);font-size:17.5px;line-height:1.32;font-weight:600}
+  .bill-card .meta{font-size:13px;color:var(--ink-2)}
+  .bill-card .foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;gap:8px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px;white-space:nowrap}
+  .chip .dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .chip.enacted{background:var(--support-soft);color:var(--support-ink)} .chip.enacted .dot{background:var(--support)}
+  .chip.vetoed{background:var(--oppose-soft);color:var(--oppose-ink)} .chip.vetoed .dot{background:var(--oppose)}
+  .chip.died{background:var(--neutral-soft);color:var(--neutral-ink)} .chip.died .dot{background:var(--neutral)}
+  .chip.held{background:var(--amber-soft);color:var(--amber-ink)} .chip.held .dot{background:#C9862B}
+  .chip.pending{background:var(--pine-soft);color:var(--pine)} .chip.pending .dot{background:var(--pine-mid)}
+  .chip.withdrawn{background:var(--neutral-soft);color:var(--neutral-ink)} .chip.withdrawn .dot{background:var(--neutral)}
+  .tcount{font-size:13px;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+  .tcount svg{opacity:.6}
+
+  .how{background:var(--pine-soft);border-radius:16px;padding:36px;margin:56px 0 0}
+  .how h2{font-family:var(--serif);font-size:26px;margin-bottom:24px;color:var(--pine-deep)}
+  .how .grid-3 .step{background:#fff;border:1px solid #D8E5DE;border-radius:var(--radius);padding:22px}
+  .step .num{width:32px;height:32px;border-radius:50%;background:var(--pine);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;margin-bottom:12px}
+  .step h3{font-size:16.5px;margin-bottom:6px}
+  .step p{font-size:14px;color:var(--ink-2)}
+
+  .steward{display:flex;gap:28px;align-items:center;background:var(--card);border:1px solid var(--hairline);border-radius:16px;padding:30px 34px;margin:48px 0}
+  .steward .seal{flex:none;width:76px;height:76px;border-radius:50%;background:var(--pine-soft);display:flex;align-items:center;justify-content:center}
+  .steward h3{font-family:var(--serif);font-size:20px;margin-bottom:4px}
+  .steward p{font-size:14.5px;color:var(--ink-2);max-width:720px}
+
+  .page-head{background:linear-gradient(180deg,#fff 0%,var(--paper) 100%);border-bottom:1px solid var(--hairline);padding:40px 0 28px}
+  .page-head h1{font-family:var(--serif);font-size:34px;letter-spacing:-.01em}
+  .page-head p{color:var(--ink-2);margin-top:6px;max-width:640px}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0 20px}
+  .toolbar input[type=search]{flex:1;min-width:240px;border:1px solid var(--hairline-2);border-radius:8px;padding:10px 14px;font-size:15px;background:#fff;outline-color:var(--pine-mid)}
+  .toolbar select{border:1px solid var(--hairline-2);border-radius:8px;padding:10px 12px;font-size:14px;background:#fff;color:var(--ink-2);outline-color:var(--pine-mid);max-width:100%}
+  .result-note{font-size:13.5px;color:var(--ink-3);margin-bottom:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .list{display:flex;flex-direction:column;gap:12px;padding-bottom:64px}
+  .pager{display:flex;gap:8px;justify-content:center;padding:8px 0 64px}
+  .pager button{border:1px solid var(--hairline-2);background:#fff;border-radius:8px;padding:8px 14px;font-size:14px}
+  .pager button[disabled]{opacity:.4;cursor:default}
+
+  .bill-row{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:18px 22px;display:grid;grid-template-columns:1fr auto;gap:6px 20px;cursor:pointer;transition:box-shadow .15s}
+  .bill-row:hover{box-shadow:var(--shadow)}
+  .bill-row h3{font-family:var(--serif);font-size:17px;font-weight:600;line-height:1.35}
+  .bill-row .meta{font-size:13px;color:var(--ink-2)}
+  .bill-row .right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;justify-content:center}
+
+  .crumb{font-size:13px;color:var(--ink-3);margin-bottom:14px}
+  .bd-grid{display:grid;grid-template-columns:1fr 320px;gap:28px;padding:32px 0 64px}
+  .bd-main h1{font-family:var(--serif);font-size:27px;line-height:1.25;letter-spacing:-.01em;margin:6px 0 14px}
+  .bd-meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;color:var(--ink-2);margin-bottom:20px}
+  .bd-meta b{color:var(--ink)}
+  .panel{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+  .panel h2{font-size:15px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:600;margin-bottom:12px}
+  .panel p.summary{font-size:15.5px;line-height:1.6;white-space:pre-line}
+  .src{font-size:12.5px;color:var(--ink-3);margin-top:10px}
+  .timeline{list-style:none;position:relative;padding-left:22px}
+  .timeline::before{content:'';position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--hairline-2)}
+  .timeline li{position:relative;padding:0 0 14px 8px;font-size:14px;color:var(--ink-2)}
+  .timeline li::before{content:'';position:absolute;left:-20px;top:5px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--pine-mid)}
+  .timeline li.final::before{background:var(--pine-mid)}
+  .timeline li b{color:var(--ink);display:block;font-size:14.5px}
+  .kv{font-size:14px;color:var(--ink-2);display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+  .kv b{color:var(--ink);font-weight:600}
+  table.plain{width:100%;border-collapse:collapse;font-size:14px}
+  table.plain th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);padding:6px 8px 6px 0;border-bottom:1px solid var(--hairline)}
+  table.plain td{padding:7px 8px 7px 0;border-bottom:1px solid var(--hairline);vertical-align:top;color:var(--ink-2)}
+  table.plain td:first-child{white-space:nowrap}
+  .stancebar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--neutral-soft);margin:10px 0 12px}
+  .stancebar span{height:100%}
+  .stancebar .gap{width:2px;background:var(--card);flex:none}
+  .stance-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+  .stance-legend .key{display:inline-flex;align-items:center;gap:6px}
+  .stance-legend .sw{width:10px;height:10px;border-radius:3px;flex:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;font-weight:600;font-size:15px;padding:11px 18px;border:1px solid transparent}
+  .btn.primary{background:var(--pine);color:#fff}
+  .btn.primary:hover{background:var(--pine-deep);text-decoration:none}
+  .btn.ghost{background:#fff;color:var(--pine);border-color:var(--hairline-2)}
+  .btn.ghost:hover{background:var(--pine-soft);text-decoration:none}
+  .btn.block{width:100%}
+  .btn.sm{font-size:13px;padding:6px 11px}
+  .side-note{font-size:12.5px;color:var(--ink-3);margin-top:10px;line-height:1.5}
+
+  .t-item{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:18px 22px}
+  .t-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .t-head .who{font-weight:600;font-size:15px}
+  .t-head .where{font-size:13px;color:var(--ink-3)}
+  .t-body{font-size:15px;color:var(--ink-2);line-height:1.62;white-space:pre-line}
+  .t-body.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+  .t-foot{margin-top:10px;font-size:12.5px;color:var(--ink-3);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .t-foot a,.t-foot button{font-weight:600;font-size:12.5px;color:var(--pine-mid);background:none;border:none;padding:0}
+  .stance-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:999px;padding:3px 11px}
+  .stance-pill.support{background:var(--support-soft);color:var(--support-ink)}
+  .stance-pill.oppose{background:var(--oppose-soft);color:var(--oppose-ink)}
+  .stance-pill.neutral{background:var(--neutral-soft);color:var(--neutral-ink)}
+  .stance-pill.none{background:transparent;color:var(--ink-3);border:1px dashed var(--hairline-2);font-weight:600}
+  .mine{border-color:var(--maple);box-shadow:0 0 0 1px var(--maple)}
+  .mine-tag{display:inline-block;background:var(--maple-soft);color:var(--amber-ink);font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 8px;margin-left:4px}
+  .record-tag{display:inline-block;background:var(--pine-soft);color:var(--pine);font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 8px}
+
+  .leg-card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:20px;cursor:pointer;transition:box-shadow .15s;display:flex;gap:14px;align-items:flex-start}
+  .leg-card:hover{box-shadow:var(--shadow)}
+  .avatar{flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff}
+  .avatar.d{background:var(--pine-mid)} .avatar.r{background:#8A5314} .avatar.i{background:#52514E} .avatar.u{background:#52514E}
+  .leg-card h3{font-size:16px}
+  .leg-card .role{font-size:12.5px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em}
+  .leg-card .meta{font-size:13px;color:var(--ink-2);margin-top:2px}
+
+  .com-card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:18px 20px;cursor:pointer;transition:box-shadow .15s}
+  .com-card:hover{box-shadow:var(--shadow)}
+  .com-card h3{font-family:var(--serif);font-size:16.5px;font-weight:600}
+  .com-card .meta{font-size:13px;color:var(--ink-2);margin-top:4px}
+
+  .prose{max-width:720px;padding:36px 0 72px}
+  .prose h2{font-family:var(--serif);font-size:24px;margin:32px 0 10px}
+  .prose p{margin-bottom:14px;font-size:16px;color:var(--ink-2)}
+  .prose p b{color:var(--ink)}
+
+  .overlay{position:fixed;inset:0;background:rgba(14,40,30,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal{background:#fff;border-radius:16px;width:640px;max-width:100%;max-height:90vh;overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,.25)}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 26px;border-bottom:1px solid var(--hairline)}
+  .modal-head h2{font-family:var(--serif);font-size:20px}
+  .modal-head .steps{font-size:12.5px;color:var(--ink-3);font-weight:600}
+  .modal-x{border:none;background:none;font-size:22px;color:var(--ink-3);line-height:1;padding:4px 8px;border-radius:6px}
+  .modal-x:hover{background:var(--neutral-soft)}
+  .modal-body{padding:24px 26px}
+  .modal-body .billref{font-size:13.5px;color:var(--ink-2);background:var(--pine-soft);border-radius:8px;padding:10px 14px;margin-bottom:20px}
+  .stance-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .stance-choice{border:2px solid var(--hairline-2);border-radius:12px;background:#fff;padding:20px 12px;text-align:center;font-size:15px;font-weight:600;color:var(--ink-2);display:flex;flex-direction:column;align-items:center;gap:8px}
+  .stance-choice .ic{font-size:24px;line-height:1}
+  .stance-choice:hover{border-color:var(--pine-mid)}
+  .stance-choice.sel-support{border-color:var(--support);background:var(--support-soft);color:var(--support-ink)}
+  .stance-choice.sel-oppose{border-color:var(--oppose);background:var(--oppose-soft);color:var(--oppose-ink)}
+  .stance-choice.sel-neutral{border-color:var(--neutral);background:var(--neutral-soft);color:var(--neutral-ink)}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:13.5px;font-weight:600;margin-bottom:6px}
+  .field input,.field textarea{width:100%;border:1px solid var(--hairline-2);border-radius:8px;padding:10px 13px;font-size:15px;font-family:inherit;outline-color:var(--pine-mid)}
+  .field textarea{min-height:150px;resize:vertical;line-height:1.55}
+  .field .sub{font-size:12.5px;color:var(--ink-3);margin-top:5px}
+  .tips{background:var(--maple-soft);border-radius:8px;padding:13px 16px;font-size:13.5px;color:var(--amber-ink);margin-bottom:18px}
+  .tips b{display:block;margin-bottom:4px}
+  .modal-foot{display:flex;justify-content:space-between;gap:10px;padding:18px 26px;border-top:1px solid var(--hairline)}
+  .review-box{border:1px solid var(--hairline);border-radius:10px;padding:18px;margin-top:6px}
+  .review-box .rb-head{display:flex;gap:10px;align-items:center;margin-bottom:8px;font-weight:600}
+  .review-box p{font-size:14.5px;color:var(--ink-2);white-space:pre-wrap}
+  .success{text-align:center;padding:16px 8px 8px}
+  .success .big{width:64px;height:64px;border-radius:50%;background:var(--support-soft);color:var(--support-ink);font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+  .success h3{font-family:var(--serif);font-size:22px;margin-bottom:8px}
+  .success p{color:var(--ink-2);font-size:14.5px;max-width:440px;margin:0 auto 8px}
+  .demo-note{background:var(--neutral-soft);border-radius:8px;font-size:12.5px;color:var(--ink-2);padding:10px 14px;margin-top:16px;text-align:left}
+
+  footer.site{background:var(--pine-deep);color:#B7CCC2;margin-top:0;padding:44px 0 36px;font-size:14px}
+  footer .cols{display:grid;grid-template-columns:2fr 1fr 1fr;gap:32px}
+  footer h4{color:#fff;font-size:13px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+  footer a{color:#D5E4DC;display:block;margin-bottom:6px}
+  footer .fine{border-top:1px solid rgba(255,255,255,.14);margin-top:32px;padding-top:18px;font-size:12.5px;color:#8FA99D}
+  .f-brand{font-family:var(--serif);font-size:20px;color:#fff;font-weight:700}
+  .f-brand em{font-style:normal;color:#F3C98B}
+
+  #app{min-height:60vh}
+  .empty{padding:48px;text-align:center;color:var(--ink-3)}
+  .loading{padding:48px;text-align:center;color:var(--ink-3);font-size:14px}
+  @media(max-width:900px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .grid-3,.grid-2{grid-template-columns:1fr}
+    .bd-grid{grid-template-columns:1fr}
+    nav.main{display:none}
+    footer .cols{grid-template-columns:1fr}
+    .stance-choices{grid-template-columns:1fr}
+    .bill-row{grid-template-columns:1fr}
+    .bill-row .right{align-items:flex-start;flex-direction:row;flex-wrap:wrap}
+    .steward{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+<div class="ribbon" id="ribbon"></div>
+
+<header class="site">
+  <div class="wrap site-inner">
+    <a class="brand" href="#/" aria-label="MEPLE home">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+        <circle cx="17" cy="17" r="16" fill="#14503C"/>
+        <path d="M17 6l1.8 4.2 4.4-1-2.4 3.8 3.7 2.4-4.3 1 .5 4.4-3.7-2.5-3.7 2.5.5-4.4-4.3-1 3.7-2.4-2.4-3.8 4.4 1L17 6z" fill="#F3C98B"/>
+        <rect x="16.2" y="20" width="1.6" height="7" rx="0.8" fill="#F3C98B"/>
+      </svg>
+      <span>
+        <span class="word">ME<em>PLE</em></span>
+        <span class="tag">Maine Platform for Legislative Engagement</span>
+      </span>
+    </a>
+    <nav class="main" id="nav">
+      <a href="#/bills" data-nav="bills">Bills</a>
+      <a href="#/testimony" data-nav="testimony">Testimony</a>
+      <a href="#/legislators" data-nav="legislators">Legislators</a>
+      <a href="#/committees" data-nav="committees">Committees</a>
+      <a href="#/about" data-nav="about">About</a>
+    </nav>
+    <button class="hdr-cta" onclick="openSubmit()">Submit testimony</button>
+  </div>
+</header>
+
+<main id="app" aria-live="polite"><div class="loading">Loading…</div></main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <div class="f-brand">ME<em>PLE</em></div>
+        <p style="margin-top:10px;max-width:380px">An open civic platform to read and publish testimony on the bills before the Maine State Legislature — free, nonpartisan, and built in the open.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <a href="#/bills">Browse bills</a>
+        <a href="#/testimony">Testimony archive</a>
+        <a href="#/legislators">Find your legislators</a>
+        <a href="#/committees">Committees</a>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <a href="#/about">About MEPLE</a>
+        <a href="#/about">Stewardship &amp; governance</a>
+        <a href="#/about">Open source</a>
+      </div>
+    </div>
+    <div class="fine" id="footfine">
+      Stewarded by the <b style="color:#D5E4DC">Center for Engaged Citizenship, University of Southern Maine</b> · Adapted from MAPLE, the open-source Massachusetts Platform for Legislative Engagement (Code for Boston · NuLawLab, Northeastern University · Harvard Berkman Klein).
+    </div>
+  </div>
+</footer>
+
+<div id="modal-root"></div>
+
+<script>
+/* =========================================================
+   MEPLE — data-driven static site.
+   All content is read from ./data/*.json, which the pipeline
+   (../pipeline) generates from the Maine Legislature's public
+   record. Nothing legislative is hard-coded here.
+   ========================================================= */
+
+const DATA_ROOT = "data";
+const D = { meta:null, committees:[], legislators:[], index:[], bills:{}, texts:{}, tindex:null };
+const PAGE = 50;
+
+/* ---------- loading ---------- */
+async function getJSON(path){
+  const r = await fetch(`${DATA_ROOT}/${path}`, {cache:"no-cache"});
+  if(!r.ok) throw new Error(`${path}: ${r.status}`);
+  return r.json();
+}
+async function loadCore(){
+  const [meta, committees, legislators, index] = await Promise.all([
+    getJSON("meta.json"), getJSON("committees.json"), getJSON("legislators.json"), getJSON("bills/index.json")
+  ]);
+  Object.assign(D, {meta, committees, legislators, index});
+  D.legById = Object.fromEntries(legislators.map(l=>[l.id,l]));
+  D.comByCode = Object.fromEntries(committees.map(c=>[c.code,c]));
+  D.idxByLd = Object.fromEntries(index.map(b=>[b.ld,b]));
+}
+async function loadBill(ld){
+  if(!D.bills[ld]) D.bills[ld] = await getJSON(`bills/LD${ld}.json`);
+  return D.bills[ld];
+}
+async function loadTexts(ld){
+  if(!D.texts[ld]){
+    try { D.texts[ld] = await getJSON(`testimony/LD${ld}.json`); } catch(e){ D.texts[ld] = {}; }
+  }
+  return D.texts[ld];
+}
+async function loadTestimonyIndex(){
+  if(!D.tindex){ try { D.tindex = await getJSON("testimony/index.json"); } catch(e){ D.tindex = []; } }
+  return D.tindex;
+}
+
+/* ---------- state ---------- */
+let userTestimony = []; // testimony submitted through MEPLE in this session (demo)
+let submitState = null;
+
+/* ---------- helpers ---------- */
+const $ = sel => document.querySelector(sel);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtN = n => Number(n||0).toLocaleString();
+const legName = (id, short=true) => {
+  const l = D.legById[id]; if(!l) return "—";
+  const pre = l.chamber==="Senate" ? "Sen." : "Rep.";
+  return short ? `${pre} ${l.name}` : `${pre} ${l.name} (${l.party}-${l.town||""})`;
+};
+const legLink = id => D.legById[id] ? `<a href="#/legislator/${esc(id)}">${esc(legName(id))}</a>` : "—";
+const comName = code => (D.comByCode[code]||{}).name || code || "—";
+const STANCE_META = { support:{label:"Support", icon:"✓"}, oppose:{label:"Oppose", icon:"✗"}, neutral:{label:"Neither for nor against", icon:"–"} };
+const STATUS_LABELS = {enacted:"Enacted / signed", vetoed:"Vetoed", died:"Died", held:"Held by Governor", pending:"Pending / carried over", withdrawn:"Withdrawn"};
+
+function statusChip(b){
+  const cls = ["enacted","vetoed","died","held","pending","withdrawn"].includes(b.status) ? b.status : "died";
+  return `<span class="chip ${cls}"><span class="dot"></span>${esc(b.status_label || STATUS_LABELS[b.status] || b.status)}</span>`;
+}
+function stancePill(st, source){
+  if(!st) return `<span class="stance-pill none">Position not recorded</span>`;
+  const m = STANCE_META[st] || {label:st, icon:""};
+  const title = source==="inferred" ? ' title="Position inferred from the text of the testimony"' : '';
+  return `<span class="stance-pill ${esc(st)}"${title}>${m.icon} ${esc(m.label)}${source==="inferred"?"*":""}</span>`;
+}
+function tIcon(){
+  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+}
+function billTestimonyCount(row){ return (row.testimony_count||0) + userTestimony.filter(t=>t.ld===row.ld).length; }
+
+function positionCounts(items){
+  const c = {support:0, neutral:0, oppose:0, unknown:0};
+  for(const t of items){ if(c[t.position]!==undefined) c[t.position]++; else c.unknown++; }
+  return c;
+}
+function stanceBar(items){
+  const c = positionCounts(items);
+  const tot = c.support + c.neutral + c.oppose;
+  if(!tot) return `<p class="src">No positions recorded for the testimony on this bill.</p>`;
+  const pct = k => Math.max(2,(c[k]/tot*100));
+  return `
+    <div class="stancebar" role="img" aria-label="${c.support} support, ${c.neutral} neither, ${c.oppose} oppose">
+      <span style="width:${pct('support')}%;background:var(--support)"></span><span class="gap"></span>
+      <span style="width:${pct('neutral')}%;background:var(--neutral)"></span><span class="gap"></span>
+      <span style="width:${pct('oppose')}%;background:var(--oppose)"></span>
+    </div>
+    <div class="stance-legend">
+      <span class="key"><span class="sw" style="background:var(--support)"></span><b>${c.support}</b>&nbsp;Support</span>
+      <span class="key"><span class="sw" style="background:var(--neutral)"></span><b>${c.neutral}</b>&nbsp;Neither</span>
+      <span class="key"><span class="sw" style="background:var(--oppose)"></span><b>${c.oppose}</b>&nbsp;Oppose</span>
+      ${c.unknown?`<span class="key"><b>${c.unknown}</b>&nbsp;without a recorded position</span>`:""}
+    </div>`;
+}
+
+/* ---------- shared pieces ---------- */
+function billCard(b){
+  return `
+  <article class="bill-card" onclick="location.hash='#/bill/${b.ld}'">
+    <div class="ld">LD ${b.ld} · ${esc(D.meta.legislature.toUpperCase())}</div>
+    <h3>${esc(b.title)}</h3>
+    <div class="meta">Sponsored by ${esc(legName(b.sponsor_id,false))} · ${esc(comName(b.committee_code))}</div>
+    <div class="foot">
+      ${statusChip(b)}
+      <span class="tcount">${tIcon()} ${fmtN(billTestimonyCount(b))} testimonies</span>
+    </div>
+  </article>`;
+}
+function billRow(b){
+  return `<article class="bill-row" onclick="location.hash='#/bill/${b.ld}'">
+    <div>
+      <div class="ld">LD ${b.ld}${b.paper?` · ${esc(b.paper)}`:""}</div>
+      <h3>${esc(b.title)}</h3>
+      <div class="meta">${esc(legName(b.sponsor_id,false))} · ${esc(comName(b.committee_code))}${b.hearing_date?` · Hearing ${esc(b.hearing_date)}`:""}</div>
+    </div>
+    <div class="right">${statusChip(b)}<span class="tcount">${tIcon()} ${fmtN(billTestimonyCount(b))} testimonies</span></div>
+  </article>`;
+}
+function testimonyItem(t, text, opts={}){
+  const b = D.idxByLd[t.ld];
+  const who = t.organization ? `${t.name}${t.name?", ":""}${t.organization}` : t.name;
+  const where = [t.town, t.date].filter(Boolean).join(" · ");
+  const id = `t-${esc(t.id)}`;
+  const body = text!=null
+    ? `<div class="t-body ${opts.clamp?"clamp":""}" id="${id}">${esc(text)}</div>`
+    : `<div class="t-body" style="color:var(--ink-3)">Text not yet extracted.${t.url?` <a href="${esc(t.url)}" target="_blank" rel="noopener">Open the official PDF →</a>`:""}</div>`;
+  return `<article class="t-item ${t.mine?"mine":""}">
+    <div class="t-head">${stancePill(t.position, t.position_source)}<span class="who">${esc(who)}${t.mine?'<span class="mine-tag">Submitted through MEPLE · demo</span>':""}</span><span class="where">${esc(where)}</span></div>
+    ${body}
+    <div class="t-foot">
+      ${opts.showBill && b ? `<span>LD ${b.ld} — ${esc(b.title.length>76?b.title.slice(0,74)+"…":b.title)}</span><a href="#/bill/${b.ld}">View bill →</a>` : ""}
+      ${text!=null && opts.clamp && text.length>320 ? `<button onclick="document.getElementById('${id}').classList.toggle('clamp');this.textContent=this.textContent==='Read more'?'Show less':'Read more'">Read more</button>` : ""}
+      ${t.url ? `<a href="${esc(t.url)}" target="_blank" rel="noopener">Official PDF ↗</a>` : ""}
+      ${t.position_source==="inferred" ? `<span>* position inferred from the text</span>` : ""}
+    </div>
+  </article>`;
+}
+
+/* ---------- views ---------- */
+function viewHome(){
+  const featured = (D.meta.featured||[]).map(ld=>D.idxByLd[ld]).filter(Boolean);
+  const top = featured.length ? featured : [...D.index].sort((a,b)=>(b.testimony_count||0)-(a.testimony_count||0)).slice(0,3);
+  const c = D.meta.counts||{};
+  const loaded = c.bills_loaded ?? D.index.length;
+  const firstLd = top[0] ? top[0].ld : null;
+  // archive sample is loaded asynchronously below
+  setTimeout(async()=>{
+    const slot = document.getElementById("home-archive"); if(!slot) return;
+    let items=[];
+    for(const row of top){
+      try{ const b = await loadBill(row.ld); const tx = await loadTexts(row.ld);
+        for(const t of (b.testimony||[])){ if(tx[t.id]){ items.push({t:{...t, ld:row.ld}, text:tx[t.id]}); if(items.length>=3) break; } }
+      }catch(e){}
+      if(items.length>=3) break;
+    }
+    slot.innerHTML = items.length ? items.map(x=>testimonyItem(x.t, x.text.length>240?x.text.slice(0,238)+"…":x.text, {showBill:true})).join("") : `<div class="empty">No testimony loaded yet.</div>`;
+  },0);
+  return `
+  <div class="hero">
+    <svg class="leafbg" width="420" height="420" viewBox="0 0 34 34" fill="none">
+      <path d="M17 6l1.8 4.2 4.4-1-2.4 3.8 3.7 2.4-4.3 1 .5 4.4-3.7-2.5-3.7 2.5.5-4.4-4.3-1 3.7-2.4-2.4-3.8 4.4 1L17 6z" fill="#fff"/>
+    </svg>
+    <div class="wrap">
+      <h1>The people's voice, <em>on the record</em> in Augusta.</h1>
+      <p class="lede">MEPLE makes it easy for any Mainer to read, search, and publish testimony on the bills before the Maine State Legislature — in plain language, all in one place, free forever.</p>
+      <form class="searchbar" onsubmit="event.preventDefault(); location.hash='#/bills?q='+encodeURIComponent(this.q.value)">
+        <input name="q" type="search" placeholder="Search bills — try &quot;data center&quot;, &quot;privacy&quot;, or an LD number…" aria-label="Search bills">
+        <button type="submit">Search</button>
+      </form>
+      <div class="hint">${top.length?`Most testimony: ${top.map(b=>`<a href="#/bill/${b.ld}">LD ${b.ld}</a>`).join(" · ")}`:""}</div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="n">${fmtN(loaded)}</div><div class="l">Bills on MEPLE${c.bills_introduced && c.bills_introduced!==loaded?` of ${fmtN(c.bills_introduced)} introduced`:""}, ${esc(D.meta.legislature)}</div></div>
+      <div class="stat"><div class="n">${fmtN((c.testimony||0)+userTestimony.length)}</div><div class="l">Testimonies on record</div></div>
+      <div class="stat"><div class="n">${fmtN(c.legislators||D.legislators.length)}</div><div class="l">Legislators — ${fmtN(c.house||151)} House · ${fmtN(c.senate||35)} Senate</div></div>
+      <div class="stat"><div class="n">${fmtN(c.committees||D.committees.length)}</div><div class="l">Joint standing committees</div></div>
+    </div>
+
+    <section class="block">
+      <div class="sec-head">
+        <h2>Bills Mainers are talking about</h2>
+        <a class="more" href="#/bills">Browse all bills →</a>
+      </div>
+      <div class="grid-3">${top.map(billCard).join("")}</div>
+    </section>
+
+    <section class="block">
+      <div class="sec-head">
+        <h2>From the testimony archive</h2>
+        <a class="more" href="#/testimony">Read all testimony →</a>
+      </div>
+      <div class="grid-3" id="home-archive"><div class="loading">Loading…</div></div>
+    </section>
+
+    <div class="how">
+      <h2>How it works</h2>
+      <div class="grid-3">
+        <div class="step"><div class="num">1</div><h3>Find your bill</h3><p>Search by keyword, LD number, committee, or sponsor. Every bill carries the official summary alongside the bill text and its history.</p></div>
+        <div class="step"><div class="num">2</div><h3>Write your testimony</h3><p>Say whether you support, oppose, or are neither for nor against — in your own words. Guided prompts help first-timers write testimony that committees actually read.</p></div>
+        <div class="step"><div class="num">3</div><h3>Publish &amp; deliver</h3><p>Your testimony is delivered to the committee and published in a permanent public archive alongside everything already on the Legislature's record.</p></div>
+      </div>
+    </div>
+
+    <div class="steward">
+      <div class="seal">
+        <svg width="40" height="40" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="16" fill="#14503C"/><path d="M17 6l1.8 4.2 4.4-1-2.4 3.8 3.7 2.4-4.3 1 .5 4.4-3.7-2.5-3.7 2.5.5-4.4-4.3-1 3.7-2.4-2.4-3.8 4.4 1L17 6z" fill="#F3C98B"/></svg>
+      </div>
+      <div>
+        <h3>Stewarded by the Center for Engaged Citizenship at the University of Southern Maine</h3>
+        <p>MEPLE adapts MAPLE — the open-source civic platform proven in Massachusetts and built by Code for Boston, NuLawLab at Northeastern, and collaborators — for Maine's Legislature. Nonpartisan, independent, and free to every Mainer. <a href="#/about">Read the full story →</a></p>
+      </div>
+    </div>
+  </div>`;
+}
+
+function viewBills(params){
+  const q = (params.get("q")||"").trim().toLowerCase();
+  const com = params.get("committee")||"";
+  const st = params.get("status")||"";
+  const sort = params.get("sort")||"testimony";
+  const page = Math.max(1, Number(params.get("page")||1));
+  const ldq = q.replace(/^ld\s*/,"");
+  let list = D.index.filter(b=>{
+    const s = D.legById[b.sponsor_id];
+    const hay = `ld ${b.ld} ${b.paper||""} ${b.title} ${(b.tags||[]).join(" ")} ${s?s.name:""} ${comName(b.committee_code)}`.toLowerCase();
+    const qok = !q || hay.includes(q) || (/^\d+$/.test(ldq) && String(b.ld)===ldq);
+    return qok && (!com || b.committee_code===com) && (!st || b.status===st);
+  });
+  if(sort==="testimony") list.sort((a,b)=>(b.testimony_count||0)-(a.testimony_count||0) || a.ld-b.ld);
+  else if(sort==="ld") list.sort((a,b)=>a.ld-b.ld);
+  else if(sort==="title") list.sort((a,b)=>a.title.localeCompare(b.title));
+  const pages = Math.max(1, Math.ceil(list.length/PAGE));
+  const slice = list.slice((page-1)*PAGE, page*PAGE);
+  const sample = D.meta.sample;
+  return `
+  <div class="page-head"><div class="wrap">
+    <h1>Bills</h1>
+    <p>Every bill before the ${esc(D.meta.legislature)} (${esc(D.meta.years)}), with the official summary, committee history, and public testimony.${sample?" This demonstration shows a featured selection.":""}</p>
+  </div></div>
+  <div class="wrap">
+    <div class="toolbar">
+      <input type="search" placeholder="Search by keyword, LD number, sponsor…" value="${esc(params.get("q")||"")}"
+        oninput="updateParam('q', this.value, true)" aria-label="Search bills">
+      <select onchange="updateParam('committee', this.value, true)" aria-label="Filter by committee">
+        <option value="">All committees</option>
+        ${D.committees.map(c=>`<option ${c.code===com?"selected":""} value="${esc(c.code)}">${esc(c.name)}</option>`).join("")}
+      </select>
+      <select onchange="updateParam('status', this.value, true)" aria-label="Filter by status">
+        <option value="">Any outcome</option>
+        ${Object.entries(STATUS_LABELS).map(([k,v])=>`<option value="${k}" ${st===k?"selected":""}>${v}</option>`).join("")}
+      </select>
+      <select onchange="updateParam('sort', this.value, true)" aria-label="Sort">
+        <option value="testimony" ${sort==="testimony"?"selected":""}>Most testimony</option>
+        <option value="ld" ${sort==="ld"?"selected":""}>LD number</option>
+        <option value="title" ${sort==="title"?"selected":""}>Title</option>
+      </select>
+    </div>
+    <div class="result-note"><span>${fmtN(list.length)} bill${list.length===1?"":"s"}${sample?" · demonstration data set":""}</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
+    <div class="list">
+      ${slice.length ? slice.map(billRow).join("") : `<div class="empty">No bills match those filters. <a href="#/bills">Clear filters</a></div>`}
+    </div>
+    ${pages>1?`<div class="pager"><button ${page<=1?"disabled":""} onclick="updateParam('page',${page-1})">← Previous</button><button ${page>=pages?"disabled":""} onclick="updateParam('page',${page+1})">Next →</button></div>`:""}
+  </div>`;
+}
+
+function historyList(b){
+  // Merge committee actions and chamber actions into one dated list; fall back to the hand-written timeline.
+  const ev = [];
+  for(const a of (b.committee_actions||[])) ev.push({date:a.date, label:`${a.action}${a.result?` — ${a.result}`:""}`, where:b.committee_name||comName(b.committee_code)});
+  for(const a of (b.chamber_actions||[])) ev.push({date:a.date, label:a.action, where:a.chamber});
+  if(!ev.length && b.timeline) return b.timeline.map(e=>`<li class="${e.final?"final":""}"><b>${esc(e.label)}</b>${esc(e.date||"")}</li>`).join("");
+  ev.sort((x,y)=>String(x.date).localeCompare(String(y.date)));
+  const fd = b.final_disposition && b.final_disposition.label ? `<li class="final"><b>${esc(b.final_disposition.label)}</b>${esc(b.final_disposition.date||"")}</li>` : "";
+  return ev.map(e=>`<li><b>${esc(e.label)}</b>${esc(e.date||"")}${e.where?` · ${esc(e.where)}`:""}</li>`).join("") + fd;
+}
+
+async function viewBill(ld){
+  const row = D.idxByLd[Number(ld)];
+  if(!row) return `<div class="wrap"><div class="empty">Bill not found. <a href="#/bills">Back to bills</a></div></div>`;
+  let b; try { b = await loadBill(row.ld); } catch(e){ return `<div class="wrap"><div class="empty">Couldn't load LD ${esc(ld)}. <a href="#/bills">Back to bills</a></div></div>`; }
+  const texts = await loadTexts(row.ld);
+  const mine = userTestimony.filter(t=>t.ld===row.ld).map(t=>({...t, mine:true}));
+  const filed = (b.testimony||[]).map(t=>({...t, ld:row.ld}));
+  const all = [...mine, ...filed];
+  const sum = b.summary||{};
+  const docs = b.documents||[];
+  const reports = b.committee_reports||[];
+  const amendments = b.amendments||[];
+  const rolls = b.roll_calls||[];
+  const cos = b.cosponsor_ids||[];
+  return `
+  <div class="wrap">
+    <div class="bd-grid">
+      <div class="bd-main">
+        <div class="crumb"><a href="#/bills">Bills</a> / LD ${b.ld}</div>
+        <div class="ld">LD ${b.ld}${b.paper?` · ${esc(b.paper)}`:""} · ${esc(D.meta.legislature.toUpperCase())}</div>
+        <h1>${esc(b.title)}</h1>
+        <div class="bd-meta">
+          <span>Sponsor: <b>${legLink(b.sponsor_id)}</b>${D.legById[b.sponsor_id]?` (${esc(D.legById[b.sponsor_id].party)}-${esc(D.legById[b.sponsor_id].town||"")})`:""}</span>
+          <span>Committee: <b><a href="#/committee/${esc(b.committee_code)}">${esc(b.committee_name||comName(b.committee_code))}</a></b></span>
+          <span>${statusChip(b)}</span>
+        </div>
+        ${cos.length?`<div class="bd-meta" style="margin-top:-10px"><span>Cosponsors: ${cos.map(legLink).join(", ")}</span></div>`:""}
+        <div class="panel">
+          <h2>${sum.official?"Summary from the bill text":"Summary"}</h2>
+          <p class="summary">${esc(sum.text||"No summary available.")}</p>
+          ${sum.source?`<div class="src">Source: ${esc(sum.source)}${sum.official?" (Office of the Revisor of Statutes)":""}</div>`:""}
+        </div>
+        <div class="panel">
+          <h2>Public testimony · ${fmtN(all.length)} on record</h2>
+          ${stanceBar(all)}
+          ${filed.length && !b.sample?`<div class="src" style="margin-bottom:6px"><span class="record-tag">Legislature's record</span> Written testimony filed with the ${esc(b.committee_name||comName(b.committee_code))} Committee${b.hearing&&b.hearing.date?` for the ${esc(b.hearing.date)} public hearing`:""}.</div>`:""}
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px">
+            ${all.length ? all.map(t=>testimonyItem(t, t.mine ? t.text : (texts[t.id] ?? null), {clamp:true})).join("") : `<div class="empty">No testimony on record for this bill.</div>`}
+          </div>
+        </div>
+      </div>
+      <aside>
+        <div class="panel">
+          <h2>Add your voice</h2>
+          <button class="btn primary block" onclick="openSubmit(${b.ld})">Submit testimony on LD ${b.ld}</button>
+          <div class="side-note">In the live platform, testimony is delivered to the ${esc(b.committee_name||comName(b.committee_code))} Committee and published to the permanent archive. This demo keeps everything on your screen.</div>
+        </div>
+        ${docs.length?`<div class="panel"><h2>Documents</h2>${docs.map(d=>`<div style="font-size:14px;margin-bottom:6px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.label)} ↗</a></div>`).join("")}</div>`:""}
+        <div class="panel">
+          <h2>Status history</h2>
+          <ul class="timeline">${historyList(b)}</ul>
+        </div>
+        ${reports.length?`<div class="panel"><h2>Committee report</h2>
+          ${reports.map(r=>`<div style="font-size:14px;margin-bottom:10px"><b>${esc(r.label||"Report")}${r.recommendation?` — ${esc(r.recommendation)}`:""}</b>${r.signer_ids&&r.signer_ids.length?`<div style="color:var(--ink-2);margin-top:3px">${r.signer_ids.map(legLink).join(", ")}</div>`:(r.signers&&r.signers.length?`<div style="color:var(--ink-2);margin-top:3px">${r.signers.map(esc).join(", ")}</div>`:"")}</div>`).join("")}
+        </div>`:""}
+        ${amendments.length?`<div class="panel"><h2>Amendments</h2><table class="plain"><tr><th>Amendment</th><th>Status</th></tr>
+          ${amendments.map(a=>`<tr><td>${a.url?`<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.id)}</a>`:esc(a.id)}</td><td>${esc(a.status||"")}${a.sponsor?` · ${esc(a.sponsor)}`:""}${a.fiscal_note_url?` · <a href="${esc(a.fiscal_note_url)}" target="_blank" rel="noopener">fiscal note</a>`:""}</td></tr>`).join("")}
+        </table></div>`:""}
+        ${rolls.length?`<div class="panel"><h2>Roll-call votes</h2><table class="plain"><tr><th>Date</th><th>Vote</th></tr>
+          ${rolls.map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.chamber||"")} ${esc(r.motion||"")}<br><b>${esc(r.yea)}–${esc(r.nay)}</b>${r.result?` · ${esc(r.result)}`:""}${r.url?` · <a href="${esc(r.url)}" target="_blank" rel="noopener">record</a>`:""}</td></tr>`).join("")}
+        </table></div>`:""}
+        ${(b.tags||[]).length?`<div class="panel"><h2>Topics</h2><div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${b.tags.map(t=>`<a class="chip died" href="#/bills?q=${encodeURIComponent(t)}">${esc(t)}</a>`).join("")}</div></div>`:""}
+        ${(b.sources||[]).length?`<div class="panel"><h2>Sources</h2>${b.sources.map(s=>`<div style="font-size:13px;margin-bottom:6px;word-break:break-all"><a href="${esc(s)}" target="_blank" rel="noopener">${esc(s.replace(/^https?:\/\//,""))}</a></div>`).join("")}</div>`:""}
+      </aside>
+    </div>
+  </div>`;
+}
+
+async function viewTestimony(params){
+  const rows = await loadTestimonyIndex();
+  const st = params.get("position")||"";
+  const com = params.get("committee")||"";
+  const q = (params.get("q")||"").trim().toLowerCase();
+  const page = Math.max(1, Number(params.get("page")||1));
+  let all = [...userTestimony.map(t=>({...t, mine:true})), ...rows].filter(t=>
+    (!st || t.position===st) && (!com || t.committee_code===com) &&
+    (!q || `${t.name||""} ${t.organization||""} ${t.town||""} ld ${t.ld} ${(D.idxByLd[t.ld]||{}).title||""}`.toLowerCase().includes(q))
+  );
+  const pages = Math.max(1, Math.ceil(all.length/PAGE));
+  const slice = all.slice((page-1)*PAGE, page*PAGE);
+  // Load texts for the bills on this page
+  const lds = [...new Set(slice.map(t=>t.ld))];
+  await Promise.all(lds.map(loadTexts));
+  return `
+  <div class="page-head"><div class="wrap">
+    <h1>Testimony archive</h1>
+    <p>Every piece of written testimony on the Legislature's public record for the ${esc(D.meta.legislature)}, plus testimony published through MEPLE. What Mainers tell their Legislature shouldn't disappear into a filing cabinet.</p>
+  </div></div>
+  <div class="wrap">
+    <div class="toolbar">
+      <input type="search" placeholder="Search by name, organization, town, or LD number…" value="${esc(params.get("q")||"")}" oninput="updateParam('q', this.value, true)" aria-label="Search testimony">
+      <select onchange="updateParam('committee', this.value, true)" aria-label="Filter by committee">
+        <option value="">All committees</option>
+        ${D.committees.map(c=>`<option ${c.code===com?"selected":""} value="${esc(c.code)}">${esc(c.name)}</option>`).join("")}
+      </select>
+      <select onchange="updateParam('position', this.value, true)" aria-label="Filter by position">
+        <option value="">All positions</option>
+        <option value="support" ${st==="support"?"selected":""}>✓ Support</option>
+        <option value="neutral" ${st==="neutral"?"selected":""}>– Neither for nor against</option>
+        <option value="oppose" ${st==="oppose"?"selected":""}>✗ Oppose</option>
+      </select>
+    </div>
+    <div class="result-note"><span>${fmtN(all.length)} testimonies${D.meta.sample?" · sample content for demonstration":""}</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
+    <div class="list">
+      ${slice.length ? slice.map(t=>testimonyItem(t, t.mine ? t.text : ((D.texts[t.ld]||{})[t.id] ?? null), {showBill:true, clamp:true})).join("") : `<div class="empty">No testimony matches those filters.</div>`}
+    </div>
+    ${pages>1?`<div class="pager"><button ${page<=1?"disabled":""} onclick="updateParam('page',${page-1})">← Previous</button><button ${page>=pages?"disabled":""} onclick="updateParam('page',${page+1})">Next →</button></div>`:""}
+  </div>`;
+}
+
+function initials(name){ return name.split(" ").filter(w=>/^[A-Za-z]/.test(w)).map(w=>w[0]).slice(0,2).join(""); }
+function partyName(p){ return {D:"Democrat", R:"Republican", I:"Independent", U:"Unenrolled"}[p] || p || ""; }
+function legCard(l){
+  return `<article class="leg-card" onclick="location.hash='#/legislator/${esc(l.id)}'">
+    <div class="avatar ${(l.party||"u").toLowerCase()}">${esc(initials(l.name))}</div>
+    <div>
+      ${l.role?`<div class="role">${esc(l.role)}</div>`:""}
+      <h3>${l.chamber==="Senate"?"Sen.":"Rep."} ${esc(l.name)}</h3>
+      <div class="meta">${esc(partyName(l.party))} · ${esc(l.district?`${l.chamber} District ${l.district}`:"")}${l.town?` · ${esc(l.town)}`:""}</div>
+    </div>
+  </article>`;
+}
+function viewLegislators(params){
+  const q = (params.get("q")||"").trim().toLowerCase();
+  const ch = params.get("chamber")||"";
+  const pt = params.get("party")||"";
+  const list = D.legislators.filter(l => (!q || `${l.name} ${(l.towns||[]).join(" ")} ${l.district||""}`.toLowerCase().includes(q)) && (!ch || l.chamber===ch) && (!pt || l.party===pt))
+    .sort((a,b)=>(a.chamber===b.chamber?0:(a.chamber==="Senate"?-1:1)) || a.name.split(" ").pop().localeCompare(b.name.split(" ").pop()));
+  return `
+  <div class="page-head"><div class="wrap">
+    <h1>Legislators</h1>
+    <p>Maine's citizen Legislature: 151 Representatives and 35 Senators.${D.meta.sample?" This demonstration profiles leadership and the sponsors of featured bills.":""}</p>
+  </div></div>
+  <div class="wrap">
+    <div class="toolbar">
+      <input type="search" placeholder="Search by name, town, or district…" value="${esc(params.get("q")||"")}" oninput="updateParam('q', this.value, true)" aria-label="Search legislators">
+      <select onchange="updateParam('chamber', this.value, true)"><option value="">Both chambers</option><option value="House" ${ch==="House"?"selected":""}>House</option><option value="Senate" ${ch==="Senate"?"selected":""}>Senate</option></select>
+      <select onchange="updateParam('party', this.value, true)"><option value="">All parties</option><option value="D" ${pt==="D"?"selected":""}>Democrat</option><option value="R" ${pt==="R"?"selected":""}>Republican</option><option value="I" ${pt==="I"?"selected":""}>Independent</option><option value="U" ${pt==="U"?"selected":""}>Unenrolled</option></select>
+    </div>
+    <div class="result-note"><span>${fmtN(list.length)} legislators</span></div>
+    <div class="grid-2" style="padding:0 0 64px">${list.map(legCard).join("")||`<div class="empty">No legislators match.</div>`}</div>
+  </div>`;
+}
+
+function viewLegislator(id){
+  const l = D.legById[id];
+  if(!l) return `<div class="wrap"><div class="empty">Not found. <a href="#/legislators">Back to legislators</a></div></div>`;
+  const sponsored = D.index.filter(b=>b.sponsor_id===id).sort((a,b)=>a.ld-b.ld);
+  const cosponsored = D.index.filter(b=>(b.cosponsor_ids||[]).includes(id)).sort((a,b)=>a.ld-b.ld);
+  const coms = (l.committees||[]).map(c=>typeof c==="string"?{code:c}:c);
+  return `
+  <div class="wrap">
+    <div class="bd-grid">
+      <div class="bd-main">
+        <div class="crumb"><a href="#/legislators">Legislators</a> / ${esc(l.name)}</div>
+        <div style="display:flex;gap:18px;align-items:center;margin:8px 0 18px">
+          <div class="avatar ${(l.party||"u").toLowerCase()}" style="width:64px;height:64px;font-size:20px">${esc(initials(l.name))}</div>
+          <div>
+            ${l.role?`<div class="role" style="font-size:12.5px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em">${esc(l.role)}</div>`:""}
+            <h1 style="font-family:var(--serif);font-size:28px">${l.chamber==="Senate"?"Sen.":"Rep."} ${esc(l.name)}</h1>
+            <div style="color:var(--ink-2);font-size:14.5px">${esc(partyName(l.party))}${l.district?` · ${esc(l.chamber)} District ${esc(l.district)}`:""}${(l.towns||[]).length?` · ${esc(l.towns.join(", "))}`:""}</div>
+          </div>
+        </div>
+        ${l.bio?`<div class="panel"><h2>About</h2><p class="summary">${esc(l.bio)}</p></div>`:""}
+        <div class="panel">
+          <h2>Sponsored bills · ${fmtN(sponsored.length)}</h2>
+          ${sponsored.length ? `<div style="display:flex;flex-direction:column;gap:12px">${sponsored.map(billRow).join("")}</div>` : `<p style="color:var(--ink-2);font-size:14.5px">No sponsored bills in the loaded data.</p>`}
+        </div>
+        ${cosponsored.length?`<div class="panel"><h2>Cosponsored bills · ${fmtN(cosponsored.length)}</h2><div style="display:flex;flex-direction:column;gap:12px">${cosponsored.map(billRow).join("")}</div></div>`:""}
+      </div>
+      <aside>
+        ${coms.length?`<div class="panel"><h2>Committees</h2>${coms.map(c=>`<div style="font-size:14px;margin-bottom:6px"><a href="#/committee/${esc(c.code)}">${esc(comName(c.code))}</a>${c.role?` <span style="color:var(--ink-3)">· ${esc(c.role)}</span>`:""}</div>`).join("")}</div>`:""}
+        ${l.url?`<div class="panel"><h2>Official page</h2><a href="${esc(l.url)}" target="_blank" rel="noopener" style="font-size:14px">legislature.maine.gov ↗</a></div>`:""}
+        <div class="panel">
+          <h2>Find your legislators</h2>
+          <p style="font-size:14px;color:var(--ink-2);margin-bottom:12px">In the live platform, enter your address to see your Representative and Senator, the committees they sit on, and every bill they've sponsored.</p>
+          <button class="btn ghost block" onclick="alert('In the live platform, this looks up your district by address.')">Look up my district</button>
+        </div>
+      </aside>
+    </div>
+  </div>`;
+}
+
+function viewCommittees(){
+  return `
+  <div class="page-head"><div class="wrap">
+    <h1>Joint standing committees</h1>
+    <p>Where the real work happens. Every Maine bill gets a public hearing before one of these committees — and every hearing is an opportunity to testify, in person, by Zoom, or in writing.</p>
+  </div></div>
+  <div class="wrap">
+    <div class="grid-3" style="padding:28px 0 64px">
+      ${D.committees.map(c=>{
+        const n = D.index.filter(b=>b.committee_code===c.code).length;
+        const t = D.index.filter(b=>b.committee_code===c.code).reduce((s,b)=>s+(b.testimony_count||0),0);
+        return `<article class="com-card" onclick="location.hash='#/committee/${esc(c.code)}'">
+          <h3>${esc(c.name)}</h3>
+          <div class="meta">${fmtN(n)} bill${n===1?"":"s"}${t?` · ${fmtN(t)} testimonies`:""}${(c.members||[]).length?` · ${c.members.length} members`:""}</div>
+        </article>`;
+      }).join("")}
+    </div>
+  </div>`;
+}
+
+function viewCommittee(code){
+  const c = D.comByCode[code];
+  if(!c) return `<div class="wrap"><div class="empty">Committee not found. <a href="#/committees">Back to committees</a></div></div>`;
+  const bills = D.index.filter(b=>b.committee_code===code).sort((a,b)=>(b.testimony_count||0)-(a.testimony_count||0) || a.ld-b.ld);
+  const members = (c.members||[]).map(m=>typeof m==="string"?{id:m}:m);
+  const chairs = members.filter(m=>/chair/i.test(m.role||""));
+  const rest = members.filter(m=>!/chair/i.test(m.role||""));
+  const memberLine = m => `<div style="font-size:14px;margin-bottom:6px">${legLink(m.id)}${m.role?` <span style="color:var(--ink-3)">· ${esc(m.role)}</span>`:""}</div>`;
+  return `
+  <div class="wrap">
+    <div class="bd-grid">
+      <div class="bd-main">
+        <div class="crumb"><a href="#/committees">Committees</a> / ${esc(c.name)}</div>
+        <h1 style="font-family:var(--serif);font-size:28px;margin:6px 0 14px">Joint Standing Committee on ${esc(c.name)}</h1>
+        ${c.description?`<div class="panel"><h2>Jurisdiction</h2><p class="summary">${esc(c.description)}</p></div>`:""}
+        <div class="panel">
+          <h2>Bills referred · ${fmtN(bills.length)}</h2>
+          ${bills.length?`<div style="display:flex;flex-direction:column;gap:12px">${bills.slice(0,100).map(billRow).join("")}</div>${bills.length>100?`<p class="src"><a href="#/bills?committee=${esc(code)}">See all ${fmtN(bills.length)} bills →</a></p>`:""}`:`<p style="color:var(--ink-2);font-size:14.5px">No bills loaded for this committee yet.</p>`}
+        </div>
+      </div>
+      <aside>
+        <div class="panel"><h2>Members</h2>
+          ${members.length ? chairs.map(memberLine).join("") + (chairs.length&&rest.length?`<div style="height:8px"></div>`:"") + rest.map(memberLine).join("") : `<p style="font-size:14px;color:var(--ink-2)">Roster not loaded yet.</p>`}
+        </div>
+        <div class="panel"><h2>On the Legislature's site</h2>
+          <div style="font-size:14px;margin-bottom:6px"><a href="https://legislature.maine.gov/legis/bills/phwksched.html?CODE=${esc(code)}&snum=${esc(D.meta.session)}" target="_blank" rel="noopener">Hearings and work sessions ↗</a></div>
+          ${c.url?`<div style="font-size:14px"><a href="${esc(c.url)}" target="_blank" rel="noopener">Committee page ↗</a></div>`:""}
+        </div>
+      </aside>
+    </div>
+  </div>`;
+}
+
+function viewAbout(){
+  const m = D.meta;
+  return `
+  <div class="page-head"><div class="wrap">
+    <h1>About MEPLE</h1>
+    <p>A public commons for legislative testimony — built in the open, owned by no one, useful to everyone.</p>
+  </div></div>
+  <div class="wrap"><div class="prose">
+    <h2>The idea</h2>
+    <p>Every year, thousands of Mainers testify before the Legislature — and their words vanish into PDFs and filing systems that almost no one can search. Meanwhile, most Mainers have never testified at all, not because they have nothing to say, but because nobody ever showed them how.</p>
+    <p><b>MEPLE — the Maine Platform for Legislative Engagement — fixes both problems.</b> It makes testimony easy to submit for first-timers, and it makes every submission part of a permanent, searchable public archive — so journalists, researchers, legislators, and neighbors can see what Maine actually said about the bills that shape it.</p>
+    <h2>A proven model</h2>
+    <p>MAPLE — the Massachusetts Platform for Legislative Engagement — launched in Massachusetts in 2023, built by <b>Code for Boston</b> volunteers with <b>NuLawLab at Northeastern University School of Law</b> and collaborators from the Harvard Berkman Klein Center. It is open source, nonpartisan, and free, and it has helped thousands of residents publish testimony to the Massachusetts Legislature.</p>
+    <p>MEPLE adapts that working codebase for Maine: our LD numbering, our 17 joint standing committees, our public hearing process, and our citizen Legislature.</p>
+    <h2>Where the data comes from</h2>
+    <p>Bills, sponsors, committee actions, reports, amendments, votes, and written testimony are drawn from the Maine Legislature's public record at legislature.maine.gov, with bill metadata cross-checked against LegiScan and Open States. Each bill page links to its sources. Testimony shown under "Legislature's record" was filed with a committee through the Legislature's own submission system; testimony submitted through MEPLE is marked separately.</p>
+    <h2>Stewardship</h2>
+    <p>MEPLE is stewarded by the <b>Center for Engaged Citizenship at the University of Southern Maine</b>, which provides nonpartisan editorial standards, student-powered civic education programming, and institutional continuity. The platform's code remains open source; its data remains public.</p>
+    <h2>Why it matters for Maine</h2>
+    <p>Maine has one of the most accessible legislatures in the country — every bill gets a public hearing, and anyone may testify. But accessibility on paper isn't accessibility in practice when hearings happen on weekday mornings in Augusta. A farmer in Fort Kent, a sternman in Jonesport, and a nurse on the night shift in Bangor deserve the same voice as anyone who can spend a Tuesday at the State House.</p>
+    ${m.sample?`<p><i>This site is a demonstration prototype. The bills shown are real measures from the ${esc(m.legislature)}; testimony, counts, and organizational names are illustrative samples.</i></p>`:`<p><i>Data last updated ${esc(m.generated_at)}.</i></p>`}
+  </div></div>`;
+}
+
+/* ---------- submit flow (demo) ---------- */
+function openSubmit(ld){
+  const row = ld ? D.idxByLd[Number(ld)] : (D.index[0]||null);
+  if(!row) return;
+  submitState = {bill:row, step:1, stance:null, name:"", town:"", text:""};
+  renderModal();
+}
+function closeSubmit(){ submitState = null; $("#modal-root").innerHTML=""; }
+function setStance(s){ submitState.stance = s; renderModal(); }
+function submitNext(){
+  if(submitState.step===2){
+    submitState.name = $("#f-name").value.trim();
+    submitState.town = $("#f-town").value.trim();
+    submitState.text = $("#f-text").value.trim();
+    if(!submitState.name || !submitState.town || submitState.text.length < 20){
+      $("#form-warn").textContent = "Please add your name, town, and at least a few sentences of testimony.";
+      return;
+    }
+  }
+  submitState.step++;
+  renderModal();
+}
+function submitBack(){ submitState.step--; renderModal(); }
+function submitFinal(){
+  userTestimony.unshift({
+    id:`mine-${Date.now()}`, ld: submitState.bill.ld, name: submitState.name, town: submitState.town,
+    position: submitState.stance, position_source:"filed", date:"Today", text: submitState.text, committee_code: submitState.bill.committee_code
+  });
+  submitState.step = 4;
+  renderModal();
+}
+function renderModal(){
+  if(!submitState){ $("#modal-root").innerHTML=""; return; }
+  const st = submitState;
+  const b = st.bill;
+  const cname = comName(b.committee_code);
+  let body="", foot="", stepLabel="";
+  if(st.step===1){
+    stepLabel = "Step 1 of 3 — Your position";
+    body = `
+      <div class="billref"><b>LD ${b.ld}</b> — ${esc(b.title)}</div>
+      <p style="font-size:15px;margin-bottom:16px">Where do you stand on this bill?</p>
+      <div class="stance-choices">
+        <button class="stance-choice ${st.stance==="support"?"sel-support":""}" onclick="setStance('support')"><span class="ic">✓</span>Support</button>
+        <button class="stance-choice ${st.stance==="neutral"?"sel-neutral":""}" onclick="setStance('neutral')"><span class="ic">–</span>Neither for nor against</button>
+        <button class="stance-choice ${st.stance==="oppose"?"sel-oppose":""}" onclick="setStance('oppose')"><span class="ic">✗</span>Oppose</button>
+      </div>`;
+    foot = `<span></span><button class="btn primary" ${st.stance?"":"disabled style='opacity:.5;cursor:not-allowed'"} onclick="${st.stance?"submitNext()":""}">Continue →</button>`;
+  } else if(st.step===2){
+    stepLabel = "Step 2 of 3 — Your testimony";
+    body = `
+      <div class="billref"><b>LD ${b.ld}</b> · ${stancePill(st.stance)}</div>
+      <div class="tips"><b>What makes testimony effective?</b>Say who you are and where you live, tell the committee how this bill would affect you or your community, and be specific. One honest paragraph from Machias beats ten pages of boilerplate.</div>
+      <div class="field"><label for="f-name">Your name</label><input id="f-name" value="${esc(st.name)}" placeholder="e.g., Jordan Small"></div>
+      <div class="field"><label for="f-town">Your town</label><input id="f-town" value="${esc(st.town)}" placeholder="e.g., Presque Isle"></div>
+      <div class="field"><label for="f-text">Your testimony</label>
+        <textarea id="f-text" placeholder="Senator, Representative, and members of the Committee — my name is…">${esc(st.text)}</textarea>
+        <div class="sub">Testimony becomes part of the permanent public record.</div>
+      </div>
+      <div id="form-warn" style="color:var(--oppose-ink);font-size:13.5px;font-weight:600"></div>`;
+    foot = `<button class="btn ghost" onclick="submitBack()">← Back</button><button class="btn primary" onclick="submitNext()">Review →</button>`;
+  } else if(st.step===3){
+    stepLabel = "Step 3 of 3 — Review & publish";
+    body = `
+      <div class="billref"><b>LD ${b.ld}</b> — ${esc(b.title)}</div>
+      <div class="review-box">
+        <div class="rb-head">${stancePill(st.stance)}<span>${esc(st.name)}</span><span style="color:var(--ink-3);font-weight:400;font-size:13px">${esc(st.town)}</span></div>
+        <p>${esc(st.text)}</p>
+      </div>
+      <div class="demo-note"><b>Demonstration mode:</b> in the live platform, publishing delivers this testimony to the ${esc(cname)} Committee clerk and adds it to the public archive. In this demo, it appears only in your current session.</div>`;
+    foot = `<button class="btn ghost" onclick="submitBack()">← Edit</button><button class="btn primary" onclick="submitFinal()">Publish testimony</button>`;
+  } else {
+    stepLabel = "Published";
+    body = `
+      <div class="success">
+        <div class="big">✓</div>
+        <h3>Your testimony is on the record.</h3>
+        <p>It now appears on the LD ${b.ld} bill page and in the testimony archive — marked as a demo submission for this session.</p>
+      </div>`;
+    foot = `<span></span><button class="btn primary" onclick="closeSubmit(); location.hash='#/bill/${b.ld}'; render();">See it on the bill page →</button>`;
+  }
+  $("#modal-root").innerHTML = `
+    <div class="overlay" onclick="if(event.target===this) closeSubmit()">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="Submit testimony">
+        <div class="modal-head">
+          <h2>Submit testimony</h2>
+          <div style="display:flex;align-items:center;gap:14px"><span class="steps">${stepLabel}</span>
+          <button class="modal-x" onclick="closeSubmit()" aria-label="Close">×</button></div>
+        </div>
+        <div class="modal-body">${body}</div>
+        <div class="modal-foot">${foot}</div>
+      </div>
+    </div>`;
+}
+
+/* ---------- router ---------- */
+function updateParam(k,v,resetPage){
+  const [path, qs] = location.hash.slice(1).split("?");
+  const p = new URLSearchParams(qs||"");
+  if(v) p.set(k,v); else p.delete(k);
+  if(resetPage) p.delete("page");
+  const s = p.toString();
+  history.replaceState(null,"","#"+path+(s?"?"+s:""));
+  render(false);
+}
+
+let renderSeq = 0;
+async function render(scroll=true){
+  const seq = ++renderSeq;
+  const hash = location.hash.slice(1) || "/";
+  const [path, qs] = hash.split("?");
+  const params = new URLSearchParams(qs||"");
+  const seg = path.split("/").filter(Boolean);
+  let html, nav="";
+  try{
+    if(seg.length===0){ html = viewHome(); }
+    else if(seg[0]==="bills"){ html = viewBills(params); nav="bills"; }
+    else if(seg[0]==="bill"){ html = await viewBill(seg[1]); nav="bills"; }
+    else if(seg[0]==="testimony"){ html = await viewTestimony(params); nav="testimony"; }
+    else if(seg[0]==="legislators"){ html = viewLegislators(params); nav="legislators"; }
+    else if(seg[0]==="legislator"){ html = viewLegislator(decodeURIComponent(seg[1]||"")); nav="legislators"; }
+    else if(seg[0]==="committees"){ html = viewCommittees(); nav="committees"; }
+    else if(seg[0]==="committee"){ html = viewCommittee(decodeURIComponent(seg[1]||"")); nav="committees"; }
+    else if(seg[0]==="about"){ html = viewAbout(); nav="about"; }
+    else { html = viewHome(); }
+  }catch(e){ console.error(e); html = `<div class="wrap"><div class="empty">Something went wrong loading this page.</div></div>`; }
+  if(seq!==renderSeq) return; // a newer render superseded this one
+  const app = $("#app");
+  const active = document.activeElement;
+  const keepFocus = active && (active.tagName==="INPUT"||active.tagName==="SELECT") && app.contains(active);
+  const focusId = keepFocus ? {tag:active.tagName, idx:[...app.querySelectorAll(active.tagName)].indexOf(active), pos:active.selectionStart} : null;
+  app.innerHTML = html;
+  if(focusId){
+    const el = [...app.querySelectorAll(focusId.tag)][focusId.idx];
+    if(el){ el.focus(); if(el.setSelectionRange && focusId.pos!=null){ try{el.setSelectionRange(focusId.pos,focusId.pos);}catch(e){} } }
+  }
+  document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("active", a.dataset.nav===nav));
+  if(scroll) window.scrollTo(0,0);
+}
+
+function setChrome(){
+  const m = D.meta;
+  const rib = $("#ribbon");
+  if(m.sample){
+    rib.innerHTML = `<strong>Demonstration prototype.</strong> ${esc(m.notice||"Bills shown are real measures; testimony and counts are illustrative sample content.")}`;
+  } else {
+    rib.innerHTML = `<strong>Public record.</strong> Bills, votes and written testimony from the Maine Legislature's website, ${esc(m.legislature)} · data updated ${esc(m.generated_at)}`;
+  }
+  const ff = $("#footfine");
+  ff.innerHTML += m.sample
+    ? `<br>Demonstration build — testimony shown is illustrative and has not been submitted to the Legislature. Bill data reflects the ${esc(m.legislature)} (${esc(m.years)}).`
+    : `<br>Bill and testimony data from legislature.maine.gov, ${esc(m.legislature)} (${esc(m.years)}), last updated ${esc(m.generated_at)}. MEPLE is an independent project, not affiliated with the Maine Legislature.`;
+}
+
+window.addEventListener("hashchange", ()=>render());
+loadCore().then(()=>{ setChrome(); render(); }).catch(e=>{
+  console.error(e);
+  $("#app").innerHTML = `<div class="wrap"><div class="empty">Couldn't load MEPLE's data files (${esc(e.message)}). If you opened this file directly, serve the folder over HTTP instead.</div></div>`;
+});
+</script>
+</body>
+</html>

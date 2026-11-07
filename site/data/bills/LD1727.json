@@ -1,0 +1,79 @@
+{
+ "ld": 1727,
+ "paper": null,
+ "session": "132",
+ "title": "An Act to Ensure Transparency in Consumer Transactions Involving Artificial Intelligence",
+ "sponsor_id": "kuhn",
+ "cosponsor_ids": [],
+ "committee_code": "HCIFS",
+ "committee_name": "Health Coverage, Insurance and Financial Services",
+ "summary": {
+  "text": "Requires businesses to clearly disclose when a consumer is interacting with an artificial intelligence system rather than a human being in consumer transactions. Passed to be enacted with bipartisan sponsorship on June 10, 2025.",
+  "source": "MEPLE prototype draft",
+  "official": false
+ },
+ "status": "enacted",
+ "status_label": "Enacted",
+ "final_disposition": {
+  "label": "Enacted",
+  "date": null
+ },
+ "documents": [],
+ "amendments": [],
+ "fiscal_status": null,
+ "committee_actions": [],
+ "committee_reports": [],
+ "chamber_actions": [],
+ "roll_calls": [],
+ "hearing": null,
+ "timeline": [
+  {
+   "label": "Introduced by Rep. Kuhn (D-Falmouth)",
+   "date": "April 2025",
+   "final": false
+  },
+  {
+   "label": "Public hearing — Health Coverage, Insurance and Financial Services",
+   "date": "May 2025",
+   "final": false
+  },
+  {
+   "label": "Passed to be enacted, in concurrence",
+   "date": "June 10, 2025",
+   "final": true
+  }
+ ],
+ "tags": [
+  "AI",
+  "consumer protection",
+  "technology"
+ ],
+ "testimony": [
+  {
+   "id": "sample-1727-1",
+   "name": "Priya Raman",
+   "organization": null,
+   "town": "Orono",
+   "position": "support",
+   "position_source": "sample",
+   "date": "May 2025",
+   "url": null,
+   "has_text": true
+  },
+  {
+   "id": "sample-1727-2",
+   "name": "Stanley Weeks",
+   "organization": null,
+   "town": "Belfast",
+   "position": "support",
+   "position_source": "sample",
+   "date": "May 2025",
+   "url": null,
+   "has_text": true
+  }
+ ],
+ "sources": [
+  "https://legislature.maine.gov/legis/bills/display_ps.asp?LD=1727&snum=132"
+ ],
+ "sample": true
+}

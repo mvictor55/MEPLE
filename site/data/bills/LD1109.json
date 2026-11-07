@@ -1,0 +1,105 @@
+{
+ "ld": 1109,
+ "paper": null,
+ "session": "132",
+ "title": "An Act to Reduce Gun Violence Casualties in Maine by Prohibiting the Possession of Large-capacity Ammunition Feeding Devices",
+ "sponsor_id": "beck",
+ "cosponsor_ids": [],
+ "committee_code": "JUD",
+ "committee_name": "Judiciary",
+ "summary": {
+  "text": "Would have prohibited possession of ammunition feeding devices holding more than a set number of rounds, with exceptions. One of the most heavily debated bills of the session. The House accepted an 'Ought Not to Pass' report 88–59, and the Senate followed on June 13, 2025, ending the bill.",
+  "source": "MEPLE prototype draft",
+  "official": false
+ },
+ "status": "died",
+ "status_label": "Died in the Senate",
+ "final_disposition": {
+  "label": "Died in the Senate",
+  "date": null
+ },
+ "documents": [],
+ "amendments": [],
+ "fiscal_status": null,
+ "committee_actions": [],
+ "committee_reports": [],
+ "chamber_actions": [],
+ "roll_calls": [],
+ "hearing": null,
+ "timeline": [
+  {
+   "label": "Introduced by Rep. Beck (D-South Portland)",
+   "date": "March 2025",
+   "final": false
+  },
+  {
+   "label": "Public hearing — Judiciary",
+   "date": "April 2025",
+   "final": false
+  },
+  {
+   "label": "House accepts Ought Not to Pass report, 88–59",
+   "date": "June 12, 2025",
+   "final": false
+  },
+  {
+   "label": "Senate accepts Ought Not to Pass report — bill dies",
+   "date": "June 13, 2025",
+   "final": true
+  }
+ ],
+ "tags": [
+  "gun safety",
+  "public safety"
+ ],
+ "testimony": [
+  {
+   "id": "sample-1109-1",
+   "name": "Ruth Alley",
+   "organization": null,
+   "town": "Jonesport",
+   "position": "oppose",
+   "position_source": "sample",
+   "date": "April 2025",
+   "url": null,
+   "has_text": true
+  },
+  {
+   "id": "sample-1109-2",
+   "name": "Sofia Nadeau",
+   "organization": null,
+   "town": "Lewiston",
+   "position": "support",
+   "position_source": "sample",
+   "date": "April 2025",
+   "url": null,
+   "has_text": true
+  },
+  {
+   "id": "sample-1109-3",
+   "name": "Joe Carrier",
+   "organization": null,
+   "town": "Skowhegan",
+   "position": "oppose",
+   "position_source": "sample",
+   "date": "April 2025",
+   "url": null,
+   "has_text": true
+  },
+  {
+   "id": "sample-1109-4",
+   "name": "Dr. Hannah Cyr",
+   "organization": null,
+   "town": "Bangor",
+   "position": "support",
+   "position_source": "sample",
+   "date": "April 2025",
+   "url": null,
+   "has_text": true
+  }
+ ],
+ "sources": [
+  "https://legislature.maine.gov/legis/bills/display_ps.asp?LD=1109&snum=132"
+ ],
+ "sample": true
+}

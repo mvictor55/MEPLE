@@ -1,0 +1,126 @@
+[
+ {
+  "ld": 1,
+  "paper": null,
+  "title": "An Act to Increase Storm Preparedness for Maine's Communities, Homes and Infrastructure",
+  "sponsor_id": "fecteau",
+  "committee_code": "EUT",
+  "status": "enacted",
+  "status_label": "Signed into law",
+  "final_date": null,
+  "hearing_date": null,
+  "testimony_count": 3,
+  "tags": [
+   "climate",
+   "infrastructure",
+   "emergency management"
+  ],
+  "cosponsor_ids": []
+ },
+ {
+  "ld": 307,
+  "paper": null,
+  "title": "An Act to Establish the Maine Data Center Coordination Council and Place a Temporary Limitation on Certain Data Centers",
+  "sponsor_id": "sachs",
+  "committee_code": "EUT",
+  "status": "vetoed",
+  "status_label": "Vetoed — override failed",
+  "final_date": null,
+  "hearing_date": null,
+  "testimony_count": 5,
+  "tags": [
+   "energy",
+   "data centers",
+   "utilities"
+  ],
+  "cosponsor_ids": []
+ },
+ {
+  "ld": 1109,
+  "paper": null,
+  "title": "An Act to Reduce Gun Violence Casualties in Maine by Prohibiting the Possession of Large-capacity Ammunition Feeding Devices",
+  "sponsor_id": "beck",
+  "committee_code": "JUD",
+  "status": "died",
+  "status_label": "Died in the Senate",
+  "final_date": null,
+  "hearing_date": null,
+  "testimony_count": 4,
+  "tags": [
+   "gun safety",
+   "public safety"
+  ],
+  "cosponsor_ids": []
+ },
+ {
+  "ld": 1228,
+  "paper": null,
+  "title": "An Act to Clarify Certain Terms in and to Make Other Changes to the Automotive Right to Repair Laws",
+  "sponsor_id": "roberts",
+  "committee_code": "HED",
+  "status": "vetoed",
+  "status_label": "Vetoed — override failed",
+  "final_date": null,
+  "hearing_date": null,
+  "testimony_count": 3,
+  "tags": [
+   "consumer protection",
+   "right to repair"
+  ],
+  "cosponsor_ids": []
+ },
+ {
+  "ld": 1727,
+  "paper": null,
+  "title": "An Act to Ensure Transparency in Consumer Transactions Involving Artificial Intelligence",
+  "sponsor_id": "kuhn",
+  "committee_code": "HCIFS",
+  "status": "enacted",
+  "status_label": "Enacted",
+  "final_date": null,
+  "hearing_date": null,
+  "testimony_count": 2,
+  "tags": [
+   "AI",
+   "consumer protection",
+   "technology"
+  ],
+  "cosponsor_ids": []
+ },
+ {
+  "ld": 1822,
+  "paper": null,
+  "title": "An Act to Enact the Maine Online Data Privacy Act",
+  "sponsor_id": "kuhn",
+  "committee_code": "JUD",
+  "status": "died",
+  "status_label": "Died between chambers",
+  "final_date": null,
+  "hearing_date": null,
+  "testimony_count": 4,
+  "tags": [
+   "privacy",
+   "technology",
+   "consumer protection"
+  ],
+  "cosponsor_ids": []
+ },
+ {
+  "ld": 1971,
+  "paper": null,
+  "title": "An Act to Protect Workers in This State by Clarifying the Relationship of State and Local Law Enforcement Agencies with Federal Immigration Authorities",
+  "sponsor_id": "dhalac",
+  "committee_code": "JUD",
+  "status": "held",
+  "status_label": "Passed — held by the Governor",
+  "final_date": null,
+  "hearing_date": null,
+  "testimony_count": 4,
+  "tags": [
+   "immigration",
+   "labor",
+   "law enforcement"
+  ],
+  "cosponsor_ids": []
+ }
+]

@@ -1,0 +1,162 @@
+[
+ {
+  "id": "fecteau",
+  "name": "Ryan Fecteau",
+  "party": "D",
+  "chamber": "House",
+  "district": null,
+  "towns": [
+   "Biddeford"
+  ],
+  "town": "Biddeford",
+  "role": "Speaker of the House",
+  "committees": [],
+  "bio": "Speaker of the Maine House of Representatives. Sponsor of LD 1, the storm-resilience package signed into law in 2025.",
+  "url": null,
+  "sample_profile": true
+ },
+ {
+  "id": "daughtry",
+  "name": "Mattie Daughtry",
+  "party": "D",
+  "chamber": "Senate",
+  "district": null,
+  "towns": [
+   "Brunswick"
+  ],
+  "town": "Brunswick",
+  "role": "President of the Senate",
+  "committees": [],
+  "bio": "President of the Maine Senate, representing Senate District 23 (Brunswick, Freeport, Harpswell, Pownal and part of Yarmouth).",
+  "url": null,
+  "sample_profile": true
+ },
+ {
+  "id": "faulkingham",
+  "name": "Billy Bob Faulkingham",
+  "party": "R",
+  "chamber": "House",
+  "district": null,
+  "towns": [
+   "Winter Harbor"
+  ],
+  "town": "Winter Harbor",
+  "role": "House Minority Leader",
+  "committees": [],
+  "bio": "House Republican Leader and commercial lobsterman representing Downeast coastal communities.",
+  "url": null,
+  "sample_profile": true
+ },
+ {
+  "id": "kuhn",
+  "name": "Amy Kuhn",
+  "party": "D",
+  "chamber": "House",
+  "district": null,
+  "towns": [
+   "Falmouth"
+  ],
+  "town": "Falmouth",
+  "role": null,
+  "committees": [],
+  "bio": "Represents Falmouth and part of Cumberland. Lead sponsor of Maine's online data privacy and AI-transparency legislation.",
+  "url": null,
+  "sample_profile": true
+ },
+ {
+  "id": "sachs",
+  "name": "Melanie Sachs",
+  "party": "D",
+  "chamber": "House",
+  "district": null,
+  "towns": [
+   "Freeport"
+  ],
+  "town": "Freeport",
+  "role": null,
+  "committees": [],
+  "bio": "Represents Freeport and Pownal. Sponsor of LD 307, the first-in-the-nation data center moratorium bill.",
+  "url": null,
+  "sample_profile": true
+ },
+ {
+  "id": "roberts",
+  "name": "Tiffany Roberts-Lovell",
+  "party": "D",
+  "chamber": "House",
+  "district": null,
+  "towns": [
+   "South Berwick"
+  ],
+  "town": "South Berwick",
+  "role": null,
+  "committees": [],
+  "bio": "Represents South Berwick and part of North Berwick. Sponsor of automotive right-to-repair implementation legislation.",
+  "url": null,
+  "sample_profile": true
+ },
+ {
+  "id": "dhalac",
+  "name": "Deqa Dhalac",
+  "party": "D",
+  "chamber": "House",
+  "district": null,
+  "towns": [
+   "South Portland"
+  ],
+  "town": "South Portland",
+  "role": null,
+  "committees": [],
+  "bio": "Represents part of South Portland. Sponsor of LD 1971 on state and local roles in federal immigration enforcement.",
+  "url": null,
+  "sample_profile": true
+ },
+ {
+  "id": "beck",
+  "name": "Matthew Beck",
+  "party": "D",
+  "chamber": "House",
+  "district": null,
+  "towns": [
+   "South Portland"
+  ],
+  "town": "South Portland",
+  "role": null,
+  "committees": [],
+  "bio": "Represents part of South Portland. Sponsor of LD 1109 on large-capacity ammunition feeding devices.",
+  "url": null,
+  "sample_profile": true
+ },
+ {
+  "id": "carney",
+  "name": "Anne Carney",
+  "party": "D",
+  "chamber": "Senate",
+  "district": null,
+  "towns": [
+   "Cape Elizabeth"
+  ],
+  "town": "Cape Elizabeth",
+  "role": null,
+  "committees": [],
+  "bio": "Represents Cape Elizabeth, South Portland and part of Scarborough. Senate chair of the Judiciary Committee.",
+  "url": null,
+  "sample_profile": true
+ },
+ {
+  "id": "stewart",
+  "name": "Trey Stewart",
+  "party": "R",
+  "chamber": "Senate",
+  "district": null,
+  "towns": [
+   "Presque Isle"
+  ],
+  "town": "Presque Isle",
+  "role": "Senate Minority Leader",
+  "committees": [],
+  "bio": "Senate Republican Leader representing Aroostook County communities.",
+  "url": null,
+  "sample_profile": true
+ }
+]
