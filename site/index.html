@@ -679,7 +679,10 @@ function lobbyingPanel(lob){
     <table class="plain"><tr><th>Client</th><th>Lobbyist / firm</th><th>Months reported</th></tr>
     ${clients.map(([c, rs])=>{
       const who = [...new Set(rs.map(r=>[r.lobbyist, r.firm].filter(Boolean).join(", ")))].join("; ");
-      const months = [...new Set(rs.map(r=>`${r.month||""} ${r.year||""}`.trim()))].join(", ");
+      // r.period is the calendar month ("2025-12"); r.year is the Ethics Commission's lobbying year (December-November)
+      const months = [...new Set([...rs].sort((x,y)=>(x.period||"").localeCompare(y.period||"")).map(r=>r.period
+        ? new Date(r.period+"-15T12:00:00").toLocaleDateString("en-US",{month:"short",year:"numeric"})
+        : `${r.month||""} ${r.year||""}`.trim()))].join(", ");
       return `<tr><td style="white-space:normal"><b>${esc(c)}</b></td><td>${esc(who)}</td><td>${esc(months)}</td></tr>`;
     }).join("")}
     </table>

@@ -30,6 +30,8 @@ from .agencies import AGENCIES, OFFICIAL_TITLES
 MIN_ORG_TESTIMONIES = 2
 ORG_ALIASES: dict[str, str] = {
     # "variant as written": "canonical as written"   (add after reviewing profiles/review.json)
+    "Alliance for Addiction & Mental Health Services, Maine": "Alliance for Addiction and Mental Health Services",
+    "Alliance for Addiction and Mental Health Services, Maine": "Alliance for Addiction and Mental Health Services",
 }
 JUNK_ORG = {"", "self", "myself", "none", "n a", "na", "citizen", "private citizen", "resident", "individual",
             "personal", "retired", "constituent", "concerned citizen", "parent", "voter", "student", "taxpayer",
@@ -100,6 +102,126 @@ INTRO_PATTERNS = [
 CLAUSE_STOP = re.compile(r",\s+(?:and|where|which|who|but)\b|\s+and\s+(?:I|we|our|my|am|have)\b|\s+(?:where|which|who|because)\b")
 LEGISLATOR_TITLE = re.compile(r"\b(Senator|Representative|Speaker|Senate President)\b")
 
+# ---- titles: which officials get a person profile (decided Nov 2026)
+# Senior roles only: commissioners and their deputy/associate/acting commissioners; heads of independent agencies
+# and authorities (executive director, president, CEO, chancellor, superintendent of a bureau); constitutional
+# officers and other statutory office heads; commission chairs and members; bureau or office directors. Staff
+# (policy director, legislative liaison, general counsel, analyst, deputy director, assistant AG, ...) get no
+# person profile; their letters still count on the agency's profile.
+_QUAL = r"(?:Acting|Interim|Senior|Deputy|Associate|Assistant|Executive|Chief|Bureau|Division|Program|Policy|Legislative|Communications|Government Relations|Medical|Field Services|EMS|Vice|Special|Staff|State)"
+TITLE_WORDS = sorted({*OFFICIAL_TITLES, "Analyst", "Policy Advisor", "Legislative Director", "Commission Member", "Manager", "Coordinator",
+                      "Specialist", "Advisor", "Counsel", "Liaison", "Fire Marshal", "Chief of the Maine State Police"}, key=len, reverse=True)
+_TW = "|".join(re.escape(t) for t in TITLE_WORDS)
+# a title with its "of ..." tail: "Director of Policy and Legislative Affairs", "Director of the Bureau of Parks and Lands"
+# a title with its "of ..." tail: "Director of Policy and Legislative Affairs", "Director of the Maine Center for Disease Control"
+_TITLE = rf"(?:{_QUAL}\s+)*(?:{_TW})(?:\s+(?:of|for)\s+(?:the\s+)?(?:Maine\s+)?[A-Z][\w&'\-]*(?:\s+(?:and(?=\s+[A-Z][a-z])|of|the|for(?!\s+the\b)|&|[A-Z][\w&'\-]*)){{0,7}})?"
+# senior if the head ends in one of these (and has no staff words), and the "of ..." part is not a staff area
+_SENIOR_HEAD = re.compile(r"\b(?:Commissioner|Executive Director|President|Chief Executive Officer|CEO|Chancellor|Superintendent|"
+                          r"Public Advocate|State Court Administrator|Fire Marshal|Colonel|Chair|Chairman|Chairwoman|Chairperson|"
+                          r"Commission Member|Director)$")
+_TOP_OFFICES = re.compile(r"^(?:Secretary of State|Attorney General|State Treasurer|State Auditor|Chief Justice|Chief of the Maine State Police)$")
+_STAFF_HEAD = re.compile(r"\b(Policy|Legislative|Liaison|Counsel|Analyst|Communications|Government|Advisor|Manager|Coordinator|Specialist|"
+                         r"Deputy Director|Assistant|Associate Director|Senior Director|Program Director|Medical Director|Field Services|"
+                         r"Vice Chancellor|Vice President|Deputy Attorney General|Deputy Secretary|Officer)\b", re.I)
+_STAFF_TAIL = re.compile(r"^(?:the\s+)?(?:Policy|Legislative|Government|Communications|Public Affairs|Public Relations|External|Strategy|Strategic|"
+                         r"Actuarial|Constituent|Legal Affairs)\b|Legislative Affairs|Government Relations|Public Affairs|Public Relations|Communications", re.I)
+# rank for choosing among a person's senior titles (lower = higher rank)
+_RANK = [("Attorney General|Secretary of State|State Treasurer|State Auditor|Chief Justice|Public Advocate|State Court Administrator", 0),
+         ("^(?:Acting |Interim )?Commissioner", 1),
+         ("Chancellor|President|CEO|Chief Executive Officer|Executive Director|Superintendent|Colonel|Fire Marshal|Chief of", 2),
+         ("Deputy Commissioner|Associate Commissioner", 3), ("Chair", 4), ("Director", 5)]
+_HONORIFIC = re.compile(r"^(dr|mr|mrs|ms|mx|rev|hon)\.?$", re.I)
+_BAD = "�"   # a character the PDF extractor couldn't read
+
+def _fold(s: str) -> str:
+    """ASCII-fold, keeping U+FFFD."""
+    return "".join(c if c == _BAD else unicodedata.normalize("NFKD", c).encode("ascii", "ignore").decode() for c in s or "")
+
+def _split_title(t: str) -> tuple[str, str]:
+    m = re.match(r"^(.*?)\s+(?:of|for)\s+(.*)$", t)
+    if not m or re.fullmatch(r"(?:Chief|Secretary|State|Attorney)", m.group(1)):
+        return t, ""
+    return m.group(1), m.group(2)
+
+def clean_title(title: str | None, person: str | None = None) -> str | None:
+    """'Erik Jorgensen Senior Director' -> 'Senior Director': drop words of the person's own name and stray initials."""
+    if not title:
+        return None
+    t = re.sub(r"\s+", " ", _fold(title)).strip(" ,.;:")
+    name_words = {w.lower().strip(".,") for w in re.split(r"[\s\-]+", _fold(person or "")) if w}
+    words = t.split()
+    while words and (words[0].lower().strip(".,") in name_words or re.fullmatch(r"[A-Z]\.?", words[0])):
+        words.pop(0)
+    t = " ".join(words)
+    while True:   # dangling "... of the Maine", "... Subject" (a memo's next line)
+        u = re.sub(r"\s+(?:of|for|the|and|&|Maine|Maine Department|Subject|Re|Date|Testimony)$", "", t)
+        if u == t: break
+        t = u
+    return t or None
+
+def is_senior(title: str | None) -> bool:
+    if not title:
+        return False
+    if _TOP_OFFICES.match(title):
+        return True
+    head, tail = _split_title(title)
+    return bool(_SENIOR_HEAD.search(head)) and not _STAFF_HEAD.search(head) and not (tail and _STAFF_TAIL.search(tail))
+
+def _is_staff(title: str) -> bool:
+    head, tail = _split_title(title)
+    return bool(_STAFF_HEAD.search(head) or (tail and _STAFF_TAIL.search(tail)))
+
+def title_rank(title: str) -> int:
+    return next((r for pat, r in _RANK if re.search(pat, title)), 9)
+
+def best_title(titles) -> tuple[str | None, bool]:
+    """(title to show, senior?). A bare 'Director' next to a staff title ('Director of Policy ...') is staff."""
+    ts = [t for t in titles if t]
+    if not ts:
+        return None, False
+    senior = [t for t in ts if is_senior(t)]
+    staff = [t for t in ts if _is_staff(t)]
+    if senior and staff and all(re.fullmatch(r"(?:Acting |Interim )?Director", t) for t in senior):
+        senior = []
+    if senior:
+        c = Counter(senior)
+        return sorted(c, key=lambda t: (title_rank(t), -c[t], -len(t)))[0], True
+    return Counter(ts).most_common(1)[0][0], False
+
+def display_title(title: str | None, agency_names=()) -> str | None:
+    """'Commissioner of the Department of Environmental Protection' on the DEP profile -> 'Commissioner'."""
+    if not title:
+        return None
+    head, tail = _split_title(title)
+    words = lambda x: set(re.findall(r"[a-z]+", x.lower().replace("&", " and "))) - {"the", "maine", "of", "and", "for", "department", "office", "state"}
+    # "Commissioner of the Department of Environmental Protection" / "Commissioner of Inland Fisheries & Wildlife" on that agency's profile
+    if tail and any(words(n) and words(n) <= words(tail) | {"department"} and words(tail) <= words(n) for n in agency_names if n):
+        return head
+    return title
+
+def titles_near_name(text: str | None, person: str) -> list[str]:
+    """Titles written next to the person's own name ('Commissioner Sara Gagné-Holmes', a signature block
+    'Aaron M. Frey / Attorney General', 'Nate Webb, Wildlife Division Director') or in their self-introduction."""
+    if not text or not person:
+        return []
+    parts = [p.strip(".,") for p in re.split(r"\s+", _fold(person).strip()) if re.match(r"^[A-Za-z]", p) and not _HONORIFIC.match(p)]
+    if len(parts) < 2:
+        return []
+    def pat(w):   # any letter may have come out of the PDF as U+FFFD
+        return "".join(f"(?:{re.escape(c)}|{_BAD})" if c.isalpha() else re.escape(c) for c in w)
+    name = rf"{pat(parts[0])}\s+(?:[A-Z]\.?\s+|[A-Z][a-z]+\s+){{0,2}}{pat(parts[-1])}"
+    t = re.sub(r"[ \t]+", " ", _fold(text[:2500] + "\n" + text[-1500:]))
+    out = []
+    for m in re.finditer(rf"\b({_TITLE})\s+(?:Dr\.?\s+)?{name}\b", t):
+        out.append(m.group(1))
+    after = rf"\b{name}(?:,?\s+(?:Ph\.?D|M\.?D|J\.?D|Esq)\.?)?\s*(?:,|\n|\s-\s|\s–\s)\s*(?:the\s+)?((?:[A-Z][a-z]+\s+){{0,3}}?{_TITLE})"
+    for m in re.finditer(after, t):
+        out.append(m.group(1))
+    intro = rf"(?:I serve as|I am|I'm|my role as|I work as)\s+(?:the\s+)?(?:Maine'?s?\s+)?((?:[A-Z][a-z]+\s+){{0,3}}?{_TITLE})"
+    for m in re.finditer(intro, t[:1500]):
+        out.append(m.group(1))
+    return [x for x in (clean_title(x, person) for x in out) if x]
+
 def official_from_text(text: str | None) -> tuple[str | None, str | None]:
     """Return (title, agency_id) from a letter's opening, or (None, None)."""
     head = re.sub(r"\s+", " ", (text or "")[:1200])
@@ -142,7 +264,12 @@ def run():
         raw_org = ORG_ALIASES.get(r.get("organization") or "", r.get("organization"))
         n_org = norm(raw_org)
         aid = match_agency(raw_org) if raw_org else None
-        title, aid_text = official_from_text(text_for(r["ld"], r["id"])) if r.get("has_text") else (None, None)
+        txt = text_for(r["ld"], r["id"]) if r.get("has_text") else None
+        title, aid_text = official_from_text(txt) if txt else (None, None)
+        # The letter's text may name an agency only when the organization field doesn't name a different body
+        # ("Industrial Energy Consumer Group" writing about Efficiency Maine is not Efficiency Maine).
+        if not aid and raw_org and n_org not in JUNK_ORG and not LEGISLATOR_ORG.match(n_org):
+            aid_text = None
         aid = aid or aid_text
         pk = person_key(r.get("name") or "")
         if aid:
@@ -152,7 +279,8 @@ def run():
                 off_rows[key].append(r)
                 m = off_meta.setdefault(key, {"names": Counter(), "titles": Counter()})
                 m["names"][r.get("name")] += 1
-                if title: m["titles"][title] += 1
+                for tt in [clean_title(title, r.get("name"))] + titles_near_name(txt, r.get("name") or ""):
+                    if tt: m["titles"][tt] += 1
             continue
         if raw_org and LEGISLATOR_ORG.match(n_org):
             continue                   # legislators testifying: they have legislator pages, not an organization profile
@@ -175,6 +303,19 @@ def run():
         c = Counter((r.get("position") or "unknown") for r in rs)
         return {k: c.get(k, 0) for k in ("support", "neutral", "oppose", "unknown")}
 
+    # person profiles only for senior roles (see _SENIOR); everyone else stays on the agency profile only
+    staff_titles = Counter()
+    for key in list(off_rows):
+        m = off_meta[key]
+        title, senior = best_title(m["titles"].elements())
+        if senior:
+            m["title"] = title
+        else:
+            staff_titles[title or "(no title found)"] += 1
+            del off_rows[key]
+    print(f"officials without a senior title (no person profile): {sum(staff_titles.values())}; "
+          f"titles: {staff_titles.most_common(12)}")
+
     for aid, rs in agency_rows.items():
         a = AG_BY_ID[aid]; pid = f"a-{aid}"
         officials = [f"o-{slug(k[0])}-{k[1]}" for k in off_rows if k[1] == aid]
@@ -187,7 +328,7 @@ def run():
     for (pk, aid), rs in off_rows.items():
         pid = f"o-{slug(pk)}-{aid}"; m = off_meta[(pk, aid)]
         prof = {"id": pid, "type": "official", "name": m["names"].most_common(1)[0][0],
-                "title": m["titles"].most_common(1)[0][0] if m["titles"] else None,
+                "title": display_title(m.get("title"), [AG_BY_ID[aid]["name"], *AG_BY_ID[aid]["aliases"]]),
                 "titles": [t for t, _ in m["titles"].most_common()], "agency_id": f"a-{aid}", "agency_name": AG_BY_ID[aid]["name"],
                 "testimony_count": len(rs), "bill_count": len({r["ld"] for r in rs}), "positions": counts(rs),
                 "testimony": testimony_list(rs, False)}

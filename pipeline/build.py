@@ -21,6 +21,12 @@ from .normalize import normalize_disposition
 def _load(p: Path, default):
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else default
 
+def _force_remove(func, path, exc):
+    """OneDrive marks synced folders read-only; clear the flag and retry."""
+    import os, stat
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
 def slug(s: str) -> str:
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
     return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
@@ -144,7 +150,7 @@ def run(sample_notice: str | None = None):
     lds = sorted(set(int(k) for k in lg_bills.keys()) | set(status_pages.keys()))
     index, out_bills = [], config.OUT / "bills"
     if config.OUT.exists():
-        shutil.rmtree(config.OUT)
+        shutil.rmtree(config.OUT, onexc=_force_remove)
     (out_bills).mkdir(parents=True); (config.OUT / "testimony").mkdir()
     t_index, t_total = [], 0
     for ld in lds:

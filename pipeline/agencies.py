@@ -14,11 +14,11 @@ in scope yet.
 
 AGENCIES = [
     # Executive departments
-    {"id": "dafs",  "name": "Department of Administrative and Financial Services", "aliases": ["DAFS", "Administrative and Financial Services"]},
+    {"id": "dafs",  "name": "Department of Administrative and Financial Services", "aliases": ["DAFS", "Administrative and Financial Services", "Department of Financial and Administrative Services"]},
     {"id": "dacf",  "name": "Department of Agriculture, Conservation and Forestry", "aliases": ["DACF", "Agriculture, Conservation and Forestry"]},
     {"id": "doc",   "name": "Department of Corrections", "aliases": ["Maine Department of Corrections", "MDOC"]},
     {"id": "dvem",  "name": "Department of Defense, Veterans and Emergency Management", "aliases": ["DVEM", "Maine Emergency Management Agency", "MEMA", "Bureau of Maine Veterans' Services"]},
-    {"id": "decd",  "name": "Department of Economic and Community Development", "aliases": ["DECD", "Economic and Community Development"]},
+    {"id": "decd",  "name": "Department of Economic and Community Development", "aliases": ["DECD", "Economic and Community Development", "Department of Economic and Community Develpment"]},
     {"id": "doe",   "name": "Department of Education", "aliases": ["Maine Department of Education", "Maine DOE"]},
     {"id": "dep",   "name": "Department of Environmental Protection", "aliases": ["Maine DEP", "DEP"]},
     {"id": "dhhs",  "name": "Department of Health and Human Services", "aliases": ["DHHS", "Maine DHHS", "Maine CDC", "Maine Center for Disease Control and Prevention", "MaineCare"]},
@@ -26,7 +26,7 @@ AGENCIES = [
     {"id": "dol",   "name": "Department of Labor", "aliases": ["Maine Department of Labor", "MDOL"]},
     {"id": "dmr",   "name": "Department of Marine Resources", "aliases": ["DMR", "Marine Resources"]},
     {"id": "pfr",   "name": "Department of Professional and Financial Regulation", "aliases": ["PFR", "Bureau of Insurance", "Bureau of Financial Institutions", "Office of Professional and Occupational Regulation"]},
-    {"id": "dps",   "name": "Department of Public Safety", "aliases": ["DPS", "Maine State Police", "Office of the State Fire Marshal"]},
+    {"id": "dps",   "name": "Department of Public Safety", "aliases": ["DPS", "Maine State Police", "Office of the State Fire Marshal", "Public Safety", "State Bureau of Identification", "Bureau of Highway Safety", "MeBHS"]},
     {"id": "mdot",  "name": "Department of Transportation", "aliases": ["MaineDOT", "MDOT", "Maine Department of Transportation"]},
     # Constitutional officers
     {"id": "sos",   "name": "Secretary of State", "aliases": ["Department of the Secretary of State", "Bureau of Motor Vehicles", "Bureau of Corporations, Elections and Commissions"]},
@@ -59,7 +59,7 @@ AGENCIES = [
     {"id": "mccs",  "name": "Maine Community College System", "aliases": ["MCCS"]},
     # Judicial Branch (administrative office testifies on court bills)
     {"id": "jud",   "name": "Maine Judicial Branch", "aliases": ["Judicial Branch", "Administrative Office of the Courts", "State Court Administrator"]},
-    {"id": "mccla", "name": "Maine Commission on Public Defense Services", "aliases": ["Commission on Public Defense Services", "MCPDS", "Maine Commission on Indigent Legal Services", "MCILS"]},
+    {"id": "mccla", "name": "Maine Commission on Public Defense Services", "aliases": ["Commission on Public Defense Services", "Commission of Public Defense Services", "MCPDS", "Maine Commission on Indigent Legal Services", "MCILS"]},
 ]
 
 # Titles that mark testimony in an official role.

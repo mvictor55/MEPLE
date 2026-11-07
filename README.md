@@ -91,7 +91,31 @@ row therefore has one or the other, never both.
 them. Legislators are not given organization profiles ("Maine State
 Legislature", "House District 15"); they have legislator pages. Name variants
 that were merged are listed in `pipeline/raw/profiles_review.json`; add
-non-obvious ones to `ORG_ALIASES`.
+non-obvious ones to `ORG_ALIASES`. Officials get a person profile only in
+senior roles (commissioners and deputy/associate/acting commissioners; heads of
+independent agencies and authorities; constitutional officers; commission chairs
+and members; bureau or office directors), judged from the title written next to
+their name or in their self-introduction. Staff (policy director, legislative
+liaison, general counsel, analyst, deputy director) count only on the agency's
+profile. An agency is inferred from a letter's text only when the organization
+field is blank or itself an agency.
+
+**Lobbying** (`python -m pipeline.lobbying index`, then `python run.py
+lobbying`) reads the Ethics Commission portal's own API
+(`api.mainelobbying.com/api/advanced-search/monthly-report/bills-and-issues` and
+`.../compensation-for-lobbying`, 100 rows per page; about 9 minutes). The
+Commission's "lobbying year" runs December to November, so lobbying years 2025
+and 2026 cover the 132nd; the site shows calendar months. Checked 2026-11-07
+against the Commission's per-bill search for LD 1822: the same 91 clients; the
+Commission lists 3 more reports (all Google LLC) that are missing from its
+monthly-report datasets.
+
+**Campaign finance** is not loaded yet. mainecampaignfinancedisclosure.com is
+behind a Cloudflare browser check (no automated download), its public datasets
+cover 2026 only, and it says data for reports filed before December 2025 is
+available on request from the Ethics Commission. Put the 2024-cycle exports in
+`pipeline/raw/finance/candidates.csv` and `transactions.csv`, then run `python
+run.py finance`.
 
 **Testimony synthesis.** `pipeline/synthesis.py` (Batch API, needs
 `ANTHROPIC_API_KEY`) is not run yet. `synthesis_manual/` holds hand-written

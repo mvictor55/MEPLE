@@ -8,7 +8,15 @@ reports do NOT say whether the lobbying was for or against a bill, and the
 compensation is per client per month, not per bill. The site must say both.
 
 The public portal (https://mainelobbying.com/public/dashboard) is a JavaScript
-app, so the data endpoints are UNVERIFIED until discovered:
+app. Its data API (found 2026-11-07 with `discover` and the portal's JS bundle):
+  api.mainelobbying.com/api/advanced-search/monthly-report/bills-and-issues?pageSize=100&pageNumber=N
+      one row per (monthly report, LD or issue): billOrIssue, ldNumber, isIssue, year, month,
+      primaryLobbyistName, clientRegistrationName, filingId, filingVersion
+  .../monthly-report/compensation-for-lobbying?pageSize=100&pageNumber=N
+      one row per monthly report: compensationForLobbying, year, month, filingId, filingVersion
+  Pages are capped at 100 rows. `year` is the LOBBYING year, which runs December-November:
+  lobbying year 2026, month 12 is December 2025. Years 2025 and 2026 cover the 132nd.
+  This is the same data as the advanced search's "Download CSV".
 
   STEP 0  python -m pipeline.lobbying discover
           Opens the portal in headless Chromium, clicks into the search/report
@@ -33,7 +41,9 @@ from . import config, fetch
 
 RAW_L = config.RAW / "lobbying"
 PORTAL = "https://mainelobbying.com/public/dashboard"
-LOBBYING_ENDPOINTS: list[str] = []   # filled in after `discover`
+API = "https://api.mainelobbying.com/api/advanced-search/monthly-report"
+LOBBYING_ENDPOINTS = {"bills": API + "/bills-and-issues", "compensation": API + "/compensation-for-lobbying"}
+SEARCH_URL = "https://mainelobbying.com/advanced-search"
 LOBBYING_YEARS = ("2025", "2026")    # lobbying years overlapping the 132nd
 
 def discover():
@@ -97,39 +107,73 @@ def normalize_record(r: dict) -> dict:
         "raw_keys": sorted(r.keys())[:40],
     }
 
+def _pages(url: str) -> list[dict]:
+    out, n = [], 1
+    while True:
+        d = fetch.get_json(f"{url}?pageSize=100&pageNumber={n}", refresh=True)
+        items = d.get("items") or []
+        out.extend(items)
+        if not items or len(out) >= (d.get("total") or 0):
+            return out
+        n += 1
+        if n % 50 == 0:
+            print(f"  ...{len(out)}/{d.get('total')} rows from {url.rsplit('/', 1)[-1]}", file=sys.stderr, flush=True)
+
+def _calendar(year: int, month: int) -> tuple[int, int]:
+    """Lobbying year runs December-November: (lobbying year 2026, month 12) -> December 2025."""
+    return (year - 1, 12) if month == 12 else (year, month)
+
 def index(from_csv: bool = False):
     RAW_L.mkdir(parents=True, exist_ok=True)
-    rows = []
     if from_csv:
+        rows = []
         with open(RAW_L / "export.csv", newline="", encoding="utf-8-sig") as f:
             for r in csv.DictReader(f):
                 rows.append(normalize_record(r))
     else:
-        if not LOBBYING_ENDPOINTS:
-            sys.exit("Run `discover` first and fill LOBBYING_ENDPOINTS in pipeline/lobbying.py")
-        for ep in LOBBYING_ENDPOINTS:
-            data = fetch.get_json(ep, refresh=True)
-            items = data if isinstance(data, list) else (data.get("data") or data.get("items") or data.get("results") or [])
-            rows.extend(normalize_record(r) for r in items)
+        years = {int(y) for y in LOBBYING_YEARS}
+        bills = [r for r in _pages(LOBBYING_ENDPOINTS["bills"]) if r.get("year") in years]
+        comp = [r for r in _pages(LOBBYING_ENDPOINTS["compensation"]) if r.get("year") in years]
+        (RAW_L / "bills_and_issues.json").write_text(json.dumps(bills), encoding="utf-8")
+        (RAW_L / "compensation.json").write_text(json.dumps(comp), encoding="utf-8")
+        # one report per filingId, latest version (amended reports keep the id)
+        latest = {}
+        for r in comp + bills:
+            latest[r["filingId"]] = max(latest.get(r["filingId"], 0), r.get("filingVersion") or 0)
+        reports = {}
+        for r in comp + bills:
+            if (r.get("filingVersion") or 0) != latest[r["filingId"]]:
+                continue
+            cy, cm = _calendar(r["year"], r["month"])
+            rep_ = reports.setdefault(r["filingId"], {
+                "report_id": r["filingId"], "lobbyist": r.get("primaryLobbyistName"), "firm": None,
+                "client": r.get("clientRegistrationName"), "year": str(r["year"]), "month": r["month"],
+                "period": f"{cy}-{cm:02d}", "compensation_month": None, "bills": set(), "issues": set(), "url": SEARCH_URL})
+            if "compensationForLobbying" in r:
+                rep_["compensation_month"] = round(float(r["compensationForLobbying"] or 0), 2)
+            elif r.get("isIssue") or not r.get("ldNumber"):
+                if r.get("issueAndInterest"): rep_["issues"].add(r["issueAndInterest"])
+            else:
+                rep_["bills"].add(int(r["ldNumber"]))
+        rows = [{**v, "bills": sorted(v["bills"]), "issues": sorted(v["issues"])} for v in reports.values()]
+        print(f"{len(bills)} report-bill rows and {len(comp)} compensation rows for lobbying years {sorted(years)}")
     rows = [r for r in rows if r["bills"] or r["client"]]
-    (RAW_L / "reports.json").write_text(json.dumps(rows, indent=1))
-    print(f"{len(rows)} monthly report rows -> {RAW_L/'reports.json'}")
-    if rows:
-        print("field keys seen on first record:", rows[0]["raw_keys"])
+    (RAW_L / "reports.json").write_text(json.dumps(rows, indent=1), encoding="utf-8")
+    print(f"{len(rows)} monthly reports -> {RAW_L/'reports.json'}; {sum(1 for r in rows if r['bills'])} name at least one LD")
 
 def build():
     if not (RAW_L / "reports.json").exists():
         print("lobbying: no pipeline/raw/lobbying/reports.json yet; skipping (run `python -m pipeline.lobbying index` first)"); return
-    rows = json.loads((RAW_L / "reports.json").read_text())
+    rows = json.loads((RAW_L / "reports.json").read_text(encoding="utf-8"))
     out = config.OUT / "lobbying"; out.mkdir(parents=True, exist_ok=True)
     by_ld, by_client, by_lobbyist = defaultdict(list), defaultdict(lambda: {"reports": 0, "compensation": 0.0, "bills": set()}), defaultdict(lambda: {"reports": 0, "compensation": 0.0, "clients": set()})
     for r in rows:
         for ld in r["bills"]:
-            by_ld[ld].append({k: r[k] for k in ("report_id", "lobbyist", "firm", "client", "year", "month", "compensation_month", "url")} | {"bills_in_report": len(r["bills"])})
+            by_ld[ld].append({k: r.get(k) for k in ("report_id", "lobbyist", "firm", "client", "year", "month", "period", "compensation_month", "url")} | {"bills_in_report": len(r["bills"])})
         c = by_client[r["client"] or "—"]; c["reports"] += 1; c["compensation"] += r["compensation_month"] or 0; c["bills"].update(r["bills"])
         l = by_lobbyist[r["lobbyist"] or "—"]; l["reports"] += 1; l["compensation"] += r["compensation_month"] or 0; l["clients"].add(r["client"] or "—")
     for ld, items in by_ld.items():
-        items.sort(key=lambda x: (x["year"], str(x["month"]), x["client"] or ""))
+        items.sort(key=lambda x: (x.get("period") or "", x["client"] or ""))
         (out / f"LD{ld}.json").write_text(json.dumps({
             "ld": ld, "reports": items,
             "clients": sorted({i["client"] for i in items if i["client"]}),
