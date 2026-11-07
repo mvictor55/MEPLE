@@ -226,7 +226,9 @@ def run(sample_notice: str | None = None):
         index.append({"ld": ld, "paper": full["paper"], "title": title, "sponsor_id": sponsor_id, "cosponsor_ids": cos_ids,
                       "committee_code": code, "status": status, "status_label": status_label,
                       "final_date": full["final_disposition"].get("date"), "hearing_date": (hearing or {}).get("date"),
-                      "testimony_count": len(trows), "tags": full["tags"][:6]})
+                      "testimony_count": len(trows), "tags": full["tags"][:6],
+                      # position counts for stance bars on cards and overviews (inferred positions, see testimony.positions)
+                      "positions": {k: sum(1 for t in trows if t.get("position") == k) for k in ("support", "neutral", "oppose")}})
         for t in trows:
             t_index.append({k: t.get(k) for k in ("id", "name", "organization", "town", "position", "position_source", "date", "url", "has_text")} | {"ld": ld, "committee_code": code})
     for c in committees:
@@ -236,6 +238,8 @@ def run(sample_notice: str | None = None):
     (config.OUT / "testimony" / "index.json").write_text(json.dumps(t_index, ensure_ascii=False), encoding="utf-8")
     (config.OUT / "legislators.json").write_text(json.dumps(sorted(legislators.values(), key=lambda l: (l["chamber"], last_name(l["name"]))), ensure_ascii=False, indent=0), encoding="utf-8")
     (config.OUT / "committees.json").write_text(json.dumps(committees, ensure_ascii=False, indent=0), encoding="utf-8")
+    # Municipalities with their House and Senate districts (House district-towns list), for the town picker and district pages
+    (config.OUT / "towns.json").write_text(json.dumps(sorted(rosters.get("towns", []), key=lambda t: t["town"].lower()), ensure_ascii=False), encoding="utf-8")
     top = [b["ld"] for b in sorted(index, key=lambda b: -b["testimony_count"])[:3]]
     meta = {"session": config.SESSION, "legislature": config.LEGISLATURE_LABEL, "years": config.YEARS,
             "generated_at": date.today().isoformat(), "sample": bool(sample_notice), "notice": sample_notice,

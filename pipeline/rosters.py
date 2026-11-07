@@ -167,14 +167,20 @@ def maine_towns() -> list[dict]:
     testimony.py uses it to tell a town typed into the 'organization' field from an organization."""
     soup = BeautifulSoup(fetch.get(config.HOUSE_DISTRICT_TOWNS, refresh=True), "lxml")
     heads = [_text(th) for th in soup.select("thead th")]
-    seen, out = set(), []
+    by_town = {}
     for tr in soup.select("tbody tr"):
         c = dict(zip(heads, (_text(td) for td in tr.find_all("td"))))
         # "Portland Part": a town split between House districts
-        t = re.sub(r"\s*(?:\((?:part|pt\.?)\)|\bPart)\s*$", "", c.get("Town") or "", flags=re.I).strip()
-        if t and t.lower() not in seen:
-            seen.add(t.lower()); out.append({"town": t, "county": c.get("County")})
-    return out
+        raw = c.get("Town") or ""
+        t = re.sub(r"\s*(?:\((?:part|pt\.?)\)|\bPart)\s*$", "", raw, flags=re.I).strip()
+        if not t:
+            continue
+        e = by_town.setdefault(t.lower(), {"town": t, "county": c.get("County"), "house": [], "senate": [], "split": False})
+        hd, sd = (c.get("District") or "").strip(), (c.get("Senate District") or "").strip()
+        if hd and hd not in e["house"]: e["house"].append(hd)
+        if sd and sd not in e["senate"]: e["senate"].append(sd)
+        e["split"] = e["split"] or raw != t
+    return list(by_town.values())
 
 def committee_rosters(house: list[dict], senate: list[dict]) -> dict[str, dict]:
     """code -> {url, members: [{name, chamber, role}]}; role in {'Senate Chair','House Chair','Member'}"""
