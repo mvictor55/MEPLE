@@ -44,7 +44,8 @@
   nav.main a:hover{background:var(--pine-soft);color:var(--pine);text-decoration:none}
   nav.main a.active{background:var(--pine-soft);color:var(--pine);font-weight:600}
   .hdr-cta{background:var(--pine);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14.5px;font-weight:600;white-space:nowrap}
-  .hdr-cta:hover{background:var(--pine-deep)}
+  .hdr-cta:hover{background:var(--pine-deep);text-decoration:none}
+  a.hdr-cta{display:inline-block;text-decoration:none}
 
   .hero{position:relative;background:linear-gradient(180deg,var(--pine-deep) 0%,var(--pine) 100%);color:#fff;overflow:hidden}
   .hero .wrap{position:relative;padding-top:72px;padding-bottom:64px}
@@ -280,7 +281,7 @@
       <a href="#/profiles" data-nav="profiles">Who testified</a>
       <a href="#/about" data-nav="about">About</a>
     </nav>
-    <button class="hdr-cta" onclick="openSubmit()">Submit testimony</button>
+    <a class="hdr-cta" id="hdr-cta" href="https://legislature.maine.gov/testimony" target="_blank" rel="noopener" title="Submit testimony on the Maine Legislature's own site">Testify ↗</a>
   </div>
 </header>
 
@@ -291,7 +292,7 @@
     <div class="cols">
       <div>
         <div class="f-brand">ME<em>PLE</em></div>
-        <p style="margin-top:10px;max-width:380px">An open civic platform to read and publish testimony on the bills before the Maine State Legislature — free, nonpartisan, and built in the open.</p>
+        <p style="margin-top:10px;max-width:380px">An open civic platform to read and search the public testimony on the bills before the Maine State Legislature — free, nonpartisan, and built in the open.</p>
       </div>
       <div>
         <h4>Explore</h4>
@@ -325,6 +326,8 @@
    ========================================================= */
 
 const DATA_ROOT = "data";
+// The Legislature's online testimony submission form (linked from legislature.maine.gov's "Testimony Submission" menu; checked 2026-11-07).
+const LEG_TESTIFY = "https://legislature.maine.gov/testimony";
 const D = { meta:null, committees:[], legislators:[], index:[], bills:{}, texts:{}, tindex:null };
 const PAGE = 50;
 
@@ -505,7 +508,8 @@ function viewHome(){
     </svg>
     <div class="wrap">
       <h1>The people's voice, <em>on the record</em> in Augusta.</h1>
-      <p class="lede">MEPLE makes it easy for any Mainer to read, search, and publish testimony on the bills before the Maine State Legislature — in plain language, all in one place, free forever.</p>
+      <p class="lede">Read and search what Mainers have already told the Legislature: every written testimony on the public record for the ${esc(D.meta.legislature)}, bill by bill, in one place, free.</p>
+      <p class="lede" style="font-size:15px;margin-top:10px">Submitting testimony through MEPLE is planned for the 133rd Legislature. Until then, <a href="${LEG_TESTIFY}" target="_blank" rel="noopener" style="color:#F3C98B;text-decoration:underline">testify on the Legislature's own site ↗</a>.</p>
       <form class="searchbar" onsubmit="event.preventDefault(); location.hash='#/bills?q='+encodeURIComponent(this.q.value)">
         <input name="q" type="search" placeholder="Search bills — try &quot;data center&quot;, &quot;privacy&quot;, or an LD number…" aria-label="Search bills">
         <button type="submit">Search</button>
@@ -541,8 +545,8 @@ function viewHome(){
       <h2>How it works</h2>
       <div class="grid-3">
         <div class="step"><div class="num">1</div><h3>Find your bill</h3><p>Search by keyword, LD number, committee, or sponsor. Every bill carries the official summary alongside the bill text and its history.</p></div>
-        <div class="step"><div class="num">2</div><h3>Write your testimony</h3><p>Say whether you support, oppose, or are neither for nor against — in your own words. Guided prompts help first-timers write testimony that committees actually read.</p></div>
-        <div class="step"><div class="num">3</div><h3>Publish &amp; deliver</h3><p>Your testimony is delivered to the committee and published in a permanent public archive alongside everything already on the Legislature's record.</p></div>
+        <div class="step"><div class="num">2</div><h3>Read what people said</h3><p>Every written testimony the Legislature has posted for the bill, searchable by name, organization, or town, with the official PDF one click away.</p></div>
+        <div class="step"><div class="num">3</div><h3>Testify with the Legislature</h3><p>MEPLE doesn't submit testimony yet; that's planned for the 133rd Legislature. Today, submit written testimony through the <a href="${LEG_TESTIFY}" target="_blank" rel="noopener">Legislature's online form ↗</a>, which sends it to the committee.</p></div>
       </div>
     </div>
 
@@ -623,7 +627,7 @@ function synthesisPanel(syn, params){
         <button class="btn ghost sm" style="white-space:nowrap;${String(t.i)===active?"background:var(--pine-soft)":""}" onclick="showTheme(${t.i})">${fmtN(t.count)} letter${t.count===1?"":"s"} →</button>
       </div>`).join("")}
     </div>`).join("")}
-    <div class="src" style="margin-top:12px">AI-generated summary of ${syn.letters_considered?`the ${fmtN(syn.letters_considered)} `:"the "}written testimonies with readable text, made with ${esc(syn.model||"Claude")}${syn.generated_at?` on ${esc(syn.generated_at)}`:""}.${syn.method?` ${esc(syn.method)}`:""} Counts are letters that make each point; a letter can make several. The letters themselves are below.</div>
+    <div class="src" style="margin-top:12px">AI-written summary of the letters cited below${syn.model?` (${esc(syn.model)}${syn.generated_at?`, ${esc(syn.generated_at)}`:""})`:""}. Read the letters before relying on it. Counts are letters that make each point; a letter can make several.</div>
   </div>`;
 }
 let pendingScroll = null;
@@ -758,8 +762,8 @@ async function viewBill(ld, params=new URLSearchParams()){
       <aside>
         <div class="panel">
           <h2>Add your voice</h2>
-          <button class="btn primary block" onclick="openSubmit(${b.ld})">Submit testimony on LD ${b.ld}</button>
-          <div class="side-note">In the live platform, testimony is delivered to the ${esc(b.committee_name||comName(b.committee_code))} Committee and published to the permanent archive. This demo keeps everything on your screen.</div>
+          <a class="btn primary block" href="${LEG_TESTIFY}" target="_blank" rel="noopener">Testify on the Legislature's site ↗</a>
+          <div class="side-note">The Legislature's online form sends written testimony to the ${esc(b.committee_name||comName(b.committee_code))} Committee. Submitting through MEPLE is planned for the 133rd Legislature.</div>
         </div>
         ${mediaPanel(b)}
         ${docs.length?`<div class="panel"><h2>Documents</h2>${docs.map(d=>`<div style="font-size:14px;margin-bottom:6px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.label)} ↗</a></div>`).join("")}</div>`:""}
@@ -802,7 +806,7 @@ async function viewTestimony(params){
   return `
   <div class="page-head"><div class="wrap">
     <h1>Testimony archive</h1>
-    <p>Every piece of written testimony on the Legislature's public record for the ${esc(D.meta.legislature)}, plus testimony published through MEPLE. What Mainers tell their Legislature shouldn't disappear into a filing cabinet.</p>
+    <p>Every piece of written testimony on the Legislature's public record for the ${esc(D.meta.legislature)}. What Mainers tell their Legislature shouldn't disappear into a filing cabinet.</p>
   </div></div>
   <div class="wrap">
     <div class="toolbar">
@@ -1010,6 +1014,14 @@ async function viewCommittee(code){
 }
 
 const PROFILE_TYPES = {organization:"Organization", agency:"State agency or public body", official:"Public official"};
+// "Secretary of State, Secretary of State" / "Attorney General, Office of the Attorney General": say it once.
+function officialRole(p, link=true){
+  const norm = s => String(s||"").toLowerCase().replace(/^(office of the|office of|department of the|department of|the)\s+/,"").replace(/^maine\s+/,"").trim();
+  const ag = link && p.agency_id ? t => `<a href="#/profile/${esc(p.agency_id)}">${esc(t)}</a>` : t => esc(t);
+  if(!p.title) return p.agency_name ? `Testified for ${ag(p.agency_name)}` : "";
+  if(norm(p.title)===norm(p.agency_name)) return ag(p.title);
+  return `${esc(p.title)}, ${ag(p.agency_name||"")}`;
+}
 async function viewProfiles(params){
   const idx = await loadOptional("profiles/index.json");
   if(!idx) return `<div class="page-head"><div class="wrap"><h1>Who testified</h1></div></div><div class="wrap"><div class="empty">Organization and official profiles haven't been built yet.</div></div>`;
@@ -1040,7 +1052,7 @@ async function viewProfiles(params){
       ${slice.map(p=>`<article class="com-card" onclick="location.hash='#/profile/${esc(p.id)}'">
         <div class="role" style="font-size:12px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em">${esc(PROFILE_TYPES[p.type]||p.type)}</div>
         <h3>${esc(p.name)}</h3>
-        <div class="meta">${p.type==="official"?`${esc(p.title||"")}${p.title?", ":""}${esc(p.agency_name||"")} · `:""}${fmtN(p.testimony_count)} testimon${p.testimony_count===1?"y":"ies"} on ${fmtN(p.bill_count)} bill${p.bill_count===1?"":"s"}</div>
+        <div class="meta">${p.type==="official"?`${officialRole(p,false)} · `:""}${fmtN(p.testimony_count)} testimon${p.testimony_count===1?"y":"ies"} on ${fmtN(p.bill_count)} bill${p.bill_count===1?"":"s"}</div>
       </article>`).join("") || `<div class="empty">No profiles match.</div>`}
     </div>
     ${pages>1?`<div class="pager"><button ${page<=1?"disabled":""} onclick="updateParam('page',${page-1})">← Previous</button><button ${page>=pages?"disabled":""} onclick="updateParam('page',${page+1})">Next →</button></div>`:`<div style="height:40px"></div>`}
@@ -1066,7 +1078,7 @@ async function viewProfile(id, params){
         <div class="crumb"><a href="#/profiles">Who testified</a> / ${esc(p.name)}</div>
         <div class="role" style="font-size:12.5px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em;margin-top:8px">${esc(PROFILE_TYPES[p.type]||p.type)}</div>
         <h1 style="font-family:var(--serif);font-size:28px;margin:4px 0 6px">${esc(p.name)}</h1>
-        ${p.type==="official"?`<div style="color:var(--ink-2);font-size:15px;margin-bottom:16px">${esc(p.title||"Testified for")}${p.title?", ":" "}<a href="#/profile/${esc(p.agency_id)}">${esc(p.agency_name||"")}</a></div>`:`<div style="height:10px"></div>`}
+        ${p.type==="official"?`<div style="color:var(--ink-2);font-size:15px;margin-bottom:16px">${officialRole(p)}</div>`:`<div style="height:10px"></div>`}
         <div class="panel">
           <h2>Positions in testimony · ${fmtN(items.length)} on ${fmtN(p.bill_count)} bill${p.bill_count===1?"":"s"}</h2>
           ${stanceBar(items)}
@@ -1100,113 +1112,18 @@ function viewAbout(){
   <div class="wrap"><div class="prose">
     <h2>The idea</h2>
     <p>Every year, thousands of Mainers testify before the Legislature — and their words vanish into PDFs and filing systems that almost no one can search. Meanwhile, most Mainers have never testified at all, not because they have nothing to say, but because nobody ever showed them how.</p>
-    <p><b>MEPLE — the Maine Platform for Legislative Engagement — fixes both problems.</b> It makes testimony easy to submit for first-timers, and it makes every submission part of a permanent, searchable public archive — so journalists, researchers, legislators, and neighbors can see what Maine actually said about the bills that shape it.</p>
+    <p><b>MEPLE — the Maine Platform for Legislative Engagement — starts with the second problem.</b> Today it turns the written testimony already on the Legislature's public record into a searchable archive, so journalists, researchers, legislators, and neighbors can see what Maine actually said about the bills that shape it. Helping first-timers write and submit testimony through MEPLE is planned for the 133rd Legislature; until then, testimony goes through the <a href="${LEG_TESTIFY}" target="_blank" rel="noopener">Legislature's online form</a>.</p>
     <h2>A proven model</h2>
     <p>MAPLE — the Massachusetts Platform for Legislative Engagement — launched in Massachusetts in 2023, built by <b>Code for Boston</b> volunteers with <b>NuLawLab at Northeastern University School of Law</b> and collaborators from the Harvard Berkman Klein Center. It is open source, nonpartisan, and free, and it has helped thousands of residents publish testimony to the Massachusetts Legislature.</p>
     <p>MEPLE adapts that working codebase for Maine: our LD numbering, our 17 joint standing committees, our public hearing process, and our citizen Legislature.</p>
     <h2>Where the data comes from</h2>
-    <p>Bills, sponsors, committee actions, reports, amendments, votes, and written testimony are drawn from the Maine Legislature's public record at legislature.maine.gov, with bill metadata cross-checked against LegiScan and Open States. Each bill page links to its sources. Testimony shown under "Legislature's record" was filed with a committee through the Legislature's own submission system; testimony submitted through MEPLE is marked separately.</p>
+    <p>Bills, sponsors, committee actions, reports, amendments, votes, and written testimony are drawn from the Maine Legislature's public record at legislature.maine.gov, with bill metadata cross-checked against LegiScan and Open States. Each bill page links to its sources. All testimony shown was filed with a committee through the Legislature's own submission system. Summaries marked "AI-written" are generated from the letters they cite; read the letters before relying on them.</p>
     <h2>Stewardship</h2>
     <p>MEPLE is stewarded by the <b>Center for Engaged Citizenship at the University of Southern Maine</b>, which provides nonpartisan editorial standards, student-powered civic education programming, and institutional continuity. The platform's code remains open source; its data remains public.</p>
     <h2>Why it matters for Maine</h2>
     <p>Maine has one of the most accessible legislatures in the country — every bill gets a public hearing, and anyone may testify. But accessibility on paper isn't accessibility in practice when hearings happen on weekday mornings in Augusta. A farmer in Fort Kent, a sternman in Jonesport, and a nurse on the night shift in Bangor deserve the same voice as anyone who can spend a Tuesday at the State House.</p>
     ${m.sample?`<p><i>This site is a demonstration prototype. The bills shown are real measures from the ${esc(m.legislature)}; testimony, counts, and organizational names are illustrative samples.</i></p>`:`<p><i>Data last updated ${esc(m.generated_at)}.</i></p>`}
   </div></div>`;
-}
-
-/* ---------- submit flow (demo) ---------- */
-function openSubmit(ld){
-  const row = ld ? D.idxByLd[Number(ld)] : (D.index[0]||null);
-  if(!row) return;
-  submitState = {bill:row, step:1, stance:null, name:"", town:"", text:""};
-  renderModal();
-}
-function closeSubmit(){ submitState = null; $("#modal-root").innerHTML=""; }
-function setStance(s){ submitState.stance = s; renderModal(); }
-function submitNext(){
-  if(submitState.step===2){
-    submitState.name = $("#f-name").value.trim();
-    submitState.town = $("#f-town").value.trim();
-    submitState.text = $("#f-text").value.trim();
-    if(!submitState.name || !submitState.town || submitState.text.length < 20){
-      $("#form-warn").textContent = "Please add your name, town, and at least a few sentences of testimony.";
-      return;
-    }
-  }
-  submitState.step++;
-  renderModal();
-}
-function submitBack(){ submitState.step--; renderModal(); }
-function submitFinal(){
-  userTestimony.unshift({
-    id:`mine-${Date.now()}`, ld: submitState.bill.ld, name: submitState.name, town: submitState.town,
-    position: submitState.stance, position_source:"filed", date:"Today", text: submitState.text, committee_code: submitState.bill.committee_code
-  });
-  submitState.step = 4;
-  renderModal();
-}
-function renderModal(){
-  if(!submitState){ $("#modal-root").innerHTML=""; return; }
-  const st = submitState;
-  const b = st.bill;
-  const cname = comName(b.committee_code);
-  let body="", foot="", stepLabel="";
-  if(st.step===1){
-    stepLabel = "Step 1 of 3 — Your position";
-    body = `
-      <div class="billref"><b>LD ${b.ld}</b> — ${esc(b.title)}</div>
-      <p style="font-size:15px;margin-bottom:16px">Where do you stand on this bill?</p>
-      <div class="stance-choices">
-        <button class="stance-choice ${st.stance==="support"?"sel-support":""}" onclick="setStance('support')"><span class="ic">✓</span>Support</button>
-        <button class="stance-choice ${st.stance==="neutral"?"sel-neutral":""}" onclick="setStance('neutral')"><span class="ic">–</span>Neither for nor against</button>
-        <button class="stance-choice ${st.stance==="oppose"?"sel-oppose":""}" onclick="setStance('oppose')"><span class="ic">✗</span>Oppose</button>
-      </div>`;
-    foot = `<span></span><button class="btn primary" ${st.stance?"":"disabled style='opacity:.5;cursor:not-allowed'"} onclick="${st.stance?"submitNext()":""}">Continue →</button>`;
-  } else if(st.step===2){
-    stepLabel = "Step 2 of 3 — Your testimony";
-    body = `
-      <div class="billref"><b>LD ${b.ld}</b> · ${stancePill(st.stance)}</div>
-      <div class="tips"><b>What makes testimony effective?</b>Say who you are and where you live, tell the committee how this bill would affect you or your community, and be specific. One honest paragraph from Machias beats ten pages of boilerplate.</div>
-      <div class="field"><label for="f-name">Your name</label><input id="f-name" value="${esc(st.name)}" placeholder="e.g., Jordan Small"></div>
-      <div class="field"><label for="f-town">Your town</label><input id="f-town" value="${esc(st.town)}" placeholder="e.g., Presque Isle"></div>
-      <div class="field"><label for="f-text">Your testimony</label>
-        <textarea id="f-text" placeholder="Senator, Representative, and members of the Committee — my name is…">${esc(st.text)}</textarea>
-        <div class="sub">Testimony becomes part of the permanent public record.</div>
-      </div>
-      <div id="form-warn" style="color:var(--oppose-ink);font-size:13.5px;font-weight:600"></div>`;
-    foot = `<button class="btn ghost" onclick="submitBack()">← Back</button><button class="btn primary" onclick="submitNext()">Review →</button>`;
-  } else if(st.step===3){
-    stepLabel = "Step 3 of 3 — Review & publish";
-    body = `
-      <div class="billref"><b>LD ${b.ld}</b> — ${esc(b.title)}</div>
-      <div class="review-box">
-        <div class="rb-head">${stancePill(st.stance)}<span>${esc(st.name)}</span><span style="color:var(--ink-3);font-weight:400;font-size:13px">${esc(st.town)}</span></div>
-        <p>${esc(st.text)}</p>
-      </div>
-      <div class="demo-note"><b>Demonstration mode:</b> in the live platform, publishing delivers this testimony to the ${esc(cname)} Committee clerk and adds it to the public archive. In this demo, it appears only in your current session.</div>`;
-    foot = `<button class="btn ghost" onclick="submitBack()">← Edit</button><button class="btn primary" onclick="submitFinal()">Publish testimony</button>`;
-  } else {
-    stepLabel = "Published";
-    body = `
-      <div class="success">
-        <div class="big">✓</div>
-        <h3>Your testimony is on the record.</h3>
-        <p>It now appears on the LD ${b.ld} bill page and in the testimony archive — marked as a demo submission for this session.</p>
-      </div>`;
-    foot = `<span></span><button class="btn primary" onclick="closeSubmit(); location.hash='#/bill/${b.ld}'; render();">See it on the bill page →</button>`;
-  }
-  $("#modal-root").innerHTML = `
-    <div class="overlay" onclick="if(event.target===this) closeSubmit()">
-      <div class="modal" role="dialog" aria-modal="true" aria-label="Submit testimony">
-        <div class="modal-head">
-          <h2>Submit testimony</h2>
-          <div style="display:flex;align-items:center;gap:14px"><span class="steps">${stepLabel}</span>
-          <button class="modal-x" onclick="closeSubmit()" aria-label="Close">×</button></div>
-        </div>
-        <div class="modal-body">${body}</div>
-        <div class="modal-foot">${foot}</div>
-      </div>
-    </div>`;
 }
 
 /* ---------- router ---------- */

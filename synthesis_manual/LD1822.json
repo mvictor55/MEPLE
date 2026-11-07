@@ -3,13 +3,13 @@
  "model": "Claude Opus 5.5",
  "generated_at": "2026-11-07",
  "method": "Written by Claude Opus 5.5 in a Claude Code session after reading every letter with text; not produced by the batch pipeline.",
- "summary": "Testimony on LD 1822 centered on its limits on collecting personal data, its restrictions on sensitive data, and how it compares with the privacy bills heard alongside it. Letters in support described protections for people at risk of surveillance or discrimination, while letters in opposition argued that it departs from other states and would restrict digital advertising; others asked for changes to enforcement, coverage and exemptions.",
+ "summary": "Testimony on LD 1822 centered on its limits on collecting personal data, its restrictions on sensitive data, and how it compares with the privacy bills heard alongside it. Letters in support described protections for people at risk of surveillance or discrimination, while letters in opposition argued that it departs from other states and would restrict digital advertising; other letters asked for changes to enforcement, coverage and exemptions.",
  "letters_considered": 57,
  "themes": [
   {
    "stance": "support",
    "label": "Limits collection to what a requested service needs",
-   "detail": "Letters said LD 1822 lets companies collect only the personal data needed for the product or service a person asked for, instead of anything disclosed in a privacy policy or accepted by clicking \"I agree\". Several contrasted this with the notice-and-consent approach of the bills heard alongside it.",
+   "detail": "Letters said LD 1822 lets companies collect only the personal data needed for the product or service a person asked for, instead of anything disclosed in a privacy policy or accepted by clicking \"I agree\". Letters also contrasted this with the notice-and-consent approach of the bills heard alongside it.",
    "testimony_ids": [
     "10047928",
     "10048135",
