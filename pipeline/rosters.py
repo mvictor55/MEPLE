@@ -162,6 +162,20 @@ def _senate_profile(s: dict, html: str):
         elif cname:
             s["other_committees"].append(cname + (" (Chair)" if chair else ""))
 
+def maine_towns() -> list[dict]:
+    """Every municipality and township, with county, from the House district-towns list.
+    testimony.py uses it to tell a town typed into the 'organization' field from an organization."""
+    soup = BeautifulSoup(fetch.get(config.HOUSE_DISTRICT_TOWNS, refresh=True), "lxml")
+    heads = [_text(th) for th in soup.select("thead th")]
+    seen, out = set(), []
+    for tr in soup.select("tbody tr"):
+        c = dict(zip(heads, (_text(td) for td in tr.find_all("td"))))
+        # "Portland Part": a town split between House districts
+        t = re.sub(r"\s*(?:\((?:part|pt\.?)\)|\bPart)\s*$", "", c.get("Town") or "", flags=re.I).strip()
+        if t and t.lower() not in seen:
+            seen.add(t.lower()); out.append({"town": t, "county": c.get("County")})
+    return out
+
 def committee_rosters(house: list[dict], senate: list[dict]) -> dict[str, dict]:
     """code -> {url, members: [{name, chamber, role}]}; role in {'Senate Chair','House Chair','Member'}"""
     rosters = {code: {"url": config.COMMITTEE_SCHEDULE.format(code=code, snum=config.SESSION), "members": []} for code in config.COMMITTEES}
@@ -180,7 +194,9 @@ if __name__ == "__main__":
         print("raw pages written to", d)
     listing = _house_list()
     house, senate, former = house_members(listing), senate_members(), house_former(listing)
-    data = {"house": house, "senate": senate, "former": former, "committees": committee_rosters(house, senate)}
+    data = {"house": house, "senate": senate, "former": former, "committees": committee_rosters(house, senate),
+            "towns": maine_towns()}
+    print(f"towns: {len(data['towns'])} municipalities/townships")
     for f in former:
         print(f"former member: {f['name']} (House {f['district']}) {f['status']} {f['served_until']}")
     (d / "rosters.json").write_text(json.dumps(data, indent=1), encoding="utf-8")

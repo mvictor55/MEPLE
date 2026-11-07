@@ -1,5 +1,5 @@
 """Polite, cached HTTP for the Maine Legislature's site."""
-import hashlib, time, json
+import hashlib, re, time, json
 from pathlib import Path
 import requests
 from . import config
@@ -14,6 +14,17 @@ def _cache_path(url: str, ext: str) -> Path:
     d.mkdir(parents=True, exist_ok=True)
     return d / f"{h}.{ext}"
 
+_MOJIBAKE = re.compile("[ÂÃ][\u0080-¿]|â€")
+
+def _repair(text: str) -> str:
+    """Undo UTF-8-read-as-Latin-1 in pages cached before the charset fix (e.g. 'TassÃ©' -> 'Tassé')."""
+    if not _MOJIBAKE.search(text):
+        return text
+    try:
+        return text.encode("latin-1").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return text
+
 def get(url: str, *, binary=False, refresh=False, cache=True, timeout=60, retries=3) -> bytes | str:
     """GET with on-disk cache and a fixed delay between live requests.
     cache=False skips the cache entirely (for callers that store the body themselves)."""
@@ -21,7 +32,7 @@ def get(url: str, *, binary=False, refresh=False, cache=True, timeout=60, retrie
     ext = "bin" if binary else "html"
     p = _cache_path(url, ext)
     if cache and p.exists() and not refresh:
-        return p.read_bytes() if binary else p.read_text(encoding="utf-8", errors="replace")
+        return p.read_bytes() if binary else _repair(p.read_text(encoding="utf-8", errors="replace"))
     for attempt in range(retries):
         wait = config.REQUEST_DELAY_SECONDS - (time.time() - _last)
         if wait > 0:
@@ -42,7 +53,10 @@ def get(url: str, *, binary=False, refresh=False, cache=True, timeout=60, retrie
         if cache:
             p.write_bytes(r.content)
         return r.content
-    r.encoding = r.encoding or "utf-8"
+    # The Legislature's JSON endpoints send UTF-8 without a charset; requests then assumes ISO-8859-1
+    # for text/* and "REALTORS®" becomes "REALTORSÂ®". Use UTF-8 unless the server names a charset.
+    if "charset" not in (r.headers.get("content-type") or "").lower():
+        r.encoding = "utf-8"
     if cache:
         p.write_text(r.text, encoding="utf-8")
     return r.text

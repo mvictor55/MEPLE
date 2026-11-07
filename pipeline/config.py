@@ -58,6 +58,7 @@ TESTIMONY_DOC = BASE + "/legis/bills/getTestimonyDoc.asp?id={id}"
 HOUSE_ROSTER_CSV = BASE + "/house/Home/ExportActiveMembers?format=csv"
 HOUSE_ROSTER = BASE + "/house/MemberProfiles/List?sort=alpha"
 SENATE_ROSTER = BASE + "/senate/district-listing/9526"
+HOUSE_DISTRICT_TOWNS = BASE + "/house/MemberProfiles/ListDistrictTowns"   # every municipality / township by House district
 COMMITTEE_LIST = BASE + "/committee/#Committees"
 
 # --- Roll calls (UNVERIFIED paths).

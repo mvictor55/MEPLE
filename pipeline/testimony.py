@@ -12,8 +12,12 @@ loads them by XHR; all return JSON):
       -> [{id, firstName, lastName, organization, ld, paperNumber, title,
            sessionNumber, policyArea, topic}]
   getTestimonyDoc.asp?id=NNN  -> the PDF
-The Legislature does not record a position; "organization" is free text that
-often holds the person's town. A per-bill view also exists
+The Legislature does not record a position. The feed has no town field: its
+single "organization" field holds whatever the witness typed, which for
+individuals is usually their town ("Portland", "Cape Elizabeth, ME",
+"Washington, DC"). split_org_town() moves place names to "town" using the
+Legislature's own list of Maine municipalities (rosters.json "towns", from the
+House district-towns page) plus a "City, ST" pattern for out-of-state places. A per-bill view also exists
 (getTestyRecords.asp?recid=..&date=.., keyed from getPHWS.asp) but the
 committee/date walk covers every bill in fewer requests.
 
@@ -74,10 +78,54 @@ def _date(s: str) -> str | None:
     m = re.match(r"\w{3} (\w{3}) +(\d{1,2}) [\d:]+ \w+ (\d{4})", s or "")
     return datetime.strptime(" ".join(m.groups()), "%b %d %Y").date().isoformat() if m else None
 
+_US_STATES = set("AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split())
+_STATE_NAMES = {"maine", "massachusetts", "new hampshire", "vermont", "new york", "connecticut", "rhode island", "california",
+                "florida", "virginia", "maryland", "pennsylvania", "new jersey", "texas", "colorado", "oregon", "washington", "district of columbia"}
+
+def _town_set() -> set[str]:
+    p = config.RAW / "rosters" / "rosters.json"
+    towns = json.loads(p.read_text(encoding="utf-8")).get("towns", []) if p.exists() else []
+    if not towns:
+        print("warning: no town list in rosters.json; run `python run.py rosters` first", file=sys.stderr)
+    return {t["town"].lower() for t in towns}
+
+# Villages and islands that aren't municipalities but are typed as a home town (seen in the 132nd's feed).
+_VILLAGES = {"spruce head", "orr's island", "orrs island", "bailey island", "peaks island", "chebeague island", "new harbor",
+             "stratton", "ocean park", "hulls cove", "northeast harbor", "cumberland foreside", "belgrade lakes", "kittery point",
+             "south paris", "lisbon falls", "north waterboro", "east waterboro", "west rockport", "south china", "pemaquid",
+             "round pond", "west bath", "north yarmouth", "sebago lake", "south freeport", "west kennebunk", "cape porpoise",
+             "biddeford pool", "prouts neck", "bustins island", "little deer isle", "tenants harbor", "port clyde", "sunset",
+             "east boothbay", "trevett", "ocean point", "south bristol", "walpole", "damariscotta mills", "dover"}
+_JUNK = {"n/a", "na", "null", "none", "n.a.", "-", ".", "self", "myself"}
+_COMPASS = r"(?:north|south|east|west|northeast|northwest|southeast|southwest|lower|upper)"
+_VILLAGE_SUFFIX = r"(?:falls|point|harbor|harbour|lakes?|foreside|center|centre|mills?|village|corner|beach|island|neck|station)"
+
+def _is_place(base: str, towns: set[str]) -> bool:
+    b = base.lower().replace("twp.", "township").replace(" twp", " township").strip()
+    if b in towns or b in _VILLAGES:
+        return True
+    m = re.match(rf"^{_COMPASS}\s+(.+)$", b) or re.match(rf"^(.+?)\s+{_VILLAGE_SUFFIX}$", b)
+    return bool(m and m.group(1) in towns)
+
+def split_org_town(value: str | None, towns: set[str]) -> tuple[str | None, str | None]:
+    """(organization, town) from the feed's single free-text field."""
+    v = _clean(value)
+    if not v or v.lower() in _JUNK:
+        return None, None
+    m = re.match(r"^(?P<place>[A-Za-z][A-Za-z .'\-]+?)\s*,?\s+(?P<st>[A-Za-z]{2}|[A-Za-z .]{4,})\.?$", v)
+    base = re.sub(r"\s*,?\s*(?:ME|Maine|Me)\.?$", "", v).strip()
+    if _is_place(base, towns):
+        return None, base.title() if base.isupper() else base           # "Portland", "Cape Elizabeth, ME", "NEWPORT"
+    st = (m.group("st") if m else "").strip()
+    if m and "," in v and st.upper() != "ME" and st.lower() != "maine" and (st.upper() in _US_STATES or st.lower() in _STATE_NAMES):
+        return None, v                                                   # "Washington, DC", "San Diego, CA"
+    return v, None
+
 def index():
     snum = config.SESSION
     cmtes = fetch.get_json(TESTIMONY_ENDPOINTS["committees"].format(snum=snum), refresh=True)
     rows, seen = [], set()
+    towns = _town_set()
     for c in cmtes:
         code = c["committeeCode"]
         if code not in config.COMMITTEES:
@@ -98,8 +146,7 @@ def index():
                     "ld": int(r.get("ld") or 0) or None,
                     "paper": _clean(r.get("paperNumber")),
                     "name": _name(r),
-                    "organization": _clean(r.get("organization")),
-                    "town": None,
+                    **dict(zip(("organization", "town"), split_org_town(r.get("organization"), towns))),
                     "date": day,
                     "hearing_date": day,
                     "committee_code": code,

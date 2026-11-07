@@ -1,0 +1,237 @@
+"""
+Profiles for organizations, state agencies, and public officials who testified.
+
+Decided Nov 2026: profiles are created for
+  - organizations named on testimony, when the same normalized name appears on
+    2 or more testimonies;
+  - state agencies and other public bodies in pipeline/agencies.py;
+  - public officials testifying in their official role for one of those bodies
+    (e.g. a commissioner, an authority's president), identified from the
+    testimony's organization field or the letter's self-introduction.
+Private individuals do NOT get profiles. Their testimony stays on bill pages
+and in the archive's name search, as on the Legislature's own site. Once MEPLE
+has accounts, individuals can opt in.
+
+Runs after pipeline.build. Reads site/data, writes site/data/profiles/, and adds
+`person_profile_id` / `org_profile_id` to testimony rows in
+site/data/bills/LD*.json and site/data/testimony/index.json.
+
+Merge rule: names are merged only when they match exactly after normalization
+(case, punctuation, "The", "Inc."/"LLC" and similar suffixes, "&" vs "and").
+Known variants that don't normalize together go in ORG_ALIASES below.
+Officials are keyed by (first + last name, agency), so the same name at two
+different agencies stays two profiles.
+"""
+import json, re, sys, unicodedata
+from collections import Counter, defaultdict
+from . import config
+from .agencies import AGENCIES, OFFICIAL_TITLES
+
+MIN_ORG_TESTIMONIES = 2
+ORG_ALIASES: dict[str, str] = {
+    # "variant as written": "canonical as written"   (add after reviewing profiles/review.json)
+}
+JUNK_ORG = {"", "self", "myself", "none", "n a", "na", "citizen", "private citizen", "resident", "individual",
+            "personal", "retired", "constituent", "concerned citizen", "parent", "voter", "student", "taxpayer",
+            "member of the public", "public", "me", "na na", "not applicable", "unaffiliated", "independent"}
+LEGISLATOR_ORG = re.compile(r"^(?:maine )?(?:state legislature|legislature|maine house of representatives|house of representatives|maine senate|senate"
+                            r"|(?:house|senate) district \d+|state (?:representative|senator)( district \d+)?)$")
+ORG_SUFFIXES =r"(,?\s+(inc|incorporated|llc|l l c|corp|corporation|co|company|ltd|pllc|pc|p a|lp|llp))+$"
+
+def slug(s: str) -> str:
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")[:70]
+
+def norm(s: str | None) -> str:
+    s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().lower()
+    s = s.replace("&", " and ").replace("'", "").replace("’", "")
+    s = re.sub(r"[^a-z0-9 ]+", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    s = re.sub(r"^the\s+", "", s)
+    s = re.sub(ORG_SUFFIXES, "", s).strip()
+    return s
+
+def norm_agency(s: str) -> str:
+    s = norm(s)
+    return re.sub(r"^maine\s+", "", s)
+
+def person_key(name: str) -> str | None:
+    """First + last name, dropping middle names/initials, honorifics and suffixes."""
+    n = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode()
+    n = re.sub(r"\b(dr|mr|mrs|ms|mx|rev|hon|sen|rep|senator|representative|commissioner)\.?\s+", "", n, flags=re.I)
+    n = re.sub(r",?\s+(jr|sr|ii|iii|iv|esq|phd|md|jd|rn|mph|mba)\.?$", "", n.strip(), flags=re.I)
+    parts = [p for p in re.split(r"[\s,]+", n) if re.match(r"^[A-Za-z][A-Za-z'\-]+$", p) and len(p) > 1]
+    if len(parts) < 2:
+        return None
+    return f"{parts[0].lower()} {parts[-1].lower()}"
+
+# ---- agency matching
+AG_BY_ID = {a["id"]: a for a in AGENCIES}
+AG_ALIASES = sorted(((norm_agency(x), a["id"]) for a in AGENCIES for x in [a["name"], *a["aliases"]] if norm_agency(x)),
+                    key=lambda kv: -len(kv[0]))   # longest first, so "department of education" beats "education"
+
+def match_agency(text: str | None, max_start: int | None = None) -> str | None:
+    t = " " + norm_agency(text or "") + " "
+    for alias, aid in AG_ALIASES:
+        # Acronyms and one-word aliases only as the whole string: "Maine Housing" normalizes to "housing",
+        # which must not match "Community Housing of Maine".
+        if len(alias) <= 4 or " " not in alias:
+            if t.strip() == alias:
+                return aid
+            continue
+        if f" {alias} " in t:
+            return aid
+    return None
+
+TITLE_RE = "|".join(sorted((re.escape(t) for t in OFFICIAL_TITLES), key=len, reverse=True))
+AGENCY_CLAUSE = r"(?P<agency>[A-Z][^.;()\u2014\n]{3,110})"   # up to the end of the clause
+INTRO_PATTERNS = [
+    # "I serve as President of the Maine Connectivity Authority"; "I am the Commissioner of the Department of ..."
+    re.compile(r"(?:I serve as|I am|I'm|in my (?:role|capacity) as|I currently serve as|and I am|and I serve as)\s+(?:the\s+)?(?:Maine'?s?\s+)?"
+               r"(?P<title>(?:[A-Z][\w.'\-]*\s+){0,4}?(?:" + TITLE_RE + r"))\s+(?:of|for|at|with)\s+(?:the\s+)?" + AGENCY_CLAUSE),
+    # "My name is Jane Doe, Commissioner of the Department of X"
+    re.compile(r"My name is\s+[A-Z][\w.'\- ]{2,60}?,\s*(?:the\s+)?(?P<title>(?:[A-Z][\w.'\-]*\s+){0,4}?(?:" + TITLE_RE + r"))\s+(?:of|for|at)\s+(?:the\s+)?" + AGENCY_CLAUSE),
+    # constitutional officers named by title alone: "I'm Shenna Bellows, Secretary of State"
+    re.compile(r"(?:My name is|I am|I'm)\s+[A-Z][\w.'\- ]{2,60}?,\s*(?:and I am\s+|and I serve as\s+)?(?:Maine'?s\s+)?(?:the\s+)?(?:Maine\s+)?"
+               r"(?P<title>Secretary of State|Attorney General|State Treasurer|State Auditor|Public Advocate)(?P<agency>)"),
+]
+# A clause like "Executive Director of Maine Equal Justice, and we work with the Department of ..." must not
+# match the department, so cut the clause where a new thought starts, and require the body near its start.
+CLAUSE_STOP = re.compile(r",\s+(?:and|where|which|who|but)\b|\s+and\s+(?:I|we|our|my|am|have)\b|\s+(?:where|which|who|because)\b")
+LEGISLATOR_TITLE = re.compile(r"\b(Senator|Representative|Speaker|Senate President)\b")
+
+def official_from_text(text: str | None) -> tuple[str | None, str | None]:
+    """Return (title, agency_id) from a letter's opening, or (None, None)."""
+    head = re.sub(r"\s+", " ", (text or "")[:1200])
+    for pat in INTRO_PATTERNS:
+        for m in pat.finditer(head):
+            clause = CLAUSE_STOP.split(m.group("agency") or "")[0]
+            aid = match_agency(clause, max_start=30) or match_agency(m.group("title"))
+            if aid and not LEGISLATOR_TITLE.search(m.group("title")):
+                return re.sub(r"\s+", " ", m.group("title")).strip(), aid
+    return None, None
+
+def run():
+    out = config.OUT / "profiles"; out.mkdir(parents=True, exist_ok=True)
+    rows = json.loads((config.OUT / "testimony" / "index.json").read_text(encoding="utf-8"))
+    bills = {b["ld"]: b for b in json.loads((config.OUT / "bills" / "index.json").read_text(encoding="utf-8"))}
+    legislator_keys = {person_key(l["name"]) for l in json.loads((config.OUT / "legislators.json").read_text(encoding="utf-8"))}
+
+    # Guard: the organization field should not be holding towns. The Legislature's feed has a single free-text
+    # field, so a row has an organization OR a town (testimony.split_org_town), never both; check that values
+    # left in `organization` are not themselves towns that appear in `town` elsewhere.
+    with_org = [r for r in rows if r.get("organization")]
+    towns = {norm(r.get("town")) for r in rows if r.get("town")}
+    looks_like_town = sum(1 for r in with_org if norm(r["organization"]) in towns)
+    if with_org and looks_like_town / len(with_org) > 0.05 and "--force" not in sys.argv:
+        sys.exit(f"{looks_like_town} of {len(with_org)} organization values are town names. "
+                 "Check the field mapping in pipeline/testimony.py before building profiles (or pass --force).")
+
+    texts_cache: dict[int, dict] = {}
+    def text_for(ld, tid):
+        if ld not in texts_cache:
+            p = config.OUT / "testimony" / f"LD{ld}.json"
+            texts_cache[ld] = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+        return texts_cache[ld].get(tid)
+
+    org_rows, org_forms = defaultdict(list), defaultdict(Counter)
+    off_rows, off_meta = defaultdict(list), {}
+    agency_rows = defaultdict(list)
+
+    for r in rows:
+        raw_org = ORG_ALIASES.get(r.get("organization") or "", r.get("organization"))
+        n_org = norm(raw_org)
+        aid = match_agency(raw_org) if raw_org else None
+        title, aid_text = official_from_text(text_for(r["ld"], r["id"])) if r.get("has_text") else (None, None)
+        aid = aid or aid_text
+        pk = person_key(r.get("name") or "")
+        if aid:
+            agency_rows[aid].append(r)
+            if pk and pk not in legislator_keys:
+                key = (pk, aid)
+                off_rows[key].append(r)
+                m = off_meta.setdefault(key, {"names": Counter(), "titles": Counter()})
+                m["names"][r.get("name")] += 1
+                if title: m["titles"][title] += 1
+            continue
+        if raw_org and LEGISLATOR_ORG.match(n_org):
+            continue                   # legislators testifying: they have legislator pages, not an organization profile
+        if raw_org and n_org not in JUNK_ORG and n_org not in towns and n_org != norm(r.get("name")) and len(n_org) > 2:
+            org_rows[n_org].append(r)
+            org_forms[n_org][raw_org.strip()] += 1
+
+    profiles, tag_person, tag_org = [], {}, {}
+
+    def testimony_list(rs, with_names):
+        items = []
+        for r in sorted(rs, key=lambda x: (x.get("date") or "", x["ld"])):
+            it = {"testimony_id": r["id"], "ld": r["ld"], "bill_title": (bills.get(r["ld"]) or {}).get("title"),
+                  "position": r.get("position"), "position_source": r.get("position_source"), "date": r.get("date"), "url": r.get("url")}
+            if with_names: it["name"] = r.get("name")
+            items.append(it)
+        return items
+
+    def counts(rs):
+        c = Counter((r.get("position") or "unknown") for r in rs)
+        return {k: c.get(k, 0) for k in ("support", "neutral", "oppose", "unknown")}
+
+    for aid, rs in agency_rows.items():
+        a = AG_BY_ID[aid]; pid = f"a-{aid}"
+        officials = [f"o-{slug(k[0])}-{k[1]}" for k in off_rows if k[1] == aid]
+        prof = {"id": pid, "type": "agency", "name": a["name"], "aliases": a["aliases"], "testimony_count": len(rs),
+                "bill_count": len({r["ld"] for r in rs}), "positions": counts(rs), "officials": officials,
+                "testimony": testimony_list(rs, True)}
+        profiles.append(prof)
+        for r in rs: tag_org[r["id"]] = pid
+
+    for (pk, aid), rs in off_rows.items():
+        pid = f"o-{slug(pk)}-{aid}"; m = off_meta[(pk, aid)]
+        prof = {"id": pid, "type": "official", "name": m["names"].most_common(1)[0][0],
+                "title": m["titles"].most_common(1)[0][0] if m["titles"] else None,
+                "titles": [t for t, _ in m["titles"].most_common()], "agency_id": f"a-{aid}", "agency_name": AG_BY_ID[aid]["name"],
+                "testimony_count": len(rs), "bill_count": len({r["ld"] for r in rs}), "positions": counts(rs),
+                "testimony": testimony_list(rs, False)}
+        profiles.append(prof)
+        for r in rs: tag_person[r["id"]] = pid
+
+    review = []
+    for n_org, rs in org_rows.items():
+        if len(rs) < MIN_ORG_TESTIMONIES:
+            continue
+        pid = f"org-{slug(n_org)}"
+        forms = org_forms[n_org]
+        prof = {"id": pid, "type": "organization", "name": forms.most_common(1)[0][0], "aliases": [f for f, _ in forms.most_common()][1:6],
+                "testimony_count": len(rs), "bill_count": len({r["ld"] for r in rs}), "positions": counts(rs),
+                "people": [n for n, _ in Counter(r.get("name") for r in rs if r.get("name")).most_common(12)],
+                "testimony": testimony_list(rs, True)}
+        profiles.append(prof)
+        for r in rs: tag_org[r["id"]] = pid
+        if len(forms) > 1: review.append({"id": pid, "forms": dict(forms)})
+
+    # write profiles
+    for p in out.glob("*.json"): p.unlink()
+    for p in profiles:
+        (out / f"{p['id']}.json").write_text(json.dumps(p, ensure_ascii=False), encoding="utf-8")
+    idx = sorted(({k: p.get(k) for k in ("id", "type", "name", "title", "agency_id", "agency_name", "testimony_count", "bill_count", "positions")} for p in profiles),
+                 key=lambda p: -p["testimony_count"])
+    (out / "index.json").write_text(json.dumps(idx, ensure_ascii=False), encoding="utf-8")
+    config.RAW.mkdir(parents=True, exist_ok=True)
+    (config.RAW / "profiles_review.json").write_text(json.dumps(sorted(review, key=lambda x: -sum(x["forms"].values())), indent=1, ensure_ascii=False), encoding="utf-8")
+
+    # tag testimony rows (idempotent)
+    for r in rows:
+        r["person_profile_id"] = tag_person.get(r["id"]); r["org_profile_id"] = tag_org.get(r["id"])
+    (config.OUT / "testimony" / "index.json").write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
+    for p in (config.OUT / "bills").glob("LD*.json"):
+        b = json.loads(p.read_text(encoding="utf-8"))
+        for t in b.get("testimony", []):
+            t["person_profile_id"] = tag_person.get(t["id"]); t["org_profile_id"] = tag_org.get(t["id"])
+        p.write_text(json.dumps(b, ensure_ascii=False), encoding="utf-8")
+
+    by = Counter(p["type"] for p in profiles)
+    print(f"profiles: {by.get('organization',0)} organizations, {by.get('agency',0)} agencies, {by.get('official',0)} officials; "
+          f"{len(tag_person)} testimonies linked to officials, {len(tag_org)} to organizations/agencies. "
+          f"Name variants to review: {config.RAW / 'profiles_review.json'}")
+
+if __name__ == "__main__":
+    run()

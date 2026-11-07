@@ -15,10 +15,18 @@ STEPS = [
     ("tindex",     [sys.executable, "-m", "pipeline.testimony", "index"]),   # needs TESTIMONY_ENDPOINTS (see pipeline/testimony.py)
     ("textract",   [sys.executable, "-m", "pipeline.testimony", "extract"]),  # PDFs -> text, positions
     ("build",      [sys.executable, "-m", "pipeline.build"]),             # -> site/data
+    # pipeline.build clears site/data, so everything below re-creates its files from saved inputs.
+    # Each skips quietly if its inputs don't exist yet; none of them calls a paid API.
+    ("pages",      [sys.executable, "-m", "pipeline.legislator_pages"]),  # per-legislator votes/signatures, per-committee hearings
+    ("profiles",   [sys.executable, "-m", "pipeline.profiles"]),          # organizations, agencies, public officials
+    ("lobbying",   [sys.executable, "-m", "pipeline.lobbying", "build"]), # needs raw/lobbying/reports.json (pipeline.lobbying index)
+    ("finance",    [sys.executable, "-m", "pipeline.finance", "2024"]),   # needs raw/finance/*.csv
+    ("synthesis",  [sys.executable, "-m", "pipeline.synthesis", "build"]),# rebuilds from saved results; new runs: pipeline.synthesis plan / run --yes
 ]
+DEFAULT_STEPS = ["legiscan", "crawl", "billtext", "rosters", "tindex", "textract", "build", "pages", "profiles", "lobbying", "finance", "synthesis"]
 
 def main():
-    only = sys.argv[1:] or [n for n, _ in STEPS]
+    only = sys.argv[1:] or DEFAULT_STEPS
     root = Path(__file__).resolve().parent
     for name, cmd in STEPS:
         if name not in only:

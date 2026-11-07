@@ -78,6 +78,29 @@ No support/oppose reversals remained. Every labeled row says "inferred".
 is vacant). `meta.json` counts current members only. Tribal representatives are
 not in the House CSV export and are taken from the list page.
 
+**Organization vs. town.** The Legislature's testimony feed has no town field:
+its one free-text `organization` field holds whatever the witness typed, which
+for individuals is usually their town. `testimony.split_org_town()` moves a value
+to `town` when it is a Maine municipality or township (the House district-towns
+list, saved by the `rosters` step), a village of one ("Kittery Point", "South
+China"), or an out-of-state "City, ST". Everything else stays `organization`. A
+row therefore has one or the other, never both.
+
+**Who testified** (`pipeline/profiles.py`, after `build`): organizations named on
+2+ testimonies, state agencies and public bodies, and officials testifying for
+them. Legislators are not given organization profiles ("Maine State
+Legislature", "House District 15"); they have legislator pages. Name variants
+that were merged are listed in `pipeline/raw/profiles_review.json`; add
+non-obvious ones to `ORG_ALIASES`.
+
+**Testimony synthesis.** `pipeline/synthesis.py` (Batch API, needs
+`ANTHROPIC_API_KEY`) is not run yet. `synthesis_manual/` holds hand-written
+syntheses in the same JSON format (LD 1822, 676 and 1840, written by Claude Opus
+5.5 after reading every letter on each bill). `python -m pipeline.synthesis
+build` validates them (every cited id is a letter on that bill with text, every
+count equals the ids cited) and copies them into `site/data/synthesis/`, so
+rebuilding keeps them.
+
 ## Running the pipeline
 
 Needs Python 3.11+, `pip install -r requirements.txt`, `playwright install chromium`,
@@ -103,7 +126,9 @@ the parsers see:
    `phwksched.html?CODE=…` links (Criminal Justice is `CJPS`).
 
 Then `python run.py` (or `./run.sh` on a Mac/Linux shell). Steps run in order:
-`legiscan`, `crawl`, `billtext`, `rosters`, `tindex`, `textract`, `build`. If one
+`legiscan`, `crawl`, `billtext`, `rosters`, `tindex`, `textract`, `build`, then
+the phase-2 steps `pages`, `profiles`, `lobbying`, `finance`, `synthesis` (see
+PHASE2.md; lobbying and finance skip until their inputs exist). If one
 fails, fix it and re-run just that step and the ones after it, e.g.
 `python run.py textract` and then `python run.py build`. Every step caches
 downloads under `pipeline/raw/` (gitignored), so re-runs only fetch what is new.

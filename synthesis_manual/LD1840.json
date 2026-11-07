@@ -1,0 +1,225 @@
+{
+ "ld": 1840,
+ "model": "Claude Opus 5.5",
+ "generated_at": "2026-11-07",
+ "method": "Written by Claude Opus 5.5 in a Claude Code session after reading every letter with text; not produced by the batch pipeline.",
+ "summary": "Letters in support focus on ending the public posting of caregiver names and addresses, allowing sales at events and by delivery, limiting the Office of Cannabis Policy's use of forms and guidance, and restoring businesses closed over municipal approval forms. Opponents, including the Office of Cannabis Policy, the State Fire Marshal, a cannabis trade association and the Maine Municipal Association, raise concerns about oversight of hazardous extraction, local control and public access to registry information.",
+ "letters_considered": 137,
+ "themes": [
+  {
+   "stance": "support",
+   "label": "Protects small caregivers and patients' access to medicine",
+   "detail": "Patients and caregivers, including some from out of state, say the bill keeps small local producers in business and keeps affordable, locally grown medicine available to patients.",
+   "testimony_ids": [
+    "10048298",
+    "10048401",
+    "10048448",
+    "10048472",
+    "10048481",
+    "10048542",
+    "10048581",
+    "10048585",
+    "10048610",
+    "10048673",
+    "10048700",
+    "10048701",
+    "10048745",
+    "10048905",
+    "10048930",
+    "10048931",
+    "10049034",
+    "10049037",
+    "10049085",
+    "10049261",
+    "10049409",
+    "10049466",
+    "10049487",
+    "10051080",
+    "10054041",
+    "10054065",
+    "10054241",
+    "10054834",
+    "10054851",
+    "195353"
+   ],
+   "count": 30
+  },
+  {
+   "stance": "support",
+   "label": "Authorizes sales at events, farmers markets and by delivery",
+   "detail": "Writers say farm-to-patient events and direct sales let patients meet the people who grow their medicine and ask questions, support small growers without storefronts, and can be tracked with existing trip tickets.",
+   "testimony_ids": [
+    "10048131",
+    "10048202",
+    "10048263",
+    "10048513",
+    "10048591",
+    "10048807",
+    "10049054",
+    "10049073",
+    "10049539",
+    "10049628",
+    "10049914",
+    "10049925",
+    "10049980",
+    "10050278",
+    "10050442",
+    "10051504",
+    "10053082",
+    "10054742",
+    "10054851",
+    "195290",
+    "195354",
+    "195356",
+    "195358",
+    "195359"
+   ],
+   "count": 24
+  },
+  {
+   "stance": "support",
+   "label": "Stops public posting of caregiver names and addresses",
+   "detail": "Caregivers and patients describe the online registry as a safety risk that exposes home grows to theft and has led to closed bank accounts and threatened mortgages; they ask that the information be available only on request.",
+   "testimony_ids": [
+    "10048659",
+    "10049537",
+    "10049539",
+    "10049628",
+    "10049707",
+    "10049914",
+    "10049925",
+    "10049980",
+    "10050278",
+    "10050585",
+    "10051037",
+    "10053082",
+    "10054742",
+    "195354",
+    "195356",
+    "195357",
+    "195358",
+    "195359"
+   ],
+   "count": 18
+  },
+  {
+   "stance": "support",
+   "label": "Limits Office of Cannabis Policy forms and guidance",
+   "detail": "Supporters say the office has changed program requirements through new forms, applications and guidance documents without rulemaking or legislative approval, and that the bill keeps these tied to the statute.",
+   "testimony_ids": [
+    "10049537",
+    "10049539",
+    "10049628",
+    "10049914",
+    "10050277",
+    "10050278",
+    "10050442",
+    "10050585",
+    "10053082",
+    "195356",
+    "195358",
+    "195359"
+   ],
+   "count": 12
+  },
+  {
+   "stance": "support",
+   "label": "Updates confusing or outdated program language",
+   "detail": "Writers say the bill replaces unclear wording that leaves room for inconsistent interpretation and streamlines registration for businesses run by one or two people.",
+   "testimony_ids": [
+    "10048219",
+    "10048581",
+    "10048807",
+    "10048967",
+    "10049126",
+    "10049261",
+    "10049448",
+    "10049787",
+    "10050277",
+    "10054742",
+    "195357"
+   ],
+   "count": 11
+  },
+  {
+   "stance": "support",
+   "label": "Restores businesses denied over municipal approval forms",
+   "detail": "Caregivers describe businesses that had operated for years with town approval being closed when a local official declined to sign a new state form, and support deeming them compliant on renewal.",
+   "testimony_ids": [
+    "10049628",
+    "10049914",
+    "10050278",
+    "10053082",
+    "195354",
+    "195358"
+   ],
+   "count": 6
+  },
+  {
+   "stance": "support",
+   "label": "Clarifies caregiver retail store versus appointment-only office",
+   "detail": "Supporters say a recent definition change treated offices that see patients by appointment, or deliver and offer curbside pickup, as stores needing local opt-in, and that the bill restores the distinction.",
+   "testimony_ids": [
+    "10049914",
+    "10050277",
+    "10050278",
+    "10050279",
+    "195354",
+    "195358"
+   ],
+   "count": 6
+  },
+  {
+   "stance": "support",
+   "label": "Allows registrants to extract under existing safety rules",
+   "detail": "Supporters say registered caregivers, dispensaries and manufacturers would still have to meet extraction safety and equipment standards, but without a separate departmental authorization.",
+   "testimony_ids": [
+    "10049914",
+    "10050277",
+    "10053082",
+    "195358"
+   ],
+   "count": 4
+  },
+  {
+   "stance": "oppose",
+   "label": "Removes safety oversight of hazardous extraction",
+   "detail": "The State Fire Marshal and others say the bill drops engineer certification of extraction equipment, references to fire codes, local approval and location notice for butane and similar solvents, putting workers and first responders at risk.",
+   "testimony_ids": [
+    "10049658",
+    "10049661",
+    "10049927"
+   ],
+   "count": 3
+  },
+  {
+   "stance": "oppose",
+   "label": "Overrides local control of cannabis businesses",
+   "detail": "Opponents say deeming businesses compliant without a municipal confirmation, and redefining caregiver retail stores to exclude appointment-only sales, undercut towns that voted not to allow cannabis retail.",
+   "testimony_ids": [
+    "10049658",
+    "10049661",
+    "10050032"
+   ],
+   "count": 3
+  },
+  {
+   "stance": "oppose",
+   "label": "Ends public information on who operates registered businesses",
+   "detail": "The Office of Cannabis Policy says the registry was made public on a Right to Know Advisory Committee recommendation and that limiting it would shift inquiries to records requests and reverse negotiated compromises.",
+   "testimony_ids": [
+    "10049658"
+   ],
+   "count": 1
+  },
+  {
+   "stance": "amend",
+   "label": "Keep license information public so banks can verify registrants",
+   "detail": "A credit union trade association says lenders must confirm that cannabis businesses are licensed and asks that licensure information stay publicly available.",
+   "testimony_ids": [
+    "10049737"
+   ],
+   "count": 1
+  }
+ ]
+}

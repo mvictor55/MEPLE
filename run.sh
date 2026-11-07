@@ -10,3 +10,4 @@ python -m pipeline.rosters                                           # legislato
 python -m pipeline.testimony index                                   # needs TESTIMONY_ENDPOINTS (see pipeline/testimony.py)
 python -m pipeline.testimony extract                                 # PDFs -> text, positions
 python -m pipeline.build                                             # -> site/data
+python -m pipeline.legislator_pages                                  # per-legislator votes/signatures, per-committee hearings
