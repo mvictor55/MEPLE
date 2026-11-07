@@ -22,6 +22,10 @@ BASE = "https://legislature.maine.gov"
 #     final disposition, affected statutes.
 BILL_STATUS = BASE + "/legis/bills/display_ps.asp?LD={ld}&snum={snum}"
 
+# --- Public hearings / work sessions for one paper (verified 2026-11-06): JSON
+#     list loaded by XHR on the status page; publicHearing=-1 marks a hearing.
+PHWS = BASE + "/legis/bills/getPHWS.asp?paper={paper}&snum={snum}"
+
 # --- Bill directory (verified link; page structure UNVERIFIED): list of LDs.
 BILL_DIRECTORY = BASE + "/legis/bills/billdirectory_ps.asp?snum={snum}&ldFrom={ld_from}"
 
@@ -50,9 +54,10 @@ TESTIMONY_BY_DATE_STUB = BASE + "/legis/bills/TestimonyByDate-stub.asp?snum={snu
 # /legis/bills/getTestimonyDoc.asp?id=NNNN (UNVERIFIED for the 132nd).
 TESTIMONY_DOC = BASE + "/legis/bills/getTestimonyDoc.asp?id={id}"
 
-# --- Rosters (verified pages exist; table structure UNVERIFIED).
-HOUSE_ROSTER = BASE + "/house/house/MemberProfiles/ListAlpha"
-SENATE_ROSTER = BASE + "/senate/"
+# --- Rosters (verified 2026-11-06; see pipeline/rosters.py).
+HOUSE_ROSTER_CSV = BASE + "/house/Home/ExportActiveMembers?format=csv"
+HOUSE_ROSTER = BASE + "/house/MemberProfiles/List?sort=alpha"
+SENATE_ROSTER = BASE + "/senate/district-listing/9526"
 COMMITTEE_LIST = BASE + "/committee/#Committees"
 
 # --- Roll calls (UNVERIFIED paths).
@@ -65,12 +70,12 @@ LEGISCAN_API = "https://api.legiscan.com/?key={key}&op={op}"
 OPENSTATES_API = "https://v3.openstates.org"
 
 # Joint standing committees of the 132nd and the codes the Legislature uses in
-# phwksched.html?CODE=...  (codes verified for JUD; others from the site's
-# conventions — confirm on first run).
+# phwksched.html?CODE=... (all 17 confirmed 2026-11-06 against the CODE=
+# links on bill status pages and against getTestyCmte.asp).
 COMMITTEES = {
     "ACF": "Agriculture, Conservation and Forestry",
     "AFA": "Appropriations and Financial Affairs",
-    "CJP": "Criminal Justice and Public Safety",
+    "CJPS": "Criminal Justice and Public Safety",
     "EDU": "Education and Cultural Affairs",
     "EUT": "Energy, Utilities and Technology",
     "ENR": "Environment and Natural Resources",

@@ -1,83 +1,145 @@
 """
 Legislators and committee rosters from legislature.maine.gov.
 
-The roster pages exist (House alphabetical list, Senate home, committee list)
-but their table structure has not been inspected yet. On first run:
-    python -m pipeline.rosters --debug
-dumps the raw HTML so the selectors below can be fixed in one pass.
+Sources (verified 2026-11-06):
+  House: /house/Home/ExportActiveMembers?format=csv
+         Name, Party, District, County, Seat, Email, Phone, Residence (town),
+         City, Zip, Position (leadership), Committees ("(Chair) Ethics|Judiciary")
+         /house/MemberProfiles/List?sort=alpha -> profile URL for each member
+  Senate: /senate/district-listing/9526 -> district, name, party, county, profile link
+          each profile (/districtNN) -> towns in the district, committee assignments
+          ("Judiciary (Chair)")
 
-Strategy: LegiScan's people file gives names, party, chamber, district, and a
-stable id for all 186 members. This module adds towns, leadership roles,
-committee assignments (with chair flags) and the official profile URL, keyed
-by (chamber, last name, district) to join onto the LegiScan ids.
+    python -m pipeline.rosters [--debug]   # --debug keeps the raw pages in pipeline/raw/rosters/
+
+LegiScan's people file stays the spine for ids; build.py joins these rows on
+(chamber, last name).
 """
-import json, re, sys
+import csv, io, json, re, sys
 from bs4 import BeautifulSoup
 from . import config, fetch
 
 def _text(el): return re.sub(r"\s+", " ", el.get_text(" ", strip=True)) if el else ""
 
+def _norm_cname(name: str) -> str:
+    # Pages differ on the Oxford comma ("Energy, Utilities, and Technology")
+    n = re.sub(r"\s+", " ", name).strip().lower()
+    n = re.sub(r"^joint standing committee on ", "", n)
+    return re.sub(r",? and ", " and ", n).replace(",", "")
+
+_COMMITTEE_BY_NAME = {_norm_cname(v): k for k, v in config.COMMITTEES.items()}
+
+def _committee_code(name: str) -> str | None:
+    return _COMMITTEE_BY_NAME.get(_norm_cname(name))
+
+_LEADERSHIP = re.compile(r"(?<![A-Za-z])(President|Speaker|Leader|Whip)(?![A-Za-z])")
+
 def house_members() -> list[dict]:
-    html = fetch.get(config.HOUSE_ROSTER)
-    soup = BeautifulSoup(html, "lxml")
+    rows = list(csv.DictReader(io.StringIO(fetch.get(config.HOUSE_ROSTER_CSV, refresh=True).lstrip("\ufeff"))))
+    urls = {}
+    soup = BeautifulSoup(fetch.get(config.HOUSE_ROSTER, refresh=True), "lxml")
+    for a in soup.select("a[href*='MemberProfiles/Details']"):
+        nm = _text(a)
+        if nm:
+            urls[nm.lower()] = config.BASE + a["href"] if a["href"].startswith("/") else a["href"]
     out = []
-    for a in soup.select("a[href*='MemberProfiles']"):
-        name = _text(a)
-        if not name or len(name) < 4:
+    for r in rows:
+        name = (r.get("Name") or "").strip()
+        if not name:
             continue
-        row = a.find_parent("tr") or a.parent
-        t = _text(row)
-        dist = re.search(r"District\s*(\d+)", t)
-        party = re.search(r"\b(Democrat|Republican|Independent|Unenrolled|Green)\b", t)
-        town = re.search(r"\(([A-Z][A-Za-z .'-]+)\)", t)
-        out.append({"chamber": "House", "name": name, "district": dist.group(1) if dist else None,
-                    "party": party.group(1)[0] if party else None, "town": town.group(1) if town else None,
-                    "url": a["href"] if a["href"].startswith("http") else config.BASE + a["href"]})
+        committees, other = [], []
+        for c in (r.get("Committees") or "").split("|"):
+            c = c.strip()
+            if not c:
+                continue
+            chair = "(Chair)" in c
+            cname = re.sub(r"\((Chair|Ranking)\)", "", c).strip()
+            code = _committee_code(cname)
+            if code:
+                committees.append({"code": code, "role": "House Chair" if chair else "Member"})
+            else:
+                other.append(cname + (" (Chair)" if chair else ""))
+        out.append({"chamber": "House", "name": name, "district": (r.get("District") or "").strip() or None,
+                    "party": (r.get("Party") or "?")[0] if r.get("Party") else None,
+                    "town": (r.get("Residence") or r.get("City") or "").strip() or None,
+                    "county": (r.get("County") or "").strip() or None,
+                    "role": (r.get("Position") or "").strip() or None,
+                    "email": (r.get("Email") or "").strip() or None,
+                    "committees": committees, "other_committees": other,
+                    "url": urls.get(name.lower())})
     return out
 
 def senate_members() -> list[dict]:
-    html = fetch.get(config.SENATE_ROSTER)
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(fetch.get(config.SENATE_ROSTER, refresh=True), "lxml")
     out = []
-    for a in soup.select("a[href*='senator'], a[href*='Senator']"):
-        name = _text(a)
-        if not name or len(name) < 4:
+    for p in soup.find_all("p"):
+        t = _text(p)
+        m = re.match(r"District (\d+)\s*\(Map\)\s*-\s*Senator\s+(.+?)\s*\(\s*([A-Z])\s*-\s*([A-Za-z .]+?)\s*\)", t)
+        if not m:
             continue
-        t = _text(a.parent)
-        dist = re.search(r"District\s*(\d+)", t)
-        out.append({"chamber": "Senate", "name": name, "district": dist.group(1) if dist else None,
-                    "url": a["href"] if a["href"].startswith("http") else config.BASE + a["href"]})
+        link = next((a for a in p.find_all("a") if "Senator" in _text(a)), None)
+        url = (config.BASE + link["href"] if link["href"].startswith("/") else link["href"]) if link else None
+        s = {"chamber": "Senate", "name": m.group(2).strip(), "district": m.group(1), "party": m.group(3),
+             "county": m.group(4).strip(), "town": None, "towns": [], "role": None,
+             "committees": [], "other_committees": [], "url": url}
+        s["name"] = re.sub(r'\s*"[^"]+"\s*', " ", s["name"]).strip()   # Harold "Trey" L. Stewart -> Harold L. Stewart
+        if url:
+            try:
+                _senate_profile(s, fetch.get(url))
+            except Exception as e:
+                s["profile_error"] = str(e)[:120]
+        out.append(s)
     return out
 
-def committee_rosters() -> dict[str, list[dict]]:
-    """code -> [{name, chamber, role}] ; role in {'Senate Chair','House Chair','Member'}"""
-    html = fetch.get(config.COMMITTEE_LIST)
+def _senate_profile(s: dict, html: str):
     soup = BeautifulSoup(html, "lxml")
-    rosters = {}
-    for code, cname in config.COMMITTEES.items():
-        link = soup.find("a", string=re.compile(re.escape(cname), re.I))
-        if not link:
-            continue
-        href = link["href"] if link["href"].startswith("http") else config.BASE + link["href"]
-        chtml = fetch.get(href)
-        cs = BeautifulSoup(chtml, "lxml")
-        members = []
-        for li in cs.select("li, tr, p"):
-            t = _text(li)
-            m = re.match(r"^(Senator|Representative|Sen\.|Rep\.)\s+([A-Z][^,(]+?)(?:\s*[,(]\s*(Senate Chair|House Chair|Chair))?\s*$", t)
-            if m:
-                members.append({"chamber": "Senate" if m.group(1).startswith("Sen") else "House", "name": m.group(2).strip(), "role": m.group(3) or "Member"})
-        rosters[code] = {"url": href, "members": members}
+    for t in soup(["script", "style", "nav", "header", "footer"]):
+        t.extract()
+    lines = [l.strip() for l in soup.get_text("\n").splitlines() if l.strip()]
+    txt = "\n".join(lines)
+    # "In Cumberland County: Cape Elizabeth; South Portland; and part of Scarborough."
+    towns = []
+    for m in re.finditer(r"In ([A-Za-z ]+) County:\s*([^\n]+)", txt):
+        for part in re.split(r";\s*", m.group(2).rstrip(".")):
+            part = re.sub(r"^(and )?(part of |the )?", "", part.strip()).strip(" .")
+            part = re.sub(r"^and ", "", part)
+            if part and len(part) < 60:
+                towns.append(part)
+    s["towns"] = towns
+    # "Committee Assignment\n:\nJudiciary (Chair)\n..." or "Committee Assignments:\n..."
+    m = re.search(r"Committee Assignments?\s*:\s*\n(.+?)(?:\nMaine Government|\Z)", txt, re.S)
+    for line in (m.group(1).splitlines() if m else []):
+        chair = "(Chair)" in line
+        cname = re.sub(r"\((Chair|Ranking)\)", "", line).strip()
+        code = _committee_code(cname)
+        if code:
+            s["committees"].append({"code": code, "role": "Senate Chair" if chair else "Member"})
+        elif _LEADERSHIP.search(cname) and not s.get("role"):
+            s["role"] = cname          # leadership posts are listed with the committees
+        elif cname:
+            s["other_committees"].append(cname + (" (Chair)" if chair else ""))
+
+def committee_rosters(house: list[dict], senate: list[dict]) -> dict[str, dict]:
+    """code -> {url, members: [{name, chamber, role}]}; role in {'Senate Chair','House Chair','Member'}"""
+    rosters = {code: {"url": config.COMMITTEE_SCHEDULE.format(code=code, snum=config.SESSION), "members": []} for code in config.COMMITTEES}
+    for m in senate + house:
+        for c in m["committees"]:
+            rosters[c["code"]]["members"].append({"chamber": m["chamber"], "name": m["name"], "role": c["role"]})
     return rosters
 
 if __name__ == "__main__":
     debug = "--debug" in sys.argv
     d = config.RAW / "rosters"; d.mkdir(parents=True, exist_ok=True)
     if debug:
-        (d / "house.html").write_text(fetch.get(config.HOUSE_ROSTER))
-        (d / "senate.html").write_text(fetch.get(config.SENATE_ROSTER))
-        (d / "committees.html").write_text(fetch.get(config.COMMITTEE_LIST))
-        print("raw HTML written to", d)
-    data = {"house": house_members(), "senate": senate_members(), "committees": committee_rosters()}
-    (d / "rosters.json").write_text(json.dumps(data, indent=1))
-    print(f"house={len(data['house'])} senate={len(data['senate'])} committees={len(data['committees'])}")
+        (d / "house.csv").write_text(fetch.get(config.HOUSE_ROSTER_CSV), encoding="utf-8")
+        (d / "house_list.html").write_text(fetch.get(config.HOUSE_ROSTER), encoding="utf-8")
+        (d / "senate.html").write_text(fetch.get(config.SENATE_ROSTER), encoding="utf-8")
+        print("raw pages written to", d)
+    house, senate = house_members(), senate_members()
+    data = {"house": house, "senate": senate, "committees": committee_rosters(house, senate)}
+    (d / "rosters.json").write_text(json.dumps(data, indent=1), encoding="utf-8")
+    sizes = {k: len(v["members"]) for k, v in data["committees"].items()}
+    print(f"house={len(house)} senate={len(senate)} committees={len(data['committees'])} members per committee={sizes}")
+    # Joint standing committees seat 3 senators and (in the 132nd) 9 House members; allow vacancies.
+    if len(house) < 140 or len(senate) < 34 or min(sizes.values()) < 10:
+        sys.exit("roster counts look wrong; inspect pipeline/raw/rosters/ with --debug")

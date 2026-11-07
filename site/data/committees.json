@@ -1,121 +1,1035 @@
 [
- {
-  "code": "ACF",
-  "name": "Agriculture, Conservation and Forestry",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "AFA",
-  "name": "Appropriations and Financial Affairs",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "CJP",
-  "name": "Criminal Justice and Public Safety",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "EDU",
-  "name": "Education and Cultural Affairs",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "EUT",
-  "name": "Energy, Utilities and Technology",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 2
- },
- {
-  "code": "ENR",
-  "name": "Environment and Natural Resources",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "HHS",
-  "name": "Health and Human Services",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "HCIFS",
-  "name": "Health Coverage, Insurance and Financial Services",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 1
- },
- {
-  "code": "HED",
-  "name": "Housing and Economic Development",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 1
- },
- {
-  "code": "IFW",
-  "name": "Inland Fisheries and Wildlife",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "JUD",
-  "name": "Judiciary",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 3
- },
- {
-  "code": "LAB",
-  "name": "Labor",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "MAR",
-  "name": "Marine Resources",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "SLG",
-  "name": "State and Local Government",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "TAX",
-  "name": "Taxation",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "TRA",
-  "name": "Transportation",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- },
- {
-  "code": "VLA",
-  "name": "Veterans and Legal Affairs",
-  "chamber": "joint",
-  "members": [],
-  "bill_count": 0
- }
+{
+"code": "ACF",
+"name": "Agriculture, Conservation and Forestry",
+"chamber": "joint",
+"members": [
+{
+"id": "s-talbot-ross-rachel",
+"role": "Senate Chair"
+},
+{
+"id": "h-pluecker-william",
+"role": "House Chair"
+},
+{
+"id": "s-black-russell",
+"role": "Member"
+},
+{
+"id": "s-ingwersen-henry",
+"role": "Member"
+},
+{
+"id": "h-bunker-stephan",
+"role": "Member"
+},
+{
+"id": "h-cooper-mark",
+"role": "Member"
+},
+{
+"id": "h-cray-dean",
+"role": "Member"
+},
+{
+"id": "h-dill-james",
+"role": "Member"
+},
+{
+"id": "h-frost-sharon",
+"role": "Member"
+},
+{
+"id": "h-guerrette-timothy",
+"role": "Member"
+},
+{
+"id": "h-hepler-allison",
+"role": "Member"
+},
+{
+"id": "h-jackson-caldwell",
+"role": "Member"
+},
+{
+"id": "h-nancy-theriault",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=ACF&snum=132",
+"bill_count": 76
+},
+{
+"code": "AFA",
+"name": "Appropriations and Financial Affairs",
+"chamber": "joint",
+"members": [
+{
+"id": "s-rotundo-margaret",
+"role": "Senate Chair"
+},
+{
+"id": "h-gattine-andrew",
+"role": "House Chair"
+},
+{
+"id": "s-bernard-susan",
+"role": "Member"
+},
+{
+"id": "s-reny-cameron",
+"role": "Member"
+},
+{
+"id": "h-arata-amy",
+"role": "Member"
+},
+{
+"id": "h-blier-mark",
+"role": "Member"
+},
+{
+"id": "h-brennan-michael",
+"role": "Member"
+},
+{
+"id": "h-dhalac-deqa",
+"role": "Member"
+},
+{
+"id": "h-ducharme-john",
+"role": "Member"
+},
+{
+"id": "h-fredette-kenneth",
+"role": "Member"
+},
+{
+"id": "h-matlack-ann",
+"role": "Member"
+},
+{
+"id": "h-rana-ambureen",
+"role": "Member"
+},
+{
+"id": "h-stover-holly",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=AFA&snum=132",
+"bill_count": 35
+},
+{
+"code": "CJPS",
+"name": "Criminal Justice and Public Safety",
+"chamber": "joint",
+"members": [
+{
+"id": "s-beebe-center-anne",
+"role": "Senate Chair"
+},
+{
+"id": "h-hasenfus-tavis",
+"role": "House Chair"
+},
+{
+"id": "s-curry-glenn",
+"role": "Member"
+},
+{
+"id": "s-cyrway-scott",
+"role": "Member"
+},
+{
+"id": "h-abdi-mana",
+"role": "Member"
+},
+{
+"id": "h-ardell-donald",
+"role": "Member"
+},
+{
+"id": "h-bunker-stephan",
+"role": "Member"
+},
+{
+"id": "h-lajoie-michel",
+"role": "Member"
+},
+{
+"id": "h-lookner-grayson",
+"role": "Member"
+},
+{
+"id": "h-mcintyre-mathew",
+"role": "Member"
+},
+{
+"id": "h-milliken-nina",
+"role": "Member"
+},
+{
+"id": "h-nutting-robert",
+"role": "Member"
+},
+{
+"id": "h-perkins-chad",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=CJPS&snum=132",
+"bill_count": 139
+},
+{
+"code": "EDU",
+"name": "Education and Cultural Affairs",
+"chamber": "joint",
+"members": [
+{
+"id": "s-rafferty-joseph",
+"role": "Senate Chair"
+},
+{
+"id": "h-murphy-kelly",
+"role": "House Chair"
+},
+{
+"id": "s-libby-james",
+"role": "Member"
+},
+{
+"id": "s-pierce-teresa",
+"role": "Member"
+},
+{
+"id": "h-bagshaw-barbara",
+"role": "Member"
+},
+{
+"id": "h-brennan-michael",
+"role": "Member"
+},
+{
+"id": "h-carlow-nathan",
+"role": "Member"
+},
+{
+"id": "h-crockett-edward",
+"role": "Member"
+},
+{
+"id": "h-dodge-janice",
+"role": "Member"
+},
+{
+"id": "h-haggan-kimberly",
+"role": "Member"
+},
+{
+"id": "h-lyman-sheila",
+"role": "Member"
+},
+{
+"id": "h-mitchell-christina",
+"role": "Member"
+},
+{
+"id": "h-sargent-holly",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=EDU&snum=132",
+"bill_count": 190
+},
+{
+"code": "EUT",
+"name": "Energy, Utilities and Technology",
+"chamber": "joint",
+"members": [
+{
+"id": "s-lawrence-mark",
+"role": "Senate Chair"
+},
+{
+"id": "h-sachs-melanie",
+"role": "House Chair"
+},
+{
+"id": "s-grohoski-nicole",
+"role": "Member"
+},
+{
+"id": "s-harrington-matthew",
+"role": "Member"
+},
+{
+"id": "h-foster-steven",
+"role": "Member"
+},
+{
+"id": "h-geiger-valli",
+"role": "Member"
+},
+{
+"id": "h-kessler-christopher",
+"role": "Member"
+},
+{
+"id": "h-mcintyre-mathew",
+"role": "Member"
+},
+{
+"id": "h-paul-reagan",
+"role": "Member"
+},
+{
+"id": "h-runte-walter",
+"role": "Member"
+},
+{
+"id": "h-wadsworth-nathan",
+"role": "Member"
+},
+{
+"id": "h-warren-sophia",
+"role": "Member"
+},
+{
+"id": "h-webb-kilton",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=EUT&snum=132",
+"bill_count": 106
+},
+{
+"code": "ENR",
+"name": "Environment and Natural Resources",
+"chamber": "joint",
+"members": [
+{
+"id": "s-tepler-denise",
+"role": "Senate Chair"
+},
+{
+"id": "h-doudera-victoria",
+"role": "House Chair"
+},
+{
+"id": "s-brenner-stacy",
+"role": "Member"
+},
+{
+"id": "s-martin-joseph",
+"role": "Member"
+},
+{
+"id": "h-ankeles-daniel",
+"role": "Member"
+},
+{
+"id": "h-bell-arthur",
+"role": "Member"
+},
+{
+"id": "h-bridgeo-william",
+"role": "Member"
+},
+{
+"id": "h-campbell-richard",
+"role": "Member"
+},
+{
+"id": "h-osher-laurie",
+"role": "Member"
+},
+{
+"id": "h-rielly-morgan",
+"role": "Member"
+},
+{
+"id": "h-schmersal-burgess-tammy",
+"role": "Member"
+},
+{
+"id": "h-soboleski-michael",
+"role": "Member"
+},
+{
+"id": "h-woodsome-david",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=ENR&snum=132",
+"bill_count": 98
+},
+{
+"code": "HHS",
+"name": "Health and Human Services",
+"chamber": "joint",
+"members": [
+{
+"id": "s-ingwersen-henry",
+"role": "Senate Chair"
+},
+{
+"id": "h-meyer-michele",
+"role": "House Chair"
+},
+{
+"id": "s-moore-marianne",
+"role": "Member"
+},
+{
+"id": "s-nangle-timothy",
+"role": "Member"
+},
+{
+"id": "h-daigle-lucien",
+"role": "Member"
+},
+{
+"id": "h-debrito-flavia",
+"role": "Member"
+},
+{
+"id": "h-fredericks-ann",
+"role": "Member"
+},
+{
+"id": "h-graham-anne",
+"role": "Member"
+},
+{
+"id": "h-griffin-abigail",
+"role": "Member"
+},
+{
+"id": "h-lemelin-michael",
+"role": "Member"
+},
+{
+"id": "h-mccabe-julia",
+"role": "Member"
+},
+{
+"id": "h-shagoury-daniel",
+"role": "Member"
+},
+{
+"id": "h-zager-samuel",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=HHS&snum=132",
+"bill_count": 226
+},
+{
+"code": "HCIFS",
+"name": "Health Coverage, Insurance and Financial Services",
+"chamber": "joint",
+"members": [
+{
+"id": "s-bailey-donna",
+"role": "Senate Chair"
+},
+{
+"id": "h-mathieson-kristi",
+"role": "House Chair"
+},
+{
+"id": "s-baldacci-joseph",
+"role": "Member"
+},
+{
+"id": "s-haggan-david",
+"role": "Member"
+},
+{
+"id": "h-arford-poppy",
+"role": "Member"
+},
+{
+"id": "h-boyer-michelle",
+"role": "Member"
+},
+{
+"id": "h-cimino-marygrace",
+"role": "Member"
+},
+{
+"id": "h-cluchey-sally",
+"role": "Member"
+},
+{
+"id": "h-flynn-paul",
+"role": "Member"
+},
+{
+"id": "h-foley-robert",
+"role": "Member"
+},
+{
+"id": "h-mastraccio-anne-marie",
+"role": "Member"
+},
+{
+"id": "h-morris-joshua",
+"role": "Member"
+},
+{
+"id": "h-olsen-rolf",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=HCIFS&snum=132",
+"bill_count": 182
+},
+{
+"code": "HED",
+"name": "Housing and Economic Development",
+"chamber": "joint",
+"members": [
+{
+"id": "s-curry-glenn",
+"role": "Senate Chair"
+},
+{
+"id": "h-gere-traci",
+"role": "House Chair"
+},
+{
+"id": "s-bailey-donna",
+"role": "Member"
+},
+{
+"id": "s-bennett-richard",
+"role": "Member"
+},
+{
+"id": "h-collamore-amanda",
+"role": "Member"
+},
+{
+"id": "h-eder-john",
+"role": "Member"
+},
+{
+"id": "h-golek-cheryl",
+"role": "Member"
+},
+{
+"id": "h-julia-cassie",
+"role": "Member"
+},
+{
+"id": "h-lookner-grayson",
+"role": "Member"
+},
+{
+"id": "h-malon-marc",
+"role": "Member"
+},
+{
+"id": "h-mingo-arthur",
+"role": "Member"
+},
+{
+"id": "h-walker-mark",
+"role": "Member"
+},
+{
+"id": "h-yusuf-yusuf",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=HED&snum=132",
+"bill_count": 149
+},
+{
+"code": "IFW",
+"name": "Inland Fisheries and Wildlife",
+"chamber": "joint",
+"members": [
+{
+"id": "s-baldacci-joseph",
+"role": "Senate Chair"
+},
+{
+"id": "h-roberts-lovell-tiffany",
+"role": "House Chair"
+},
+{
+"id": "s-carney-anne",
+"role": "Member"
+},
+{
+"id": "s-guerin-stacey",
+"role": "Member"
+},
+{
+"id": "h-bridgeo-william",
+"role": "Member"
+},
+{
+"id": "h-cluchey-sally",
+"role": "Member"
+},
+{
+"id": "h-dill-james",
+"role": "Member"
+},
+{
+"id": "h-lance-michael",
+"role": "Member"
+},
+{
+"id": "h-mason-richard",
+"role": "Member"
+},
+{
+"id": "h-terry-parnell",
+"role": "Member"
+},
+{
+"id": "h-thorne-james",
+"role": "Member"
+},
+{
+"id": "h-wood-stephen",
+"role": "Member"
+},
+{
+"id": "h-woodsome-david",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=IFW&snum=132",
+"bill_count": 63
+},
+{
+"code": "JUD",
+"name": "Judiciary",
+"chamber": "joint",
+"members": [
+{
+"id": "s-carney-anne",
+"role": "Senate Chair"
+},
+{
+"id": "h-kuhn-amy",
+"role": "House Chair"
+},
+{
+"id": "s-haggan-david",
+"role": "Member"
+},
+{
+"id": "s-talbot-ross-rachel",
+"role": "Member"
+},
+{
+"id": "h-babin-mark",
+"role": "Member"
+},
+{
+"id": "h-caruso-elizabeth",
+"role": "Member"
+},
+{
+"id": "h-henderson-rachel",
+"role": "Member"
+},
+{
+"id": "h-lee-adam",
+"role": "Member"
+},
+{
+"id": "h-o-halloran-dani",
+"role": "Member"
+},
+{
+"id": "h-poirier-jennifer",
+"role": "Member"
+},
+{
+"id": "h-pugh-dylan",
+"role": "Member"
+},
+{
+"id": "h-sato-eleanor",
+"role": "Member"
+},
+{
+"id": "h-sinclair-david",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=JUD&snum=132",
+"bill_count": 245
+},
+{
+"code": "LAB",
+"name": "Labor",
+"chamber": "joint",
+"members": [
+{
+"id": "s-tipping-michael",
+"role": "Senate Chair"
+},
+{
+"id": "h-roeder-amy",
+"role": "House Chair"
+},
+{
+"id": "s-bradstreet-richard",
+"role": "Member"
+},
+{
+"id": "s-rafferty-joseph",
+"role": "Member"
+},
+{
+"id": "h-archer-marshall",
+"role": "Member"
+},
+{
+"id": "h-beck-matthew",
+"role": "Member"
+},
+{
+"id": "h-collins-alicia",
+"role": "Member"
+},
+{
+"id": "h-drinkwater-gary",
+"role": "Member"
+},
+{
+"id": "h-geiger-valli",
+"role": "Member"
+},
+{
+"id": "h-libby-laurel",
+"role": "Member"
+},
+{
+"id": "h-macias-rafael",
+"role": "Member"
+},
+{
+"id": "h-skold-charles",
+"role": "Member"
+},
+{
+"id": "h-soboleski-michael",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=LAB&snum=132",
+"bill_count": 107
+},
+{
+"code": "MAR",
+"name": "Marine Resources",
+"chamber": "joint",
+"members": [
+{
+"id": "s-tepler-denise",
+"role": "Senate Chair"
+},
+{
+"id": "h-hepler-allison",
+"role": "House Chair"
+},
+{
+"id": "s-moore-marianne",
+"role": "Member"
+},
+{
+"id": "s-reny-cameron",
+"role": "Member"
+},
+{
+"id": "h-eaton-holly",
+"role": "Member"
+},
+{
+"id": "h-farrin-wayne",
+"role": "Member"
+},
+{
+"id": "h-gifford-irene",
+"role": "Member"
+},
+{
+"id": "h-golek-cheryl",
+"role": "Member"
+},
+{
+"id": "h-rielly-morgan",
+"role": "Member"
+},
+{
+"id": "h-simmons-abden",
+"role": "Member"
+},
+{
+"id": "h-strout-tiffany",
+"role": "Member"
+},
+{
+"id": "h-thorne-james",
+"role": "Member"
+},
+{
+"id": "h-wood-peter",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=MAR&snum=132",
+"bill_count": 40
+},
+{
+"code": "SLG",
+"name": "State and Local Government",
+"chamber": "joint",
+"members": [
+{
+"id": "s-baldacci-joseph",
+"role": "Senate Chair"
+},
+{
+"id": "h-salisbury-suzanne",
+"role": "House Chair"
+},
+{
+"id": "s-beebe-center-anne",
+"role": "Member"
+},
+{
+"id": "s-martin-joseph",
+"role": "Member"
+},
+{
+"id": "h-adams-jeffrey",
+"role": "Member"
+},
+{
+"id": "h-copeland-lynn",
+"role": "Member"
+},
+{
+"id": "h-farrin-wayne",
+"role": "Member"
+},
+{
+"id": "h-gramlich-lori",
+"role": "Member"
+},
+{
+"id": "h-greenwood-randall",
+"role": "Member"
+},
+{
+"id": "h-pomerleau-kimberly",
+"role": "Member"
+},
+{
+"id": "h-rollins-david",
+"role": "Member"
+},
+{
+"id": "h-tuell-william",
+"role": "Member"
+},
+{
+"id": "h-underwood-joseph",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=SLG&snum=132",
+"bill_count": 138
+},
+{
+"code": "TAX",
+"name": "Taxation",
+"chamber": "joint",
+"members": [
+{
+"id": "s-grohoski-nicole",
+"role": "Senate Chair"
+},
+{
+"id": "h-sayre-daniel",
+"role": "House Chair"
+},
+{
+"id": "s-bickford-bruce",
+"role": "Member"
+},
+{
+"id": "s-tipping-michael",
+"role": "Member"
+},
+{
+"id": "h-crockett-edward",
+"role": "Member"
+},
+{
+"id": "h-friedmann-gary",
+"role": "Member"
+},
+{
+"id": "h-lavigne-thomas",
+"role": "Member"
+},
+{
+"id": "h-matlack-ann",
+"role": "Member"
+},
+{
+"id": "h-quint-tracy",
+"role": "Member"
+},
+{
+"id": "h-rudnicki-shelley",
+"role": "Member"
+},
+{
+"id": "h-swallow-gregory",
+"role": "Member"
+},
+{
+"id": "h-white-russell",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=TAX&snum=132",
+"bill_count": 168
+},
+{
+"code": "TRA",
+"name": "Transportation",
+"chamber": "joint",
+"members": [
+{
+"id": "s-nangle-timothy",
+"role": "Senate Chair"
+},
+{
+"id": "h-brennan-michael",
+"role": "House Chair"
+},
+{
+"id": "s-farrin-bradlee",
+"role": "Member"
+},
+{
+"id": "s-pierce-teresa",
+"role": "Member"
+},
+{
+"id": "h-albert-roger",
+"role": "Member"
+},
+{
+"id": "h-ankeles-daniel",
+"role": "Member"
+},
+{
+"id": "h-bishop-steven",
+"role": "Member"
+},
+{
+"id": "h-eaton-holly",
+"role": "Member"
+},
+{
+"id": "h-mason-richard",
+"role": "Member"
+},
+{
+"id": "h-montell-karen",
+"role": "Member"
+},
+{
+"id": "h-parry-wayne",
+"role": "Member"
+},
+{
+"id": "h-ray-d",
+"role": "Member"
+},
+{
+"id": "h-white-james",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=TRA&snum=132",
+"bill_count": 137
+},
+{
+"code": "VLA",
+"name": "Veterans and Legal Affairs",
+"chamber": "joint",
+"members": [
+{
+"id": "s-hickman-craig",
+"role": "Senate Chair"
+},
+{
+"id": "h-supica-laura",
+"role": "House Chair"
+},
+{
+"id": "s-duson-jill",
+"role": "Member"
+},
+{
+"id": "s-timberlake-jeffrey",
+"role": "Member"
+},
+{
+"id": "h-boyer-david",
+"role": "Member"
+},
+{
+"id": "h-chapman-quentin",
+"role": "Member"
+},
+{
+"id": "h-faircloth-sean",
+"role": "Member"
+},
+{
+"id": "h-fredericks-ann",
+"role": "Member"
+},
+{
+"id": "h-frost-sharon",
+"role": "Member"
+},
+{
+"id": "h-graham-anne",
+"role": "Member"
+},
+{
+"id": "h-hymes-benjamin",
+"role": "Member"
+},
+{
+"id": "h-malon-marc",
+"role": "Member"
+},
+{
+"id": "h-terry-parnell",
+"role": "Member"
+}
+],
+"url": "https://legislature.maine.gov/legis/bills/phwksched.html?CODE=VLA&snum=132",
+"bill_count": 133
+}
 ]

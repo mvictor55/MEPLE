@@ -36,8 +36,8 @@ run.py           the whole thing in order (python run.py); run.sh is the same fo
 |---|---|---|
 | legislature.maine.gov bill status pages (`display_ps.asp?LD=…&snum=132`) | committee work-session history, committee reports with signers, amendments and fiscal notes, final disposition, printed-document links | public, no key |
 | legislature.maine.gov printed bills (`getPDF.asp`) | the official SUMMARY written by the Revisor's Office | public |
-| legislature.maine.gov testimony pages | every written testimony filed with a committee (name, org, town, date, PDF) | public; JS-rendered, endpoint discovered on first run |
-| legislature.maine.gov rosters and committee pages | towns, leadership, committee membership and chairs | public |
+| legislature.maine.gov testimony feeds (`getTestyCmte.asp` → `getTestyCmteDates.asp` → `getTestyForCmteHearingDate.asp`, PDFs via `getTestimonyDoc.asp`) | every written testimony filed with a committee (name, organization or town, LD, hearing date, PDF) | public JSON, no key |
+| legislature.maine.gov rosters (House `ExportActiveMembers?format=csv`, Senate `district-listing` + district profile pages) | towns, leadership, committee membership and chairs | public |
 | LegiScan dataset for the 132nd (CC BY 4.0) | LD list, sponsors/cosponsors with stable ids, chamber-by-chamber history, roll calls with per-member votes, hearing calendar, subject tags | free API key: put `LEGISCAN_KEY=...` in a `.env` file at the repo root (see `.env.example`) |
 | Open States / Plural | cross-check only | free API key (`OPENSTATES_KEY`), optional |
 
@@ -51,28 +51,33 @@ text of the testimony it is marked `inferred` and rendered with an asterisk.
 
 Needs Python 3.11+, `pip install -r requirements.txt`, `playwright install chromium`,
 and optionally `pdftotext` (poppler); without it, PDF text extraction falls back to
-pdfplumber, which is slower but works everywhere. Network access to:
+pypdf, then pdfplumber, which are slower but work everywhere. Network access to:
 
 - `legislature.maine.gov` and `mainelegislature.org`
 - `legiscan.com` / `api.legiscan.com` (if using LegiScan)
 - `v3.openstates.org` (optional)
 
-### First run: verify the UNVERIFIED patterns
+### Checking the parsers
 
-`pipeline/config.py` marks which URL patterns were observed and which are
-assumptions. In order:
+All URL patterns in `pipeline/config.py` were verified against the live site on
+2026-11-06. If the Legislature changes its pages, these debug commands show what
+the parsers see:
 
-1. `python -m pipeline.bills --ld 1822 --debug` — check the parsed JSON against
-   the status page and fix selectors in `bills.py`.
-2. `python -m pipeline.testimony discover` — logs the XHR calls the testimony
-   pages make; paste the endpoint(s) into `TESTIMONY_ENDPOINTS` and adjust the
-   field names in `testimony.index()`.
-3. `python -m pipeline.rosters --debug` — dumps the roster HTML; fix selectors.
-4. Confirm the committee codes in `config.COMMITTEES` against
-   `phwksched.html?CODE=…` links.
+1. `python -m pipeline.bills --ld 1822 --debug`: compare the parsed JSON with the
+   status page and fix the selectors in `bills.py`.
+2. `python -m pipeline.testimony discover`: logs the XHR calls the testimony
+   pages make; update `TESTIMONY_ENDPOINTS` if they change.
+3. `python -m pipeline.rosters --debug`: dumps the roster HTML.
+4. Check the committee codes in `config.COMMITTEES` against
+   `phwksched.html?CODE=…` links (Criminal Justice is `CJPS`).
 
-Then `python run.py` (or `./run.sh` on a Mac/Linux shell). Every step caches downloads under `pipeline/raw/` (gitignored),
-so re-runs only fetch what is new.
+Then `python run.py` (or `./run.sh` on a Mac/Linux shell). Steps run in order:
+`legiscan`, `crawl`, `billtext`, `rosters`, `tindex`, `textract`, `build`. If one
+fails, fix it and re-run just that step and the ones after it, e.g.
+`python run.py textract` and then `python run.py build`. Every step caches
+downloads under `pipeline/raw/` (gitignored), so re-runs only fetch what is new.
+A full first run of the 132nd (2,245 bills, about 45,000 testimony PDFs) takes
+most of a day, mostly PDF text extraction; later runs take minutes.
 
 ### Moving to the 133rd Legislature (convenes December 2026)
 
@@ -83,10 +88,45 @@ January 2027.
 
 ## Deploying
 
-Netlify: connect the repo, publish directory `site`, no build command
-(`netlify.toml` already says this). Cloudflare Pages works the same way; note
-its 20,000-file limit per deployment, which is why testimony text is bundled
-per bill rather than per document.
+**Method: Netlify continuous deploys from this repo.** Everything the site needs
+is committed, including the extracted testimony text, so the `main` branch alone
+is the deployable site. Netlify publishes the `site` folder with no build
+command (`netlify.toml` says this). Do not also deploy from this machine with
+`netlify deploy`: a manual deploy would be replaced by the next push.
+
+This was chosen because the data fits comfortably in git. Measured after the
+2026-11-07 build:
+
+| | Size |
+|---|---|
+| `site/data` total | 228 MB |
+| testimony text (`site/data/testimony/LD*.json`, 2,121 files) | 172 MB |
+| largest file (`site/data/testimony/index.json`, 1.2 MB gzipped) | 13 MB |
+| largest per-bill text file (`LD210.json`) | 5.6 MB |
+
+The rule was: commit the text while it stays under about 250 MB total with no
+file over 50 MB (GitHub's warning size). If a later session goes past that, add
+`site/data/testimony/LD*.json` to `.gitignore`, run `git rm --cached` on those
+files, deploy with `netlify deploy --prod --dir=site` from the machine that ran
+the pipeline, and turn off builds in Netlify (Site configuration → Build & deploy
+→ Stop builds) so the two methods can't overwrite each other.
+
+Cloudflare Pages also works; note its 20,000-file limit per deployment, which is
+why testimony text is bundled per bill rather than per document.
+
+### Refreshing the data
+
+1. `python run.py`. Cached pages are reused; new bills, hearings and testimony
+   are fetched. To re-read pages that have changed (status pages update as bills
+   move), delete `pipeline/raw/bills/LD*.json` first, or run
+   `python -m pipeline.crawl_bills --refresh`.
+2. Check the step summaries at the end of the log, then serve `site/` locally
+   (`python -m http.server --directory site`) and open the home page, a bill
+   with testimony (e.g. `#/bill/1822`) and `#/testimony`.
+3. `du -sh site/data site/data/testimony` to confirm the size rule above still
+   holds.
+4. `git add site/data && git commit -m "Refresh data" && git push`. Netlify
+   deploys the push.
 
 ## Attribution
 

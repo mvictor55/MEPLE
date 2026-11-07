@@ -11,14 +11,14 @@ import re
 # Ordered: first match wins. Patterns are matched against the lowercased label.
 DISPOSITION_RULES = [
     # Became law
-    (r"public law|private law|resolve.*chapter|constitutional resolution|emergency enacted|^enacted|became law without", "enacted"),
+    (r"public law|private law|resolve.*chapter|constitutional resolution|emergency enacted|^enacted|became law without|(?<!not )finally passed", "enacted"),   # resolves are "(emergency) finally passed"
     # Governor
     (r"veto sustained|vetoed", "vetoed"),
     (r"held by (the )?governor|pocket", "held"),
     # Pending / carried
     (r"carried over|committed to|referred to|in committee|pending", "pending"),
     # Withdrawn
-    (r"leave to withdraw|withdrawn", "withdrawn"),
+    (r"leave to withdraw|withdrawn|withdrawal", "withdrawn"),
     # Dead
     (r"died|ought not to pass|ontp|indefinitely postponed|placed in the legislative files|failed|rejected|not finally passed|not enacted|unanimous ought not", "died"),
 ]

@@ -14,26 +14,39 @@ def _cache_path(url: str, ext: str) -> Path:
     d.mkdir(parents=True, exist_ok=True)
     return d / f"{h}.{ext}"
 
-def get(url: str, *, binary=False, refresh=False, timeout=60) -> bytes | str:
-    """GET with on-disk cache and a fixed delay between live requests."""
+def get(url: str, *, binary=False, refresh=False, cache=True, timeout=60, retries=3) -> bytes | str:
+    """GET with on-disk cache and a fixed delay between live requests.
+    cache=False skips the cache entirely (for callers that store the body themselves)."""
     global _last
     ext = "bin" if binary else "html"
     p = _cache_path(url, ext)
-    if p.exists() and not refresh:
-        return p.read_bytes() if binary else p.read_text(errors="replace")
-    wait = config.REQUEST_DELAY_SECONDS - (time.time() - _last)
-    if wait > 0:
-        time.sleep(wait)
-    r = _session.get(url, timeout=timeout)
-    _last = time.time()
-    r.raise_for_status()
+    if cache and p.exists() and not refresh:
+        return p.read_bytes() if binary else p.read_text(encoding="utf-8", errors="replace")
+    for attempt in range(retries):
+        wait = config.REQUEST_DELAY_SECONDS - (time.time() - _last)
+        if wait > 0:
+            time.sleep(wait)
+        try:
+            r = _session.get(url, timeout=timeout)
+            _last = time.time()
+            if r.status_code >= 500 and attempt < retries - 1:
+                time.sleep(5 * (attempt + 1)); continue
+            r.raise_for_status()
+            break
+        except (requests.ConnectionError, requests.Timeout):
+            _last = time.time()
+            if attempt == retries - 1:
+                raise
+            time.sleep(5 * (attempt + 1))
     if binary:
-        p.write_bytes(r.content)
+        if cache:
+            p.write_bytes(r.content)
         return r.content
     r.encoding = r.encoding or "utf-8"
-    p.write_text(r.text)
+    if cache:
+        p.write_text(r.text, encoding="utf-8")
     return r.text
 
 def get_json(url: str, refresh=False):
     txt = get(url, refresh=refresh)
-    return json.loads(txt)
+    return json.loads(txt.lstrip("﻿"))

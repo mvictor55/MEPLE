@@ -1,22 +1,22 @@
 {
  "session": "132",
  "legislature": "132nd Maine Legislature",
- "years": "2025–2026",
+ "years": "2025\u20132026",
  "generated_at": "2026-11-07",
- "sample": true,
+ "sample": false,
+ "notice": null,
+ "featured": [
+  210,
+  2106,
+  754
+ ],
  "counts": {
-  "bills_introduced": 2454,
-  "bills_loaded": 7,
-  "legislators": 186,
-  "house": 151,
+  "bills_introduced": 2245,
+  "bills_loaded": 2245,
+  "legislators": 189,
+  "house": 154,
   "senate": 35,
   "committees": 17,
-  "testimony": 25
- },
- "notice": "Demonstration data. Bills are real measures from the 132nd Legislature; testimony and counts are illustrative sample content.",
- "featured": [
-  307,
-  1822,
-  1
- ]
+  "testimony": 45054
+ }
 }

@@ -4,7 +4,7 @@ Run the whole pipeline in order (works on Windows, macOS, Linux).
     python run.py build      # one step by name
 Every step caches what it already fetched, so re-running resumes.
 """
-import subprocess, sys
+import os, subprocess, sys
 from pathlib import Path
 
 STEPS = [
@@ -24,7 +24,8 @@ def main():
         if name not in only:
             continue
         print(f"\n=== {name}: {' '.join(cmd[1:])} ===", flush=True)
-        r = subprocess.run(cmd, cwd=root)
+        # UTF-8 mode: Windows Pythons before 3.15 otherwise read/write files as cp1252
+        r = subprocess.run(cmd, cwd=root, env={**os.environ, "PYTHONUTF8": "1"})
         if r.returncode != 0:
             sys.exit(f"step '{name}' failed (exit {r.returncode}); fix it and re-run: python run.py {name}")
     print("\nDone. Deploy the site/ folder.")

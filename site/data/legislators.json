@@ -1,162 +1,4466 @@
 [
- {
-  "id": "fecteau",
-  "name": "Ryan Fecteau",
-  "party": "D",
-  "chamber": "House",
-  "district": null,
-  "towns": [
-   "Biddeford"
-  ],
-  "town": "Biddeford",
-  "role": "Speaker of the House",
-  "committees": [],
-  "bio": "Speaker of the Maine House of Representatives. Sponsor of LD 1, the storm-resilience package signed into law in 2025.",
-  "url": null,
-  "sample_profile": true
- },
- {
-  "id": "daughtry",
-  "name": "Mattie Daughtry",
-  "party": "D",
-  "chamber": "Senate",
-  "district": null,
-  "towns": [
-   "Brunswick"
-  ],
-  "town": "Brunswick",
-  "role": "President of the Senate",
-  "committees": [],
-  "bio": "President of the Maine Senate, representing Senate District 23 (Brunswick, Freeport, Harpswell, Pownal and part of Yarmouth).",
-  "url": null,
-  "sample_profile": true
- },
- {
-  "id": "faulkingham",
-  "name": "Billy Bob Faulkingham",
-  "party": "R",
-  "chamber": "House",
-  "district": null,
-  "towns": [
-   "Winter Harbor"
-  ],
-  "town": "Winter Harbor",
-  "role": "House Minority Leader",
-  "committees": [],
-  "bio": "House Republican Leader and commercial lobsterman representing Downeast coastal communities.",
-  "url": null,
-  "sample_profile": true
- },
- {
-  "id": "kuhn",
-  "name": "Amy Kuhn",
-  "party": "D",
-  "chamber": "House",
-  "district": null,
-  "towns": [
-   "Falmouth"
-  ],
-  "town": "Falmouth",
-  "role": null,
-  "committees": [],
-  "bio": "Represents Falmouth and part of Cumberland. Lead sponsor of Maine's online data privacy and AI-transparency legislation.",
-  "url": null,
-  "sample_profile": true
- },
- {
-  "id": "sachs",
-  "name": "Melanie Sachs",
-  "party": "D",
-  "chamber": "House",
-  "district": null,
-  "towns": [
-   "Freeport"
-  ],
-  "town": "Freeport",
-  "role": null,
-  "committees": [],
-  "bio": "Represents Freeport and Pownal. Sponsor of LD 307, the first-in-the-nation data center moratorium bill.",
-  "url": null,
-  "sample_profile": true
- },
- {
-  "id": "roberts",
-  "name": "Tiffany Roberts-Lovell",
-  "party": "D",
-  "chamber": "House",
-  "district": null,
-  "towns": [
-   "South Berwick"
-  ],
-  "town": "South Berwick",
-  "role": null,
-  "committees": [],
-  "bio": "Represents South Berwick and part of North Berwick. Sponsor of automotive right-to-repair implementation legislation.",
-  "url": null,
-  "sample_profile": true
- },
- {
-  "id": "dhalac",
-  "name": "Deqa Dhalac",
-  "party": "D",
-  "chamber": "House",
-  "district": null,
-  "towns": [
-   "South Portland"
-  ],
-  "town": "South Portland",
-  "role": null,
-  "committees": [],
-  "bio": "Represents part of South Portland. Sponsor of LD 1971 on state and local roles in federal immigration enforcement.",
-  "url": null,
-  "sample_profile": true
- },
- {
-  "id": "beck",
-  "name": "Matthew Beck",
-  "party": "D",
-  "chamber": "House",
-  "district": null,
-  "towns": [
-   "South Portland"
-  ],
-  "town": "South Portland",
-  "role": null,
-  "committees": [],
-  "bio": "Represents part of South Portland. Sponsor of LD 1109 on large-capacity ammunition feeding devices.",
-  "url": null,
-  "sample_profile": true
- },
- {
-  "id": "carney",
-  "name": "Anne Carney",
-  "party": "D",
-  "chamber": "Senate",
-  "district": null,
-  "towns": [
-   "Cape Elizabeth"
-  ],
-  "town": "Cape Elizabeth",
-  "role": null,
-  "committees": [],
-  "bio": "Represents Cape Elizabeth, South Portland and part of Scarborough. Senate chair of the Judiciary Committee.",
-  "url": null,
-  "sample_profile": true
- },
- {
-  "id": "stewart",
-  "name": "Trey Stewart",
-  "party": "R",
-  "chamber": "Senate",
-  "district": null,
-  "towns": [
-   "Presque Isle"
-  ],
-  "town": "Presque Isle",
-  "role": "Senate Minority Leader",
-  "committees": [],
-  "bio": "Senate Republican Leader representing Aroostook County communities.",
-  "url": null,
-  "sample_profile": true
- }
+{
+"id": "h-abdi-mana",
+"legiscan_id": 23239,
+"name": "Mana Abdi",
+"party": "D",
+"chamber": "House",
+"district": "95",
+"towns": [
+"Lewiston"
+],
+"town": "Lewiston",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1492"
+},
+{
+"id": "h-adams-jeffrey",
+"legiscan_id": 23240,
+"name": "Jeffrey Adams",
+"party": "R",
+"chamber": "House",
+"district": "144",
+"towns": [
+"Lebanon"
+],
+"town": "Lebanon",
+"role": null,
+"committees": [
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1469"
+},
+{
+"id": "h-albert-roger",
+"legiscan_id": 23241,
+"name": "Roger Albert",
+"party": "R",
+"chamber": "House",
+"district": "2",
+"towns": [
+"Madawaska"
+],
+"town": "Madawaska",
+"role": null,
+"committees": [
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1454"
+},
+{
+"id": "h-ankeles-daniel",
+"legiscan_id": 23242,
+"name": "Daniel Ankeles",
+"party": "D",
+"chamber": "House",
+"district": "100",
+"towns": [
+"Brunswick"
+],
+"town": "Brunswick",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+},
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1495"
+},
+{
+"id": "h-arata-amy",
+"legiscan_id": 21189,
+"name": "Amy Arata",
+"party": "R",
+"chamber": "House",
+"district": "104",
+"towns": [
+"New Gloucester"
+],
+"town": "New Gloucester",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1356"
+},
+{
+"id": "h-archer-marshall",
+"legiscan_id": 25928,
+"name": "Marshall Archer",
+"party": "D",
+"chamber": "House",
+"district": "129",
+"towns": [
+"Saco"
+],
+"town": "Saco",
+"role": null,
+"committees": [
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3139"
+},
+{
+"id": "h-ardell-donald",
+"legiscan_id": 23243,
+"name": "Donald Ardell",
+"party": "R",
+"chamber": "House",
+"district": "6",
+"towns": [
+"Monticello"
+],
+"town": "Monticello",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1457"
+},
+{
+"id": "h-arford-poppy",
+"legiscan_id": 22713,
+"name": "Poppy Arford",
+"party": "D",
+"chamber": "House",
+"district": "101",
+"towns": [
+"Brunswick"
+],
+"town": "Brunswick",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1421"
+},
+{
+"id": "h-babin-mark",
+"legiscan_id": 23244,
+"name": "Mark Babin",
+"party": "R",
+"chamber": "House",
+"district": "3",
+"towns": [
+"Fort Fairfield"
+],
+"town": "Fort Fairfield",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1455"
+},
+{
+"id": "h-bagshaw-barbara",
+"legiscan_id": 23245,
+"name": "Barbara Bagshaw",
+"party": "R",
+"chamber": "House",
+"district": "106",
+"towns": [
+"Windham"
+],
+"town": "Windham",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1473"
+},
+{
+"id": "h-beck-matthew",
+"legiscan_id": 25173,
+"name": "Matthew Beck",
+"party": "D",
+"chamber": "House",
+"district": "122",
+"towns": [
+"South Portland"
+],
+"town": "South Portland",
+"role": null,
+"committees": [
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1509"
+},
+{
+"id": "h-bell-arthur",
+"legiscan_id": 22695,
+"name": "Arthur Bell",
+"party": "D",
+"chamber": "House",
+"district": "103",
+"towns": [
+"Yarmouth"
+],
+"town": "Yarmouth",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1419"
+},
+{
+"id": "h-bishop-steven",
+"legiscan_id": 25929,
+"name": "Steven Bishop",
+"party": "R",
+"chamber": "House",
+"district": "17",
+"towns": [
+"Bucksport"
+],
+"town": "Bucksport",
+"role": null,
+"committees": [
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3110"
+},
+{
+"id": "h-blier-mark",
+"legiscan_id": 21191,
+"name": "Mark Blier",
+"party": "R",
+"chamber": "House",
+"district": "138",
+"towns": [
+"Buxton"
+],
+"town": "Buxton",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1344"
+},
+{
+"id": "h-boyer-david",
+"legiscan_id": 23246,
+"name": "David Boyer",
+"party": "R",
+"chamber": "House",
+"district": "87",
+"towns": [
+"Poland"
+],
+"town": "Poland",
+"role": null,
+"committees": [
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1489"
+},
+{
+"id": "h-boyer-michelle",
+"legiscan_id": 25930,
+"name": "Michelle Boyer",
+"party": "D",
+"chamber": "House",
+"district": "123",
+"towns": [
+"Cape Elizabeth"
+],
+"town": "Cape Elizabeth",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3138"
+},
+{
+"id": "h-brennan-michael",
+"legiscan_id": 21192,
+"name": "Michael Brennan",
+"party": "D",
+"chamber": "House",
+"district": "115",
+"towns": [
+"Portland"
+],
+"town": "Portland",
+"role": null,
+"committees": [
+{
+"code": "TRA",
+"role": "House Chair"
+},
+{
+"code": "AFA",
+"role": "Member"
+},
+{
+"code": "EDU",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1350"
+},
+{
+"id": "h-bridgeo-william",
+"legiscan_id": 23247,
+"name": "William Bridgeo",
+"party": "D",
+"chamber": "House",
+"district": "60",
+"towns": [
+"Augusta"
+],
+"town": "Augusta",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+},
+{
+"code": "IFW",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1504"
+},
+{
+"id": "h-bunker-stephan",
+"legiscan_id": 25931,
+"name": "Stephan Bunker",
+"party": "D",
+"chamber": "House",
+"district": "75",
+"towns": [
+"Farmington"
+],
+"town": "Farmington",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "Member"
+},
+{
+"code": "CJPS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3124"
+},
+{
+"id": "h-campbell-richard",
+"legiscan_id": 15775,
+"name": "Richard Campbell",
+"party": "R",
+"chamber": "House",
+"district": "19",
+"towns": [
+"Orrington"
+],
+"town": "Orrington",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/21"
+},
+{
+"id": "h-carlow-nathan",
+"legiscan_id": 22712,
+"name": "Nathan Carlow",
+"party": "R",
+"chamber": "House",
+"district": "137",
+"towns": [
+"Buxton"
+],
+"town": "Buxton",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1411"
+},
+{
+"id": "h-caruso-elizabeth",
+"legiscan_id": 25932,
+"name": "Elizabeth Caruso",
+"party": "R",
+"chamber": "House",
+"district": "72",
+"towns": [
+"Caratunk"
+],
+"town": "Caratunk",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3123"
+},
+{
+"id": "h-chapman-quentin",
+"legiscan_id": 25933,
+"name": "Quentin Chapman",
+"party": "R",
+"chamber": "House",
+"district": "88",
+"towns": [
+"Auburn"
+],
+"town": "Auburn",
+"role": null,
+"committees": [
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3129"
+},
+{
+"id": "h-cimino-marygrace",
+"legiscan_id": 25934,
+"name": "Marygrace Cimino",
+"party": "R",
+"chamber": "House",
+"district": "83",
+"towns": [
+"Bridgton"
+],
+"town": "Bridgton",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3127"
+},
+{
+"id": "h-cloutier-kristen",
+"legiscan_id": 21195,
+"name": "Kristen Cloutier",
+"party": "D",
+"chamber": "House",
+"district": "94",
+"towns": [],
+"town": null,
+"role": null,
+"committees": [],
+"bio": null,
+"url": null
+},
+{
+"id": "h-cluchey-sally",
+"legiscan_id": 23248,
+"name": "Sally Cluchey",
+"party": "D",
+"chamber": "House",
+"district": "52",
+"towns": [
+"Bowdoinham"
+],
+"town": "Bowdoinham",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Member"
+},
+{
+"code": "IFW",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1501"
+},
+{
+"id": "h-collamore-amanda",
+"legiscan_id": 22693,
+"name": "Amanda Collamore",
+"party": "R",
+"chamber": "House",
+"district": "68",
+"towns": [
+"Pittsfield"
+],
+"town": "Pittsfield",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1432"
+},
+{
+"id": "h-collins-alicia",
+"legiscan_id": 25935,
+"name": "Alicia Collins",
+"party": "R",
+"chamber": "House",
+"district": "61",
+"towns": [
+"Sidney"
+],
+"town": "Sidney",
+"role": null,
+"committees": [
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3119"
+},
+{
+"id": "h-cooper-mark",
+"legiscan_id": 25936,
+"name": "Mark Cooper",
+"party": "R",
+"chamber": "House",
+"district": "107",
+"towns": [
+"Windham"
+],
+"town": "Windham",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3132"
+},
+{
+"id": "h-copeland-lynn",
+"legiscan_id": 22837,
+"name": "Lynn Copeland",
+"party": "D",
+"chamber": "House",
+"district": "130",
+"towns": [
+"Saco"
+],
+"town": "Saco",
+"role": null,
+"committees": [
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1410"
+},
+{
+"id": "h-crafts-lydia",
+"legiscan_id": 22766,
+"name": "Lydia Crafts",
+"party": "D",
+"chamber": "House",
+"district": "46",
+"towns": [],
+"town": null,
+"role": null,
+"committees": [],
+"bio": null,
+"url": null
+},
+{
+"id": "h-cray-dean",
+"legiscan_id": 8810,
+"name": "Dean Cray",
+"party": "R",
+"chamber": "House",
+"district": "69",
+"towns": [
+"Palmyra"
+],
+"town": "Palmyra",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/249"
+},
+{
+"id": "h-crockett-edward",
+"legiscan_id": 21197,
+"name": "Edward Crockett",
+"party": "D",
+"chamber": "House",
+"district": "112",
+"towns": [
+"Portland"
+],
+"town": "Portland",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "Member"
+},
+{
+"code": "TAX",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1351"
+},
+{
+"id": "h-daigle-lucien",
+"legiscan_id": 25937,
+"name": "Lucien Daigle",
+"party": "R",
+"chamber": "House",
+"district": "1",
+"towns": [
+"Fort Kent"
+],
+"town": "Fort Kent",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3106"
+},
+{
+"id": "h-dana-aaron",
+"legiscan_id": 23889,
+"name": "Aaron Dana",
+"party": "N",
+"chamber": "House",
+"district": "TRIBE",
+"towns": [],
+"town": null,
+"role": null,
+"committees": [],
+"bio": null,
+"url": null
+},
+{
+"id": "h-debrito-flavia",
+"legiscan_id": 25938,
+"name": "Flavia DeBrito",
+"party": "D",
+"chamber": "House",
+"district": "64",
+"towns": [
+"Waterville"
+],
+"town": "Waterville",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3121"
+},
+{
+"id": "h-dhalac-deqa",
+"legiscan_id": 23251,
+"name": "Deqa Dhalac",
+"party": "D",
+"chamber": "House",
+"district": "120",
+"towns": [
+"South Portland"
+],
+"town": "South Portland",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1476"
+},
+{
+"id": "h-dill-james",
+"legiscan_id": 10331,
+"name": "James Dill",
+"party": "D",
+"chamber": "House",
+"district": "26",
+"towns": [
+"Old Town"
+],
+"town": "Old Town",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "Member"
+},
+{
+"code": "IFW",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/253"
+},
+{
+"id": "h-dodge-janice",
+"legiscan_id": 21201,
+"name": "Janice Dodge",
+"party": "D",
+"chamber": "House",
+"district": "39",
+"towns": [
+"Belfast"
+],
+"town": "Belfast",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1366"
+},
+{
+"id": "h-doudera-victoria",
+"legiscan_id": 21203,
+"name": "Victoria Doudera",
+"party": "D",
+"chamber": "House",
+"district": "41",
+"towns": [
+"Camden"
+],
+"town": "Camden",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1365"
+},
+{
+"id": "h-drinkwater-gary",
+"legiscan_id": 21204,
+"name": "Gary Drinkwater",
+"party": "R",
+"chamber": "House",
+"district": "27",
+"towns": [
+"Milford"
+],
+"town": "Milford",
+"role": null,
+"committees": [
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1376"
+},
+{
+"id": "h-ducharme-john",
+"legiscan_id": 22701,
+"name": "John Ducharme",
+"party": "R",
+"chamber": "House",
+"district": "71",
+"towns": [
+"Madison"
+],
+"town": "Madison",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1434"
+},
+{
+"id": "h-eaton-holly",
+"legiscan_id": 23252,
+"name": "Holly Eaton",
+"party": "D",
+"chamber": "House",
+"district": "15",
+"towns": [
+"Deer Isle"
+],
+"town": "Deer Isle",
+"role": null,
+"committees": [
+{
+"code": "MAR",
+"role": "Member"
+},
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1461"
+},
+{
+"id": "h-eder-john",
+"legiscan_id": 25939,
+"name": "John Eder",
+"party": "R",
+"chamber": "House",
+"district": "136",
+"towns": [
+"Waterboro"
+],
+"town": "Waterboro",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/490"
+},
+{
+"id": "h-faircloth-sean",
+"legiscan_id": 26432,
+"name": "Sean Faircloth",
+"party": "D",
+"chamber": "House",
+"district": "24",
+"towns": [
+"Bangor"
+],
+"town": "Bangor",
+"role": null,
+"committees": [
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/430"
+},
+{
+"id": "h-farrin-wayne",
+"legiscan_id": 25940,
+"name": "Wayne Farrin",
+"party": "D",
+"chamber": "House",
+"district": "47",
+"towns": [
+"Jefferson"
+],
+"town": "Jefferson",
+"role": null,
+"committees": [
+{
+"code": "MAR",
+"role": "Member"
+},
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3115"
+},
+{
+"id": "h-faulkingham-william",
+"legiscan_id": 21205,
+"name": "William Faulkingham",
+"party": "R",
+"chamber": "House",
+"district": "12",
+"towns": [
+"Winter Harbor"
+],
+"town": "Winter Harbor",
+"role": null,
+"committees": [],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1379"
+},
+{
+"id": "h-fecteau-ryan",
+"legiscan_id": 16635,
+"name": "Ryan Fecteau",
+"party": "D",
+"chamber": "House",
+"district": "132",
+"towns": [
+"Biddeford"
+],
+"town": "Biddeford",
+"role": "Ex Officio",
+"committees": [],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/63"
+},
+{
+"id": "h-flynn-paul",
+"legiscan_id": 25941,
+"name": "Paul Flynn",
+"party": "R",
+"chamber": "House",
+"district": "63",
+"towns": [
+"Albion"
+],
+"town": "Albion",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3120"
+},
+{
+"id": "h-foley-robert",
+"legiscan_id": 16781,
+"name": "Robert Foley",
+"party": "R",
+"chamber": "House",
+"district": "145",
+"towns": [
+"Wells"
+],
+"town": "Wells",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/64"
+},
+{
+"id": "h-foster-steven",
+"legiscan_id": 21208,
+"name": "Steven Foster",
+"party": "R",
+"chamber": "House",
+"district": "32",
+"towns": [
+"Dexter"
+],
+"town": "Dexter",
+"role": null,
+"committees": [
+{
+"code": "EUT",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1370"
+},
+{
+"id": "h-fredericks-ann",
+"legiscan_id": 23253,
+"name": "Ann Fredericks",
+"party": "R",
+"chamber": "House",
+"district": "143",
+"towns": [
+"Sanford"
+],
+"town": "Sanford",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Member"
+},
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1468"
+},
+{
+"id": "h-fredette-kenneth",
+"legiscan_id": 10338,
+"name": "Kenneth Fredette",
+"party": "R",
+"chamber": "House",
+"district": "33",
+"towns": [
+"Newport"
+],
+"town": "Newport",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/65"
+},
+{
+"id": "h-friedmann-gary",
+"legiscan_id": 25942,
+"name": "Gary Friedmann",
+"party": "D",
+"chamber": "House",
+"district": "14",
+"towns": [
+"Bar Harbor"
+],
+"town": "Bar Harbor",
+"role": null,
+"committees": [
+{
+"code": "TAX",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3109"
+},
+{
+"id": "h-frost-sharon",
+"legiscan_id": 25943,
+"name": "Sharon Frost",
+"party": "I",
+"chamber": "House",
+"district": "58",
+"towns": [
+"Belgrade"
+],
+"town": "Belgrade",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "Member"
+},
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3117"
+},
+{
+"id": "h-gattine-andrew",
+"legiscan_id": 14717,
+"name": "Andrew Gattine",
+"party": "D",
+"chamber": "House",
+"district": "126",
+"towns": [
+"Westbrook"
+],
+"town": "Westbrook",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/68"
+},
+{
+"id": "h-geiger-valli",
+"legiscan_id": 22720,
+"name": "Valli Geiger",
+"party": "D",
+"chamber": "House",
+"district": "42",
+"towns": [
+"Rockland"
+],
+"town": "Rockland",
+"role": null,
+"committees": [
+{
+"code": "EUT",
+"role": "Member"
+},
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1430"
+},
+{
+"id": "h-gere-traci",
+"legiscan_id": 22867,
+"name": "Traci Gere",
+"party": "D",
+"chamber": "House",
+"district": "134",
+"towns": [
+"Kennebunkport"
+],
+"town": "Kennebunkport",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1408"
+},
+{
+"id": "h-gifford-irene",
+"legiscan_id": 24489,
+"name": "Irene Gifford",
+"party": "R",
+"chamber": "House",
+"district": "28",
+"towns": [
+"Lincoln"
+],
+"town": "Lincoln",
+"role": null,
+"committees": [
+{
+"code": "MAR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1465"
+},
+{
+"id": "h-golek-cheryl",
+"legiscan_id": 23255,
+"name": "Cheryl Golek",
+"party": "D",
+"chamber": "House",
+"district": "99",
+"towns": [
+"Harpswell"
+],
+"town": "Harpswell",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "Member"
+},
+{
+"code": "MAR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1494"
+},
+{
+"id": "h-graham-anne",
+"legiscan_id": 10340,
+"name": "Anne Graham",
+"party": "D",
+"chamber": "House",
+"district": "105",
+"towns": [
+"North Yarmouth"
+],
+"town": "North Yarmouth",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Member"
+},
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/259"
+},
+{
+"id": "h-gramlich-lori",
+"legiscan_id": 21209,
+"name": "Lori Gramlich",
+"party": "D",
+"chamber": "House",
+"district": "131",
+"towns": [
+"Old Orchard Beach"
+],
+"town": "Old Orchard Beach",
+"role": "Assistant Majority Leader",
+"committees": [
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1342"
+},
+{
+"id": "h-greenwood-randall",
+"legiscan_id": 17214,
+"name": "Randall Greenwood",
+"party": "R",
+"chamber": "House",
+"district": "56",
+"towns": [
+"Wales"
+],
+"town": "Wales",
+"role": null,
+"committees": [
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/208"
+},
+{
+"id": "h-griffin-abigail",
+"legiscan_id": 21210,
+"name": "Abigail Griffin",
+"party": "R",
+"chamber": "House",
+"district": "34",
+"towns": [
+"Levant"
+],
+"town": "Levant",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1369"
+},
+{
+"id": "h-guerrette-timothy",
+"legiscan_id": 23256,
+"name": "Timothy Guerrette",
+"party": "R",
+"chamber": "House",
+"district": "4",
+"towns": [
+"Caribou"
+],
+"town": "Caribou",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1456"
+},
+{
+"id": "h-haggan-kimberly",
+"legiscan_id": 25944,
+"name": "Kimberly Haggan",
+"party": "R",
+"chamber": "House",
+"district": "36",
+"towns": [
+"Hampden"
+],
+"town": "Hampden",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3113"
+},
+{
+"id": "h-hall-randall",
+"legiscan_id": 21212,
+"name": "Randall Hall",
+"party": "R",
+"chamber": "House",
+"district": "74",
+"towns": [
+"Wilton"
+],
+"town": "Wilton",
+"role": null,
+"committees": [],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1375"
+},
+{
+"id": "h-harriman-scott",
+"legiscan_id": 26634,
+"name": "Scott Harriman",
+"party": "D",
+"chamber": "House",
+"district": "94",
+"towns": [
+"Lewiston"
+],
+"town": "Lewiston",
+"role": null,
+"committees": [],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3141"
+},
+{
+"id": "h-hasenfus-tavis",
+"legiscan_id": 22718,
+"name": "Tavis Hasenfus",
+"party": "D",
+"chamber": "House",
+"district": "57",
+"towns": [
+"Readfield"
+],
+"town": "Readfield",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1427"
+},
+{
+"id": "h-henderson-rachel",
+"legiscan_id": 23257,
+"name": "Rachel Henderson",
+"party": "R",
+"chamber": "House",
+"district": "78",
+"towns": [
+"Rumford"
+],
+"town": "Rumford",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1484"
+},
+{
+"id": "h-hepler-allison",
+"legiscan_id": 21214,
+"name": "Allison Hepler",
+"party": "D",
+"chamber": "House",
+"district": "49",
+"towns": [
+"Woolwich"
+],
+"town": "Woolwich",
+"role": null,
+"committees": [
+{
+"code": "MAR",
+"role": "House Chair"
+},
+{
+"code": "ACF",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1353"
+},
+{
+"id": "h-hymes-benjamin",
+"legiscan_id": 23258,
+"name": "Benjamin Hymes",
+"party": "R",
+"chamber": "House",
+"district": "38",
+"towns": [
+"Waldo"
+],
+"town": "Waldo",
+"role": null,
+"committees": [
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1497"
+},
+{
+"id": "h-jackson-caldwell",
+"legiscan_id": 23259,
+"name": "Caldwell Jackson",
+"party": "R",
+"chamber": "House",
+"district": "80",
+"towns": [
+"Oxford"
+],
+"town": "Oxford",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1485"
+},
+{
+"id": "h-javner-kathy",
+"legiscan_id": 21218,
+"name": "Kathy Javner",
+"party": "R",
+"chamber": "House",
+"district": "29",
+"towns": [],
+"town": null,
+"role": null,
+"committees": [],
+"bio": null,
+"url": null
+},
+{
+"id": "h-julia-cassie",
+"legiscan_id": 25945,
+"name": "Cassie Julia",
+"party": "D",
+"chamber": "House",
+"district": "65",
+"towns": [
+"Waterville"
+],
+"town": "Waterville",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3122"
+},
+{
+"id": "h-kessler-christopher",
+"legiscan_id": 21219,
+"name": "Christopher Kessler",
+"party": "D",
+"chamber": "House",
+"district": "121",
+"towns": [
+"South Portland"
+],
+"town": "South Portland",
+"role": null,
+"committees": [
+{
+"code": "EUT",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1384"
+},
+{
+"id": "h-kuhn-amy",
+"legiscan_id": 23261,
+"name": "Amy Kuhn",
+"party": "D",
+"chamber": "House",
+"district": "111",
+"towns": [
+"Falmouth"
+],
+"town": "Falmouth",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1474"
+},
+{
+"id": "h-lajoie-michel",
+"legiscan_id": 8855,
+"name": "Michel Lajoie",
+"party": "D",
+"chamber": "House",
+"district": "96",
+"towns": [
+"Lewiston"
+],
+"town": "Lewiston",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/212"
+},
+{
+"id": "h-lance-michael",
+"legiscan_id": 25946,
+"name": "Michael Lance",
+"party": "R",
+"chamber": "House",
+"district": "79",
+"towns": [
+"Paris"
+],
+"town": "Paris",
+"role": null,
+"committees": [
+{
+"code": "IFW",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3125"
+},
+{
+"id": "h-lanigan-lucas",
+"legiscan_id": 23262,
+"name": "Lucas Lanigan",
+"party": "R",
+"chamber": "House",
+"district": "141",
+"towns": [
+"Sanford"
+],
+"town": "Sanford",
+"role": null,
+"committees": [],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1481"
+},
+{
+"id": "h-lavigne-thomas",
+"legiscan_id": 23263,
+"name": "Thomas Lavigne",
+"party": "R",
+"chamber": "House",
+"district": "148",
+"towns": [
+"Berwick"
+],
+"town": "Berwick",
+"role": null,
+"committees": [
+{
+"code": "TAX",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1472"
+},
+{
+"id": "h-lee-adam",
+"legiscan_id": 23264,
+"name": "Adam Lee",
+"party": "D",
+"chamber": "House",
+"district": "89",
+"towns": [
+"Auburn"
+],
+"town": "Auburn",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1491"
+},
+{
+"id": "h-lemelin-michael",
+"legiscan_id": 22868,
+"name": "Michael Lemelin",
+"party": "R",
+"chamber": "House",
+"district": "53",
+"towns": [
+"Chelsea"
+],
+"town": "Chelsea",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1428"
+},
+{
+"id": "h-libby-laurel",
+"legiscan_id": 22706,
+"name": "Laurel Libby",
+"party": "R",
+"chamber": "House",
+"district": "90",
+"towns": [
+"Auburn"
+],
+"town": "Auburn",
+"role": null,
+"committees": [
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1423"
+},
+{
+"id": "h-lookner-grayson",
+"legiscan_id": 22698,
+"name": "Grayson Lookner",
+"party": "D",
+"chamber": "House",
+"district": "113",
+"towns": [
+"Portland"
+],
+"town": "Portland",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "Member"
+},
+{
+"code": "HED",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1416"
+},
+{
+"id": "h-lyman-sheila",
+"legiscan_id": 22838,
+"name": "Sheila Lyman",
+"party": "R",
+"chamber": "House",
+"district": "76",
+"towns": [
+"Livermore Falls"
+],
+"town": "Livermore Falls",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1424"
+},
+{
+"id": "h-macias-rafael",
+"legiscan_id": 25947,
+"name": "Rafael Macias",
+"party": "D",
+"chamber": "House",
+"district": "51",
+"towns": [
+"Topsham"
+],
+"town": "Topsham",
+"role": null,
+"committees": [
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3116"
+},
+{
+"id": "h-malon-marc",
+"legiscan_id": 23265,
+"name": "Marc Malon",
+"party": "D",
+"chamber": "House",
+"district": "133",
+"towns": [
+"Biddeford"
+],
+"town": "Biddeford",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "Member"
+},
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1478"
+},
+{
+"id": "h-mason-richard",
+"legiscan_id": 21273,
+"name": "Richard Mason",
+"party": "R",
+"chamber": "House",
+"district": "97",
+"towns": [
+"Lisbon"
+],
+"town": "Lisbon",
+"role": null,
+"committees": [
+{
+"code": "IFW",
+"role": "Member"
+},
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/158"
+},
+{
+"id": "h-mastraccio-anne-marie",
+"legiscan_id": 15729,
+"name": "Anne-Marie Mastraccio",
+"party": "D",
+"chamber": "House",
+"district": "142",
+"towns": [
+"Sanford"
+],
+"town": "Sanford",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/111"
+},
+{
+"id": "h-mathieson-kristi",
+"legiscan_id": 22703,
+"name": "Kristi Mathieson",
+"party": "D",
+"chamber": "House",
+"district": "151",
+"towns": [
+"Kittery"
+],
+"town": "Kittery",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1406"
+},
+{
+"id": "h-matlack-ann",
+"legiscan_id": 21223,
+"name": "Ann Matlack",
+"party": "D",
+"chamber": "House",
+"district": "43",
+"towns": [
+"St. George"
+],
+"town": "St. George",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Member"
+},
+{
+"code": "TAX",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1364"
+},
+{
+"id": "h-mccabe-julia",
+"legiscan_id": 25948,
+"name": "Julia McCabe",
+"party": "D",
+"chamber": "House",
+"district": "93",
+"towns": [
+"Lewiston"
+],
+"town": "Lewiston",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3130"
+},
+{
+"id": "h-mcintyre-mathew",
+"legiscan_id": 25949,
+"name": "Mathew McIntyre",
+"party": "R",
+"chamber": "House",
+"district": "18",
+"towns": [
+"Lowell"
+],
+"town": "Lowell",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "Member"
+},
+{
+"code": "EUT",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3111"
+},
+{
+"id": "h-meyer-michele",
+"legiscan_id": 21226,
+"name": "Michele Meyer",
+"party": "D",
+"chamber": "House",
+"district": "150",
+"towns": [
+"Eliot"
+],
+"town": "Eliot",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1337"
+},
+{
+"id": "h-milliken-nina",
+"legiscan_id": 23266,
+"name": "Nina Milliken",
+"party": "D",
+"chamber": "House",
+"district": "16",
+"towns": [
+"Blue Hill"
+],
+"town": "Blue Hill",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1462"
+},
+{
+"id": "h-mingo-arthur",
+"legiscan_id": 25950,
+"name": "Arthur Mingo",
+"party": "R",
+"chamber": "House",
+"district": "9",
+"towns": [
+"Calais"
+],
+"town": "Calais",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3107"
+},
+{
+"id": "h-mitchell-christina",
+"legiscan_id": 25951,
+"name": "Christina Mitchell",
+"party": "D",
+"chamber": "House",
+"district": "110",
+"towns": [
+"Cumberland"
+],
+"town": "Cumberland",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3135"
+},
+{
+"id": "h-montell-karen",
+"legiscan_id": 23267,
+"name": "Karen Montell",
+"party": "D",
+"chamber": "House",
+"district": "54",
+"towns": [
+"Gardiner"
+],
+"town": "Gardiner",
+"role": null,
+"committees": [
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1502"
+},
+{
+"id": "h-moonen-matthew",
+"legiscan_id": 14726,
+"name": "Matthew Moonen",
+"party": "D",
+"chamber": "House",
+"district": "117",
+"towns": [
+"Portland"
+],
+"town": "Portland",
+"role": "Majority Leader",
+"committees": [],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/118"
+},
+{
+"id": "h-morris-joshua",
+"legiscan_id": 21228,
+"name": "Joshua Morris",
+"party": "R",
+"chamber": "House",
+"district": "91",
+"towns": [
+"Turner"
+],
+"town": "Turner",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1359"
+},
+{
+"id": "h-murphy-kelly",
+"legiscan_id": 23268,
+"name": "Kelly Murphy",
+"party": "D",
+"chamber": "House",
+"district": "125",
+"towns": [
+"Scarborough"
+],
+"town": "Scarborough",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1477"
+},
+{
+"id": "h-nutting-robert",
+"legiscan_id": 8874,
+"name": "Robert Nutting",
+"party": "R",
+"chamber": "House",
+"district": "66",
+"towns": [
+"Oakland"
+],
+"town": "Oakland",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/218"
+},
+{
+"id": "h-o-halloran-dani",
+"legiscan_id": 25952,
+"name": "Dani O'Halloran",
+"party": "D",
+"chamber": "House",
+"district": "20",
+"towns": [
+"Brewer"
+],
+"town": "Brewer",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3112"
+},
+{
+"id": "h-olsen-rolf",
+"legiscan_id": 25953,
+"name": "Rolf Olsen",
+"party": "R",
+"chamber": "House",
+"district": "86",
+"towns": [
+"Raymond"
+],
+"town": "Raymond",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3128"
+},
+{
+"id": "h-osher-laurie",
+"legiscan_id": 22707,
+"name": "Laurie Osher",
+"party": "D",
+"chamber": "House",
+"district": "25",
+"towns": [
+"Orono"
+],
+"town": "Orono",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1436"
+},
+{
+"id": "h-parry-wayne",
+"legiscan_id": 10366,
+"name": "Wayne Parry",
+"party": "R",
+"chamber": "House",
+"district": "140",
+"towns": [
+"Arundel"
+],
+"town": "Arundel",
+"role": null,
+"committees": [
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/124"
+},
+{
+"id": "h-paul-reagan",
+"legiscan_id": 23270,
+"name": "Reagan Paul",
+"party": "R",
+"chamber": "House",
+"district": "37",
+"towns": [
+"Winterport"
+],
+"town": "Winterport",
+"role": null,
+"committees": [
+{
+"code": "EUT",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1496"
+},
+{
+"id": "h-perkins-chad",
+"legiscan_id": 23271,
+"name": "Chad Perkins",
+"party": "R",
+"chamber": "House",
+"district": "31",
+"towns": [
+"Dover-Foxcroft"
+],
+"town": "Dover-Foxcroft",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1467"
+},
+{
+"id": "h-pluecker-william",
+"legiscan_id": 21230,
+"name": "William Pluecker",
+"party": "I",
+"chamber": "House",
+"district": "44",
+"towns": [
+"Warren"
+],
+"town": "Warren",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1383"
+},
+{
+"id": "h-poirier-jennifer",
+"legiscan_id": 22700,
+"name": "Jennifer Poirier",
+"party": "R",
+"chamber": "House",
+"district": "70",
+"towns": [
+"Skowhegan"
+],
+"town": "Skowhegan",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1433"
+},
+{
+"id": "h-pomerleau-kimberly",
+"legiscan_id": 23273,
+"name": "Kimberly Pomerleau",
+"party": "R",
+"chamber": "House",
+"district": "85",
+"towns": [
+"Standish"
+],
+"town": "Standish",
+"role": null,
+"committees": [
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1488"
+},
+{
+"id": "h-pugh-dylan",
+"legiscan_id": 25954,
+"name": "Dylan Pugh",
+"party": "D",
+"chamber": "House",
+"district": "114",
+"towns": [
+"Portland"
+],
+"town": "Portland",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3136"
+},
+{
+"id": "h-quint-tracy",
+"legiscan_id": 22750,
+"name": "Tracy Quint",
+"party": "R",
+"chamber": "House",
+"district": "8",
+"towns": [
+"Hodgdon"
+],
+"town": "Hodgdon",
+"role": null,
+"committees": [
+{
+"code": "TAX",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1443"
+},
+{
+"id": "h-rana-ambureen",
+"legiscan_id": 23275,
+"name": "Ambureen Rana",
+"party": "D",
+"chamber": "House",
+"district": "21",
+"towns": [
+"Bangor"
+],
+"town": "Bangor",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1464"
+},
+{
+"id": "h-ray-d",
+"legiscan_id": 25955,
+"name": "D. Ray",
+"party": "D",
+"chamber": "House",
+"district": "40",
+"towns": [
+"Lincolnville"
+],
+"town": "Lincolnville",
+"role": null,
+"committees": [
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3114"
+},
+{
+"id": "h-rielly-morgan",
+"legiscan_id": 22711,
+"name": "Morgan Rielly",
+"party": "D",
+"chamber": "House",
+"district": "127",
+"towns": [
+"Westbrook"
+],
+"town": "Westbrook",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+},
+{
+"code": "MAR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1414"
+},
+{
+"id": "h-roberts-lovell-tiffany",
+"legiscan_id": 21232,
+"name": "Tiffany Roberts-Lovell",
+"party": "D",
+"chamber": "House",
+"district": "149",
+"towns": [
+"South Berwick"
+],
+"town": "South Berwick",
+"role": null,
+"committees": [
+{
+"code": "IFW",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1385"
+},
+{
+"id": "h-roeder-amy",
+"legiscan_id": 22694,
+"name": "Amy Roeder",
+"party": "D",
+"chamber": "House",
+"district": "23",
+"towns": [
+"Bangor"
+],
+"town": "Bangor",
+"role": null,
+"committees": [
+{
+"code": "LAB",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1437"
+},
+{
+"id": "h-rollins-david",
+"legiscan_id": 25956,
+"name": "David Rollins",
+"party": "D",
+"chamber": "House",
+"district": "59",
+"towns": [
+"Augusta"
+],
+"town": "Augusta",
+"role": null,
+"committees": [
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3118"
+},
+{
+"id": "h-rudnicki-shelley",
+"legiscan_id": 21233,
+"name": "Shelley Rudnicki",
+"party": "R",
+"chamber": "House",
+"district": "67",
+"towns": [
+"Fairfield"
+],
+"town": "Fairfield",
+"role": null,
+"committees": [
+{
+"code": "TAX",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1371"
+},
+{
+"id": "h-runte-walter",
+"legiscan_id": 23276,
+"name": "Walter Runte",
+"party": "D",
+"chamber": "House",
+"district": "146",
+"towns": [
+"York"
+],
+"town": "York",
+"role": null,
+"committees": [
+{
+"code": "EUT",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1470"
+},
+{
+"id": "h-sachs-melanie",
+"legiscan_id": 22709,
+"name": "Melanie Sachs",
+"party": "D",
+"chamber": "House",
+"district": "102",
+"towns": [
+"Freeport"
+],
+"town": "Freeport",
+"role": null,
+"committees": [
+{
+"code": "EUT",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1420"
+},
+{
+"id": "h-salisbury-suzanne",
+"legiscan_id": 22717,
+"name": "Suzanne Salisbury",
+"party": "D",
+"chamber": "House",
+"district": "128",
+"towns": [
+"Westbrook"
+],
+"town": "Westbrook",
+"role": null,
+"committees": [
+{
+"code": "SLG",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1415"
+},
+{
+"id": "h-sargent-holly",
+"legiscan_id": 23278,
+"name": "Holly Sargent",
+"party": "D",
+"chamber": "House",
+"district": "147",
+"towns": [
+"York"
+],
+"town": "York",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1471"
+},
+{
+"id": "h-sato-eleanor",
+"legiscan_id": 25957,
+"name": "Eleanor Sato",
+"party": "D",
+"chamber": "House",
+"district": "109",
+"towns": [
+"Gorham"
+],
+"town": "Gorham",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3134"
+},
+{
+"id": "h-sayre-daniel",
+"legiscan_id": 23279,
+"name": "Daniel Sayre",
+"party": "D",
+"chamber": "House",
+"district": "135",
+"towns": [
+"Kennebunk"
+],
+"town": "Kennebunk",
+"role": null,
+"committees": [
+{
+"code": "TAX",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1479"
+},
+{
+"id": "h-schmersal-burgess-tammy",
+"legiscan_id": 23280,
+"name": "Tammy Schmersal-Burgess",
+"party": "R",
+"chamber": "House",
+"district": "77",
+"towns": [
+"Mexico"
+],
+"town": "Mexico",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1483"
+},
+{
+"id": "h-shagoury-daniel",
+"legiscan_id": 23281,
+"name": "Daniel Shagoury",
+"party": "D",
+"chamber": "House",
+"district": "55",
+"towns": [
+"Hallowell"
+],
+"town": "Hallowell",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1503"
+},
+{
+"id": "h-simmons-abden",
+"legiscan_id": 18204,
+"name": "Abden Simmons",
+"party": "R",
+"chamber": "House",
+"district": "45",
+"towns": [
+"Waldoboro"
+],
+"town": "Waldoboro",
+"role": null,
+"committees": [
+{
+"code": "MAR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/144"
+},
+{
+"id": "h-sinclair-david",
+"legiscan_id": 25000,
+"name": "David Sinclair",
+"party": "D",
+"chamber": "House",
+"district": "50",
+"towns": [
+"Bath"
+],
+"town": "Bath",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1508"
+},
+{
+"id": "h-skold-charles",
+"legiscan_id": 23283,
+"name": "Charles Skold",
+"party": "D",
+"chamber": "House",
+"district": "119",
+"towns": [
+"Portland"
+],
+"town": "Portland",
+"role": null,
+"committees": [
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1475"
+},
+{
+"id": "h-smith-katrina",
+"legiscan_id": 23284,
+"name": "Katrina Smith",
+"party": "R",
+"chamber": "House",
+"district": "62",
+"towns": [
+"Palermo"
+],
+"town": "Palermo",
+"role": null,
+"committees": [],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1505"
+},
+{
+"id": "h-soboleski-michael",
+"legiscan_id": 23285,
+"name": "Michael Soboleski",
+"party": "R",
+"chamber": "House",
+"district": "73",
+"towns": [
+"Phillips"
+],
+"town": "Phillips",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+},
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1482"
+},
+{
+"id": "h-stover-holly",
+"legiscan_id": 21235,
+"name": "Holly Stover",
+"party": "D",
+"chamber": "House",
+"district": "48",
+"towns": [
+"Boothbay"
+],
+"town": "Boothbay",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1363"
+},
+{
+"id": "h-strout-tiffany",
+"legiscan_id": 23286,
+"name": "Tiffany Strout",
+"party": "R",
+"chamber": "House",
+"district": "11",
+"towns": [
+"Harrington"
+],
+"town": "Harrington",
+"role": null,
+"committees": [
+{
+"code": "MAR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1459"
+},
+{
+"id": "h-supica-laura",
+"legiscan_id": 22705,
+"name": "Laura Supica",
+"party": "D",
+"chamber": "House",
+"district": "22",
+"towns": [
+"Bangor"
+],
+"town": "Bangor",
+"role": null,
+"committees": [
+{
+"code": "VLA",
+"role": "House Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1438"
+},
+{
+"id": "h-swallow-gregory",
+"legiscan_id": 21236,
+"name": "Gregory Swallow",
+"party": "R",
+"chamber": "House",
+"district": "7",
+"towns": [
+"Houlton"
+],
+"town": "Houlton",
+"role": null,
+"committees": [
+{
+"code": "TAX",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1381"
+},
+{
+"id": "h-terry-parnell",
+"legiscan_id": 25958,
+"name": "Parnell Terry",
+"party": "D",
+"chamber": "House",
+"district": "108",
+"towns": [
+"Gorham"
+],
+"town": "Gorham",
+"role": null,
+"committees": [
+{
+"code": "IFW",
+"role": "Member"
+},
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3133"
+},
+{
+"id": "h-nancy-theriault",
+"legiscan_id": null,
+"name": "Nancy Theriault",
+"party": "R",
+"chamber": "House",
+"district": "29",
+"towns": [
+"Millinocket"
+],
+"town": "Millinocket",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3142"
+},
+{
+"id": "h-thorne-james",
+"legiscan_id": 22699,
+"name": "James Thorne",
+"party": "R",
+"chamber": "House",
+"district": "35",
+"towns": [
+"Carmel"
+],
+"town": "Carmel",
+"role": null,
+"committees": [
+{
+"code": "MAR",
+"role": "Member"
+},
+{
+"code": "IFW",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1431"
+},
+{
+"id": "h-tuell-william",
+"legiscan_id": 16786,
+"name": "William Tuell",
+"party": "R",
+"chamber": "House",
+"district": "10",
+"towns": [
+"East Machias"
+],
+"town": "East Machias",
+"role": null,
+"committees": [
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/49"
+},
+{
+"id": "h-underwood-joseph",
+"legiscan_id": 22348,
+"name": "Joseph Underwood",
+"party": "R",
+"chamber": "House",
+"district": "5",
+"towns": [
+"Presque Isle"
+],
+"town": "Presque Isle",
+"role": null,
+"committees": [
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1444"
+},
+{
+"id": "h-wadsworth-nathan",
+"legiscan_id": 17340,
+"name": "Nathan Wadsworth",
+"party": "R",
+"chamber": "House",
+"district": "82",
+"towns": [
+"Hiram"
+],
+"town": "Hiram",
+"role": null,
+"committees": [
+{
+"code": "EUT",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/46"
+},
+{
+"id": "h-walker-mark",
+"legiscan_id": 23288,
+"name": "Mark Walker",
+"party": "R",
+"chamber": "House",
+"district": "84",
+"towns": [
+"Naples"
+],
+"town": "Naples",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1487"
+},
+{
+"id": "h-warren-sophia",
+"legiscan_id": 22294,
+"name": "Sophia Warren",
+"party": "D",
+"chamber": "House",
+"district": "124",
+"towns": [
+"Scarborough"
+],
+"town": "Scarborough",
+"role": null,
+"committees": [
+{
+"code": "EUT",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1413"
+},
+{
+"id": "h-webb-kilton",
+"legiscan_id": 25959,
+"name": "Kilton Webb",
+"party": "D",
+"chamber": "House",
+"district": "98",
+"towns": [
+"Durham"
+],
+"town": "Durham",
+"role": null,
+"committees": [
+{
+"code": "EUT",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3131"
+},
+{
+"id": "h-white-james",
+"legiscan_id": 23289,
+"name": "James White",
+"party": "R",
+"chamber": "House",
+"district": "30",
+"towns": [
+"Guilford"
+],
+"town": "Guilford",
+"role": null,
+"committees": [
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1466"
+},
+{
+"id": "h-white-russell",
+"legiscan_id": 25960,
+"name": "Russell White",
+"party": "R",
+"chamber": "House",
+"district": "13",
+"towns": [
+"Ellsworth"
+],
+"town": "Ellsworth",
+"role": null,
+"committees": [
+{
+"code": "TAX",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3108"
+},
+{
+"id": "h-wood-stephen",
+"legiscan_id": 23290,
+"name": "Stephen Wood",
+"party": "R",
+"chamber": "House",
+"district": "92",
+"towns": [
+"Greene"
+],
+"town": "Greene",
+"role": null,
+"committees": [
+{
+"code": "IFW",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/40"
+},
+{
+"id": "h-wood-peter",
+"legiscan_id": 25961,
+"name": "Peter Wood",
+"party": "R",
+"chamber": "House",
+"district": "81",
+"towns": [
+"Norway"
+],
+"town": "Norway",
+"role": null,
+"committees": [
+{
+"code": "MAR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3126"
+},
+{
+"id": "h-woodsome-david",
+"legiscan_id": 16787,
+"name": "David Woodsome",
+"party": "R",
+"chamber": "House",
+"district": "139",
+"towns": [
+"Waterboro"
+],
+"town": "Waterboro",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+},
+{
+"code": "IFW",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1480"
+},
+{
+"id": "h-yusuf-yusuf",
+"legiscan_id": 25962,
+"name": "Yusuf Yusuf",
+"party": "D",
+"chamber": "House",
+"district": "118",
+"towns": [
+"Portland"
+],
+"town": "Portland",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/3137"
+},
+{
+"id": "h-zager-samuel",
+"legiscan_id": 22715,
+"name": "Samuel Zager",
+"party": "D",
+"chamber": "House",
+"district": "116",
+"towns": [
+"Portland"
+],
+"town": "Portland",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/house/MemberProfiles/Details/1418"
+},
+{
+"id": "s-bailey-donna",
+"legiscan_id": 18174,
+"name": "Donna Bailey",
+"party": "D",
+"chamber": "Senate",
+"district": "31",
+"towns": [
+"Buxton",
+"Old Orchard Beach",
+"Saco"
+],
+"town": "York",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Senate Chair"
+},
+{
+"code": "HED",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District31"
+},
+{
+"id": "s-baldacci-joseph",
+"legiscan_id": 22237,
+"name": "Joseph Baldacci",
+"party": "D",
+"chamber": "Senate",
+"district": "9",
+"towns": [
+"Bangor and Hermon"
+],
+"town": "Penobscot",
+"role": null,
+"committees": [
+{
+"code": "IFW",
+"role": "Senate Chair"
+},
+{
+"code": "SLG",
+"role": "Senate Chair"
+},
+{
+"code": "HCIFS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District9"
+},
+{
+"id": "s-beebe-center-anne",
+"legiscan_id": 17667,
+"name": "Pinny Beebe-Center",
+"party": "D",
+"chamber": "Senate",
+"district": "12",
+"towns": [
+"Appleton",
+"Camden",
+"Criehaven UT",
+"Cushing",
+"Friendship",
+"Hope",
+"Matinicus Isle Plantation",
+"Muscle Ridge Islands UT",
+"North Haven",
+"Owls Head",
+"Rockland",
+"Rockport",
+"Saint George",
+"South Thomaston",
+"Thomaston",
+"Union",
+"Vinalhaven",
+"Warren"
+],
+"town": "Knox",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "Senate Chair"
+},
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District12"
+},
+{
+"id": "s-bennett-richard",
+"legiscan_id": 22238,
+"name": "Richard Bennett",
+"party": "R",
+"chamber": "Senate",
+"district": "18",
+"towns": [
+"Brownfield",
+"Denmark",
+"Fryeburg",
+"Hebron",
+"Norway",
+"Otisfield",
+"Oxford",
+"Paris",
+"Sweden",
+"Waterford",
+"Mechanic Falls",
+"Minot",
+"Bridgton",
+"Harrison"
+],
+"town": "Oxford",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District18"
+},
+{
+"id": "s-bernard-susan",
+"legiscan_id": 22716,
+"name": "Susan Bernard",
+"party": "R",
+"chamber": "Senate",
+"district": "1",
+"towns": [
+"Allagash",
+"Ashland",
+"Caribou",
+"Castle Hill",
+"Caswell",
+"Chapman",
+"Connor Township",
+"Cyr Plantation",
+"Eagle Lake",
+"Fort Fairfield",
+"Fort Kent",
+"Frenchville",
+"Garfield Plantation",
+"Grand Isle",
+"Hamlin",
+"Limestone",
+"Madawaska",
+"Mapleton",
+"Masardis",
+"Nashville Plantation",
+"New Canada",
+"New Sweden",
+"Northwest Aroostook UT",
+"Perham",
+"Portage Lake",
+"Saint Agatha",
+"Saint Francis",
+"Saint John Plantation",
+"Square Lake UT",
+"Stockholm",
+"Van Buren",
+"Wade",
+"Wallagrass",
+"Washburn",
+"Westmanland",
+"Winterville Plantation",
+"Woodland"
+],
+"town": "Aroostook",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/DIstrict1"
+},
+{
+"id": "s-bickford-bruce",
+"legiscan_id": 8786,
+"name": "Bruce Bickford",
+"party": "R",
+"chamber": "Senate",
+"district": "20",
+"towns": [
+"Auburn",
+"Durham",
+"Poland",
+"New Gloucester"
+],
+"town": "Androscoggin",
+"role": null,
+"committees": [
+{
+"code": "TAX",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District20"
+},
+{
+"id": "s-black-russell",
+"legiscan_id": 10321,
+"name": "Russell Black",
+"party": "R",
+"chamber": "Senate",
+"district": "5",
+"towns": [
+"Carrabassett Valley",
+"Chesterville",
+"East Central Franklin UT",
+"Farmington",
+"Industry",
+"Kingfield",
+"New Sharon",
+"New Vineyard",
+"Strong",
+"Wilton",
+"Wyman Township",
+"Rome",
+"Vienna",
+"Anson",
+"Athens",
+"Bingham",
+"Brighton Plantation",
+"Cambridge",
+"Caratunk",
+"Central Somerset UT",
+"Cornville",
+"Dennistown Plantation",
+"Embden",
+"Harmony",
+"Hartland",
+"Highland Plantation",
+"Jackman",
+"Mercer",
+"Moose River",
+"Moscow",
+"New Portland",
+"Northeast Somerset UT",
+"Northwest Somerset UT",
+"Pleasant Ridge Plantation",
+"Ripley",
+"Saint Albans",
+"Seboomook Lake UT",
+"Smithfield",
+"Solon",
+"Starks",
+"The Forks Plantation",
+"West Forks Plantation"
+],
+"town": "Franklin",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District5"
+},
+{
+"id": "s-bradstreet-richard",
+"legiscan_id": 18176,
+"name": "Richard Bradstreet",
+"party": "R",
+"chamber": "Senate",
+"district": "15",
+"towns": [
+"Augusta",
+"Belgrade",
+"China",
+"Mount Vernon",
+"Sidney",
+"Vassalboro"
+],
+"town": "Kennebec",
+"role": null,
+"committees": [
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District15"
+},
+{
+"id": "s-brenner-stacy",
+"legiscan_id": 22239,
+"name": "Stacy Brenner",
+"party": "D",
+"chamber": "Senate",
+"district": "30",
+"towns": [
+"Gorham",
+"Scarborough"
+],
+"town": "Cumberland",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District30"
+},
+{
+"id": "s-carney-anne",
+"legiscan_id": 21194,
+"name": "Anne Carney",
+"party": "D",
+"chamber": "Senate",
+"district": "29",
+"towns": [
+"Cape Elizabeth",
+"South Portland",
+"Scarborough"
+],
+"town": "Cumberland",
+"role": null,
+"committees": [
+{
+"code": "JUD",
+"role": "Senate Chair"
+},
+{
+"code": "IFW",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District29"
+},
+{
+"id": "s-curry-glenn",
+"legiscan_id": 22240,
+"name": "Glenn Curry",
+"party": "D",
+"chamber": "Senate",
+"district": "11",
+"towns": [],
+"town": "Waldo",
+"role": null,
+"committees": [
+{
+"code": "HED",
+"role": "Senate Chair"
+},
+{
+"code": "CJPS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District11"
+},
+{
+"id": "s-cyrway-scott",
+"legiscan_id": 16689,
+"name": "Scott Cyrway",
+"party": "R",
+"chamber": "Senate",
+"district": "16",
+"towns": [
+"Albion",
+"Oakland",
+"Waterville",
+"Winslow",
+"Fairfield and Hinckley"
+],
+"town": "Kennebec",
+"role": null,
+"committees": [
+{
+"code": "CJPS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District16"
+},
+{
+"id": "s-larsen-daughtry-matthea",
+"legiscan_id": 14714,
+"name": "Matthea Larsen Daughtry",
+"party": "D",
+"chamber": "Senate",
+"district": "23",
+"towns": [
+"Brunswick",
+"Chebeague Island",
+"Freeport",
+"Harpswell",
+"Pownal",
+"Yarmouth"
+],
+"town": "Cumberland",
+"role": "President of the Senate",
+"committees": [],
+"bio": null,
+"url": "https://legislature.maine.gov/District23"
+},
+{
+"id": "s-duson-jill",
+"legiscan_id": 23237,
+"name": "Jill Duson",
+"party": "D",
+"chamber": "Senate",
+"district": "27",
+"towns": [
+"Portland",
+"Westbrook"
+],
+"town": "Cumberland",
+"role": "Assistant Majority Leader",
+"committees": [
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District27"
+},
+{
+"id": "s-farrin-bradlee",
+"legiscan_id": 16780,
+"name": "Bradlee Farrin",
+"party": "R",
+"chamber": "Senate",
+"district": "3",
+"towns": [
+"Canaan",
+"Detroit",
+"Madison",
+"Norridgewock",
+"Palmyra",
+"Pittsfield",
+"Skowhegan",
+"Benton",
+"Clinton",
+"Unity Township",
+"Dixmont",
+"Etna",
+"Newport",
+"Plymouth",
+"Stetson"
+],
+"town": "Somerset",
+"role": null,
+"committees": [
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District3"
+},
+{
+"id": "s-grohoski-nicole",
+"legiscan_id": 21211,
+"name": "Nicole Grohoski",
+"party": "D",
+"chamber": "Senate",
+"district": "7",
+"towns": [
+"Bar Harbor",
+"Blue Hill",
+"Brooklin",
+"Brooksville",
+"Castine",
+"Cranberry Isles",
+"Deer Isle",
+"Ellsworth",
+"Frenchboro",
+"Lamoine",
+"Marshall Island UT",
+"Mount Desert",
+"Orland",
+"Penobscot",
+"Sedgwick",
+"Southwest Harbor",
+"Stonington",
+"Surry",
+"Swan's Island",
+"Tremont",
+"Trenton",
+"Verona Island",
+"Isle au Haut"
+],
+"town": "Hancock",
+"role": null,
+"committees": [
+{
+"code": "TAX",
+"role": "Senate Chair"
+},
+{
+"code": "EUT",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District7"
+},
+{
+"id": "s-guerin-stacey",
+"legiscan_id": 10341,
+"name": "Stacey Guerin",
+"party": "R",
+"chamber": "Senate",
+"district": "4",
+"towns": [
+"Bradford",
+"Charleston",
+"Corinna",
+"Corinth",
+"Dexter",
+"Exeter",
+"Garland",
+"Glenburn",
+"Hudson",
+"Kenduskeag",
+"Levant"
+],
+"town": "Penobscot",
+"role": null,
+"committees": [
+{
+"code": "IFW",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District4"
+},
+{
+"id": "s-haggan-david",
+"legiscan_id": 18188,
+"name": "David Haggan",
+"party": "R",
+"chamber": "Senate",
+"district": "10",
+"towns": [
+"Bucksport",
+"Dedham",
+"Otis",
+"Bradley",
+"Brewer",
+"Carmel",
+"Clifton",
+"Eddington",
+"Hampden",
+"Holden",
+"Newburgh",
+"Orrington"
+],
+"town": "Penobscot",
+"role": null,
+"committees": [
+{
+"code": "HCIFS",
+"role": "Member"
+},
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District10"
+},
+{
+"id": "s-harrington-matthew",
+"legiscan_id": 17788,
+"name": "Matthew Harrington",
+"party": "R",
+"chamber": "Senate",
+"district": "33",
+"towns": [
+"Alfred",
+"Lebanon",
+"Sanford",
+"Waterboro"
+],
+"town": "York",
+"role": "Assistant Senate Republican Minority Leader",
+"committees": [
+{
+"code": "EUT",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District33"
+},
+{
+"id": "s-hickman-craig",
+"legiscan_id": 14720,
+"name": "Craig Hickman",
+"party": "D",
+"chamber": "Senate",
+"district": "14",
+"towns": [
+"Chelsea",
+"Farmingdale",
+"Gardiner",
+"Hallowell",
+"Manchester",
+"Monmouth",
+"Pittston",
+"Randolph",
+"Readfield",
+"Wayne",
+"West Gardiner",
+"Winthrop"
+],
+"town": "Kennebec",
+"role": null,
+"committees": [
+{
+"code": "VLA",
+"role": "Senate Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District14"
+},
+{
+"id": "s-ingwersen-henry",
+"legiscan_id": 21217,
+"name": "Henry Ingwersen",
+"party": "D",
+"chamber": "Senate",
+"district": "32",
+"towns": [
+"Arundel",
+"Biddeford",
+"Dayton",
+"Hollis",
+"Lyman"
+],
+"town": "York",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Senate Chair"
+},
+{
+"code": "ACF",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District32"
+},
+{
+"id": "s-lawrence-mark",
+"legiscan_id": 18192,
+"name": "Mark Lawrence",
+"party": "D",
+"chamber": "Senate",
+"district": "35",
+"towns": [
+"Eliot",
+"Kittery",
+"Ogunquit",
+"South Berwick",
+"York"
+],
+"town": "York",
+"role": null,
+"committees": [
+{
+"code": "EUT",
+"role": "Senate Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District35"
+},
+{
+"id": "s-libby-james",
+"legiscan_id": 23234,
+"name": "James Libby",
+"party": "R",
+"chamber": "Senate",
+"district": "22",
+"towns": [
+"Baldwin",
+"Naples",
+"Sebago",
+"Standish",
+"Hiram",
+"Porter",
+"Acton",
+"Cornish",
+"Limerick",
+"Limington",
+"Newfield",
+"Parsonsfield",
+"Shapleigh"
+],
+"town": "Cumberland",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District22"
+},
+{
+"id": "s-martin-joseph",
+"legiscan_id": 25963,
+"name": "Joseph Martin",
+"party": "R",
+"chamber": "Senate",
+"district": "19",
+"towns": [
+"Andover",
+"Bethel",
+"Buckfield",
+"Byron",
+"Canton",
+"Dixfield",
+"Gilead",
+"Greenwood",
+"Hanover",
+"Hartford",
+"Lincoln Plantation",
+"Lovell",
+"Magalloway Plantation",
+"Mexico",
+"Milton Township",
+"Newry",
+"North Oxford UT",
+"Peru",
+"Roxbury",
+"Rumford",
+"South Oxford UT",
+"Stoneham",
+"Stow",
+"Sumner",
+"Upton",
+"West Paris",
+"Woodstock",
+"Avon",
+"Carthage",
+"Coplin Plantation",
+"Dallas Plantation",
+"Eustis",
+"Jay",
+"North Franklin UT",
+"Phillips",
+"Rangeley",
+"Rangeley Plantation",
+"Sandy River Plantation",
+"South Franklin UT",
+"Temple",
+"Weld",
+"West Central Franklin UT"
+],
+"town": "Oxford",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Member"
+},
+{
+"code": "SLG",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District19"
+},
+{
+"id": "s-moore-marianne",
+"legiscan_id": 21167,
+"name": "Marianne Moore",
+"party": "R",
+"chamber": "Senate",
+"district": "6",
+"towns": [
+"Amherst",
+"Aurora",
+"Central Hancock UT",
+"East Hancock UT",
+"Eastbrook",
+"Franklin",
+"Gouldsboro",
+"Great Pond",
+"Hancock",
+"Mariaville",
+"Northwest Hancock UT",
+"Osborn",
+"Sorrento",
+"Sullivan",
+"Waltham",
+"Winter Harbor"
+],
+"town": "Washington",
+"role": null,
+"committees": [
+{
+"code": "HHS",
+"role": "Member"
+},
+{
+"code": "MAR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District6"
+},
+{
+"id": "s-nangle-timothy",
+"legiscan_id": 23235,
+"name": "Timothy Nangle",
+"party": "D",
+"chamber": "Senate",
+"district": "26",
+"towns": [
+"Casco",
+"Frye Island",
+"Raymond",
+"Windham",
+"Westbrook"
+],
+"town": "Cumberland",
+"role": null,
+"committees": [
+{
+"code": "TRA",
+"role": "Senate Chair"
+},
+{
+"code": "HHS",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District26"
+},
+{
+"id": "s-pierce-teresa",
+"legiscan_id": 17216,
+"name": "Teresa Pierce",
+"party": "D",
+"chamber": "Senate",
+"district": "25",
+"towns": [
+"Cumberland",
+"Falmouth",
+"Gray",
+"North Yarmouth",
+"Long Island",
+"Yarmouth"
+],
+"town": "Cumberland",
+"role": "Senate Majority Leader",
+"committees": [
+{
+"code": "EDU",
+"role": "Member"
+},
+{
+"code": "TRA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District25"
+},
+{
+"id": "s-rafferty-joseph",
+"legiscan_id": 22241,
+"name": "Joseph Rafferty",
+"party": "D",
+"chamber": "Senate",
+"district": "34",
+"towns": [
+"Berwick",
+"Cape Porpoise",
+"Kennebunk",
+"Kennebunkport",
+"North Berwick",
+"Wells"
+],
+"town": "York",
+"role": null,
+"committees": [
+{
+"code": "EDU",
+"role": "Senate Chair"
+},
+{
+"code": "LAB",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District34"
+},
+{
+"id": "s-reny-cameron",
+"legiscan_id": 23236,
+"name": "Cameron Reny",
+"party": "D",
+"chamber": "Senate",
+"district": "13",
+"towns": [
+"Alna",
+"Boothbay",
+"Boothbay Harbor",
+"Bremen",
+"Bristol",
+"Damariscotta",
+"Edgecomb",
+"Hibberts Gore",
+"Jefferson",
+"Louds Island UT",
+"Monhegan Plantation",
+"Newcastle",
+"Nobleboro",
+"Somerville",
+"South Bristol",
+"Southport",
+"Waldoboro",
+"Westport Island",
+"Whitefield",
+"Wiscasset",
+"Windsor",
+"Washington"
+],
+"town": "Lincoln",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Member"
+},
+{
+"code": "MAR",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District13"
+},
+{
+"id": "s-talbot-ross-rachel",
+"legiscan_id": 18210,
+"name": "Rachel Talbot Ross",
+"party": "D",
+"chamber": "Senate",
+"district": "28",
+"towns": [
+"Portland",
+"Long Island"
+],
+"town": "Cumberland",
+"role": null,
+"committees": [
+{
+"code": "ACF",
+"role": "Senate Chair"
+},
+{
+"code": "JUD",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District28"
+},
+{
+"id": "s-rotundo-margaret",
+"legiscan_id": 8894,
+"name": "Margaret Rotundo",
+"party": "D",
+"chamber": "Senate",
+"district": "21",
+"towns": [
+"Lewiston"
+],
+"town": "Androscoggin",
+"role": null,
+"committees": [
+{
+"code": "AFA",
+"role": "Senate Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District21"
+},
+{
+"id": "s-stewart-harold",
+"legiscan_id": 18206,
+"name": "Harold Stewart",
+"party": "R",
+"chamber": "Senate",
+"district": "2",
+"towns": [
+"Amity",
+"Bancroft Township",
+"Blaine",
+"Bridgewater",
+"Central Aroostook UT",
+"Crystal",
+"Dyer Brook",
+"Easton",
+"Glenwood Plantation",
+"Hammond",
+"Haynesville",
+"Hersey",
+"Hodgdon",
+"Houlton",
+"Island Falls",
+"Linneus",
+"Littleton",
+"Ludlow",
+"Macwahoc Plantation",
+"Mars Hill",
+"Merrill",
+"Monticello",
+"Moro Plantation",
+"New Limerick",
+"Oakfield",
+"Orient",
+"Oxbow North Township",
+"Presque Isle",
+"Reed Plantation",
+"Sherman",
+"Smyrna",
+"South Aroostook UT",
+"Westfield",
+"Weston",
+"Chester",
+"Drew Plantation",
+"East Millinocket",
+"Kingman Township",
+"Mattawamkeag",
+"Maxfield",
+"Medway",
+"Millinocket",
+"Mount Chase",
+"North Penobscot UT",
+"Patten",
+"Seboeis Plantation",
+"Stacyville",
+"Woodville"
+],
+"town": "Aroostook",
+"role": "Senate Republican Minority Leader",
+"committees": [],
+"bio": null,
+"url": "https://legislature.maine.gov/District2"
+},
+{
+"id": "s-tepler-denise",
+"legiscan_id": 17107,
+"name": "Denise Tepler",
+"party": "D",
+"chamber": "Senate",
+"district": "24",
+"towns": [
+"Dresden"
+],
+"town": "Sagadahoc",
+"role": null,
+"committees": [
+{
+"code": "ENR",
+"role": "Senate Chair"
+},
+{
+"code": "MAR",
+"role": "Senate Chair"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District24"
+},
+{
+"id": "s-timberlake-jeffrey",
+"legiscan_id": 10372,
+"name": "Jeffrey Timberlake",
+"party": "R",
+"chamber": "Senate",
+"district": "17",
+"towns": [
+"Greene",
+"Leeds",
+"Lisbon",
+"Livermore",
+"Livermore Falls",
+"Sabattus",
+"Turner",
+"Wales",
+"Fayette",
+"Litchfield"
+],
+"town": "Androscoggin",
+"role": null,
+"committees": [
+{
+"code": "VLA",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District17"
+},
+{
+"id": "s-tipping-michael",
+"legiscan_id": 23238,
+"name": "Michael Tipping",
+"party": "D",
+"chamber": "Senate",
+"district": "8",
+"towns": [
+"Alton",
+"Argyle Township",
+"Burlington",
+"Carroll Plantation",
+"East Central Penobscot UT",
+"Edinburg",
+"Enfield",
+"Greenbush",
+"Howland",
+"Lagrange",
+"Lakeville",
+"Lee",
+"Lincoln",
+"Lowell",
+"Milford",
+"Old Town",
+"Orono",
+"Passadumkeag",
+"Penobscot Indian Island",
+"Prentiss Township",
+"Springfield",
+"Twombly Ridge Township",
+"Veazie",
+"Webster Plantation",
+"Whitney Township",
+"Winn"
+],
+"town": "Penobscot",
+"role": null,
+"committees": [
+{
+"code": "LAB",
+"role": "Senate Chair"
+},
+{
+"code": "TAX",
+"role": "Member"
+}
+],
+"bio": null,
+"url": "https://legislature.maine.gov/District8"
+}
 ]
