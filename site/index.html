@@ -1265,15 +1265,23 @@ async function viewLegislator(id, params=new URLSearchParams()){
       <div class="src">Positions are inferred from the text of each letter.</div></div>`;
   }
   else if(tab==="money" && fin){
-    body = `<div class="panel"><h2>Campaign finance · ${esc(fin.cycle)} cycle</h2>
+    const src = fin.by_source||[];
+    const tot = src.reduce((s,x)=>s+x.amount,0);
+    body = `<div class="panel"><h2>${esc(fin.label||`${fin.cycle} campaign`)}</h2>
       <div class="kv">
-        ${fin.funding_type?`<b>Funding</b><span>${esc(fin.funding_type)}</span>`:""}
-        ${fin.raised!=null?`<b>Raised</b><span>${money(fin.raised)}${fin.n_contributions!=null?` from ${fmtN(fin.n_contributions)} contributions`:""}</span>`:""}
-        ${fin.spent!=null?`<b>Spent</b><span>${money(fin.spent)}</span>`:""}
-        ${fin.in_state_share!=null?`<b>From Maine</b><span>${Math.round(fin.in_state_share*100)}% of itemized contributions</span>`:""}
+        <b>Ran as</b><span>${esc(fin.candidate_name||l.name)}, ${esc(fin.office||"")} District ${esc(fin.district||"")}${fin.party?` (${esc(fin.party)})`:""}</span>
+        <b>Raised</b><span>${money(fin.total_received)}</span>
+        <b>Spent</b><span>${money(fin.total_disbursed)}</span>
       </div>
-      ${(fin.top_contributor_types||[]).length?`<div style="margin-top:10px;font-size:13.5px;color:var(--ink-2)"><b style="color:var(--ink)">By contributor type:</b> ${fin.top_contributor_types.map(t=>`${esc(t.type)} ${money(t.amount)}`).join(" · ")}</div>`:""}
-      <div class="src">${esc(fin.note||"")} <a href="${esc(fin.source||"#")}" target="_blank" rel="noopener">Source ↗</a></div></div>`;
+      ${fin.clean_elections
+        ? `<p style="margin-top:12px;font-size:14.5px">Ran with public funding under the Maine Clean Election Act${fin.public_funds?`: ${money(fin.public_funds)} from the Maine Clean Election Fund`:""}${fin.contributions?`, plus ${money(fin.contributions)} in small qualifying and seed contributions`:""}.</p>`
+        : `${src.length?`<h3 class="subh">Itemized contributions by source</h3>${hbars(src.map(x=>[esc(x.source), Math.round(x.amount)]))}
+             <div class="src" style="margin-top:4px">${src.map(x=>`${esc(x.source)}: ${money(x.amount)} (${tot?Math.round(x.amount/tot*100):0}%)`).join(" · ")}</div>`:""}
+           ${(fin.top_contributors||[]).length?`<h3 class="subh">Top contributors by total</h3>
+             <table class="plain"><tr><th>Contributor</th><th>Type</th><th style="text-align:right">Total</th></tr>
+             ${fin.top_contributors.map(t=>`<tr><td style="white-space:normal">${esc(t.name)}</td><td>${esc(t.type)}</td><td style="text-align:right">${money(t.amount)}${t.count>1?` <span style="color:var(--ink-3)">(${t.count})</span>`:""}</td></tr>`).join("")}
+             </table>`:""}`}
+      <div class="src">${esc(fin.note||"")} <a href="${esc(fin.source_url||fin.source||"#")}" target="_blank" rel="noopener">Candidate page on mainecampaignfinancedisclosure.com ↗</a></div></div>`;
   }
   else {
     const top5 = sortBills(sponsored, "").slice(0,5);

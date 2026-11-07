@@ -65,73 +65,166 @@ def last_name(name: str) -> str:
         return name.split(",")[0].strip().lower()
     return name.split()[-1].lower() if name else ""
 
+def _name_key(s: str) -> str:
+    """'Andrew Stephen Dent' / 'Dent, Andrew S.' -> 'andrew stephen dent' (lowercase, no punctuation, first-last order)."""
+    s = (s or "").strip()
+    if "," in s:
+        last, first = s.split(",", 1); s = f"{first} {last}"
+    s = re.sub(r"\b(jr|sr|ii|iii|iv)\b\.?", "", s.lower())
+    s = re.sub(r"[^a-z ]+", "", re.sub(r"[.\-']", " ", s))
+    return " ".join(s.split())
+
+def _first_last(s: str) -> str:
+    p = _name_key(s).split()
+    return f"{p[0]} {p[-1]}" if len(p) >= 2 else " ".join(p)
+
+CHAMBER = {"representative": "House", "senator": "Senate"}
+ELECTION_DAY = {"2024": "2024-11-05", "2026": "2026-11-03"}
+COMMITTEE_TYPES = {"political_action_committee", "political_party_committee", "candidate_committee", "ballot_question_committee"}
+SOURCE_LABEL = {"individual": "Individuals", "committee": "Committees (PACs, party and candidate committees)",
+                "candidate": "The candidate", "business": "Businesses and organizations"}
+FILER_URL = "https://www.mainecampaignfinancedisclosure.com/public/filers/{id}"
+
 def run(cycle: str):
-    if not ((RAW_F / "candidates.csv").exists() and (RAW_F / "transactions.csv").exists()):
+    """Inputs (downloaded by hand from the public search; max 10,000 rows per CSV):
+      pipeline/raw/finance/candidates_<cycle>.csv   Candidate Name, Election Year, Office, District, Party,
+                                                   Candidate Status, Financing Type, Total Money Received, Total Disbursements
+      pipeline/raw/finance/transactions_*.csv       Transaction ID, Filer ID, Filer Name, Filer Office, Filer District,
+                                                   Transaction Type, Transaction Date, Amount, Contact Type, Contact Name, ...
+    The candidate list has no filer ID, so filers are joined on (name, office, district)."""
+    cpath = RAW_F / f"candidates_{cycle}.csv"
+    tpaths = sorted(RAW_F.glob("transactions_*.csv"))
+    if not cpath.exists() or not tpaths:
         print("finance: CSV exports not in pipeline/raw/finance/ yet; skipping"); return
-    legislators = json.loads((config.OUT / "legislators.json").read_text())
-    with open(RAW_F / "candidates.csv", newline="", encoding="utf-8-sig") as f:
-        cand_rows = list(csv.DictReader(f)); cand_h = cand_rows[0].keys() if cand_rows else []
-    with open(RAW_F / "transactions.csv", newline="", encoding="utf-8-sig") as f:
-        tx_rows = list(csv.DictReader(f)); tx_h = tx_rows[0].keys() if tx_rows else []
-    ck = {k: _resolve(list(cand_h), k) for k in ("cand_id", "cand_name", "office", "district", "party", "financing", "election_year")}
-    tk = {k: _resolve(list(tx_h), k) for k in ("tx_filer", "tx_filer_id", "tx_type", "tx_amount", "tx_date", "tx_contrib_type", "tx_contrib_name", "tx_contrib_state")}
-    print("candidates.csv headers:", list(cand_h)); print("matched:", ck)
-    print("transactions.csv headers:", list(tx_h)); print("matched:", tk)
-    missing = [k for k, v in {**ck, **tk}.items() if v is None and k in ("cand_name", "office", "tx_filer", "tx_amount", "tx_type")]
-    if missing:
-        sys.exit(f"Fix COLUMN in pipeline/finance.py for: {missing}")
+    legislators = json.loads((config.OUT / "legislators.json").read_text(encoding="utf-8"))
+    with open(cpath, newline="", encoding="utf-8-sig") as f:
+        cand_rows = [c for c in csv.DictReader(f) if c["Office"].lower() in CHAMBER and str(c["Election Year"]) == cycle]
+    seen, tx = set(), []
+    n_raw = 0
+    for p in tpaths:
+        with open(p, newline="", encoding="utf-8-sig") as f:
+            for r in csv.DictReader(f):
+                n_raw += 1
+                k = tuple(r.values())
+                if k in seen: continue
+                seen.add(k); tx.append(r)
+    print(f"finance: {len(cand_rows)} legislative candidates for {cycle}; {n_raw} transaction rows from {len(tpaths)} files, "
+          f"{n_raw - len(tx)} exact duplicates dropped")
 
-    # candidates -> legislators by chamber + last name (+ district when available)
-    by_key = {}
-    for l in legislators:
-        by_key.setdefault((l["chamber"], last_name(l["name"])), []).append(l)
-    matched = {}
+    # ---- filers -> candidates on (name, office, district); fall back to first+last name
+    cand_by_full, cand_by_fl = defaultdict(list), defaultdict(list)
     for c in cand_rows:
-        office = (c.get(ck["office"]) or "").lower()
-        chamber = "Senate" if "senat" in office else ("House" if "represent" in office or "house" in office else None)
-        if not chamber:
-            continue
-        if ck["election_year"] and str(c.get(ck["election_year"]) or "") not in ("", cycle):
-            continue
-        cands = by_key.get((chamber, last_name(c.get(ck["cand_name"]))), [])
-        if ck["district"] and len(cands) > 1:
-            d = re.sub(r"\D", "", str(c.get(ck["district"]) or ""))
-            cands = [x for x in cands if str(x.get("district") or "") == d] or cands
-        if len(cands) == 1:
-            matched[cands[0]["id"]] = c
+        key = (c["Office"].lower(), str(c["District"]).strip())
+        cand_by_full[(_name_key(c["Candidate Name"]),) + key].append(c)
+        cand_by_fl[(_first_last(c["Candidate Name"]),) + key].append(c)
+    filers = {}
+    for r in tx:
+        if r["Filer Office"].lower() in CHAMBER:
+            filers.setdefault(r["Filer ID"], (r["Filer Name"], r["Filer Office"].lower(), str(r["Filer District"]).strip()))
+    filer_cand, ambiguous_filers, unmatched_filers = {}, [], []
+    for fid, (name, office, dist) in filers.items():
+        hits = cand_by_full.get((_name_key(name), office, dist)) or cand_by_fl.get((_first_last(name), office, dist)) or []
+        if len(hits) == 1: filer_cand[fid] = hits[0]
+        elif len(hits) > 1: ambiguous_filers.append((name, office, dist, [h["Candidate Name"] for h in hits]))
+        else: unmatched_filers.append((name, office, dist))
+    # A person can have several filer IDs in these files: the previous campaign closing out in 2023, the 2024
+    # campaign, and the next campaign opened after the November 2024 election. Keep the one with the most
+    # transactions dated 2024-01-01 .. election day; the others are different campaigns and are left out.
+    in_2024 = defaultdict(int)
+    for r in tx:
+        if "2024-01-01" <= r["Transaction Date"] <= ELECTION_DAY.get(cycle, f"{cycle}-12-31"):
+            in_2024[r["Filer ID"]] += 1
+    all_filers = defaultdict(list)
+    for fid, c in filer_cand.items():
+        all_filers[id(c)].append(fid)
+    cand_filer, other_campaigns = {}, []
+    for c in cand_rows:
+        fids = sorted(all_filers.get(id(c), []), key=lambda f: -in_2024[f])
+        if fids:
+            cand_filer[id(c)] = fids[:1]
+            if len(fids) > 1:
+                other_campaigns.append((c["Candidate Name"], c["Office"], c["District"], fids[0], fids[1:]))
+    print(f"finance: {len(filers)} legislative filers in the transactions; {len(filer_cand)} joined to the candidate list; "
+          f"{len(unmatched_filers)} not on it (earlier campaigns of people not running in {cycle}); {len(ambiguous_filers)} ambiguous; "
+          f"{len(other_campaigns)} candidates also have other campaigns' filer IDs, which are left out")
+    for a in ambiguous_filers: print("  ambiguous filer:", a)
 
-    # transactions aggregated by filer
-    agg = defaultdict(lambda: {"raised": 0.0, "spent": 0.0, "n_contrib": 0, "by_type": defaultdict(float), "in_state": 0.0, "out_state": 0.0})
-    for t in tx_rows:
-        filer = t.get(tk["tx_filer"]) or ""
-        typ = (t.get(tk["tx_type"]) or "").lower()
-        amt = _money(t.get(tk["tx_amount"]))
-        a = agg[_norm(filer)]
-        if "contrib" in typ or "receipt" in typ:
-            a["raised"] += amt; a["n_contrib"] += 1
-            if tk["tx_contrib_type"]: a["by_type"][t.get(tk["tx_contrib_type"]) or "Unknown"] += amt
-            if tk["tx_contrib_state"]:
-                st = (t.get(tk["tx_contrib_state"]) or "").strip().upper()
-                a["in_state" if st in ("ME", "MAINE") else "out_state"] += amt
-        elif "expend" in typ or "disburse" in typ:
-            a["spent"] += amt
+    # ---- aggregate itemized transactions per filer
+    def money(x): return _money(x)
+    agg = defaultdict(lambda: {"contrib": 0.0, "n": 0, "by_source": defaultdict(float), "donors": defaultdict(lambda: [0.0, 0, ""]),
+                               "mcea": 0.0, "mcea_n": 0, "mcea_returned": 0.0})
+    for r in tx:
+        fid = r["Filer ID"]
+        if fid not in filer_cand: continue
+        a = agg[fid]; typ = r["Transaction Type"]; amt = money(r["Amount"]); ct = r["Contact Type"]
+        if typ in ("Monetary Contribution", "In-Kind Contribution"):
+            src = "individual" if ct == "individual" else "committee" if ct in COMMITTEE_TYPES else "candidate" if ct == "candidate" else "business"
+            a["contrib"] += amt; a["n"] += 1; a["by_source"][src] += amt
+            d = a["donors"][(r["Contact Name"] or "Unknown").strip()]; d[0] += amt; d[1] += 1; d[2] = SOURCE_LABEL[src]
+        elif typ == "Returned Monetary Contribution":
+            a["contrib"] -= amt
+        elif typ == "MCEA Payment":
+            a["mcea"] += amt; a["mcea_n"] += 1
+        elif typ == "Return of MCEA Funds":
+            a["mcea_returned"] += amt
+
+    # ---- candidates -> current members on chamber + district + name
+    by_seat = defaultdict(list)
+    for c in cand_rows:
+        by_seat[(CHAMBER[c["Office"].lower()], str(c["District"]).strip())].append(c)
+    def same_person(a, b):
+        la, lb = _name_key(a).split()[-1:], _name_key(b).split()[-1:]
+        return bool(la and lb) and (la[0] == lb[0] or la[0] in _name_key(b) or lb[0] in _name_key(a))
+    current = [l for l in legislators if l.get("current") and l.get("district") not in (None, "TRIBE")]
+    matched, unmatched, ambiguous = {}, [], []
+    for l in current:
+        hits = [c for c in by_seat.get((l["chamber"], str(l["district"])), []) if same_person(c["Candidate Name"], l["name"])]
+        if len(hits) > 1:
+            fl = [c for c in hits if _first_last(c["Candidate Name"]).split()[0] == _first_last(l["name"]).split()[0]]
+            hits = fl if len(fl) == 1 else hits
+        if len(hits) == 1: matched[l["id"]] = hits[0]
+        elif hits: ambiguous.append((l["name"], l["chamber"], l["district"], [h["Candidate Name"] for h in hits]))
+        else: unmatched.append((l["name"], l["chamber"], l["district"]))
 
     out = config.OUT / "finance"; out.mkdir(parents=True, exist_ok=True)
-    n = 0
+    for p in out.glob("*.json"): p.unlink()
+    mismatches = []
     for lid, c in matched.items():
-        a = agg.get(_norm(c.get(ck["cand_name"]) or ""), None)
-        fin_raw = (c.get(ck["financing"]) or "") if ck["financing"] else ""
-        funding = "Maine Clean Election Act (publicly financed)" if re.search(r"mcea|clean|public", fin_raw, re.I) else ("Traditionally financed" if fin_raw else None)
-        rec = {"legislator_id": lid, "cycle": cycle, "candidate_name": c.get(ck["cand_name"]), "party": c.get(ck["party"]) if ck["party"] else None,
-               "funding_type": funding, "funding_type_raw": fin_raw or None,
-               "raised": round(a["raised"], 2) if a else None, "spent": round(a["spent"], 2) if a else None,
-               "n_contributions": a["n_contrib"] if a else None,
-               "in_state_share": round(a["in_state"] / (a["in_state"] + a["out_state"]), 3) if a and (a["in_state"] + a["out_state"]) else None,
-               "top_contributor_types": sorted(({"type": k, "amount": round(v, 2)} for k, v in a["by_type"].items()), key=lambda x: -x["amount"])[:6] if a else [],
-               "source": SOURCE, "note": "Totals are summed from itemized transactions in the Ethics Commission's disclosure system for this cycle; publicly financed candidates receive most of their funds from the Maine Clean Election Fund."}
-        (out / f"{lid}.json").write_text(json.dumps(rec, ensure_ascii=False)); n += 1
-    (out / "index.json").write_text(json.dumps({"cycle": cycle, "ids": sorted(matched.keys()), "source": SOURCE}))
-    print(f"finance: {n} legislators matched of {len(legislators)} ({len(cand_rows)} candidates, {len(tx_rows)} transactions)")
+        fids = cand_filer.get(id(c), [])
+        a = {"contrib": 0.0, "n": 0, "by_source": defaultdict(float), "donors": {}, "mcea": 0.0, "mcea_n": 0, "mcea_returned": 0.0}
+        for fid in fids:
+            x = agg.get(fid)
+            if not x: continue
+            a["contrib"] += x["contrib"]; a["n"] += x["n"]; a["mcea"] += x["mcea"]; a["mcea_n"] += x["mcea_n"]; a["mcea_returned"] += x["mcea_returned"]
+            for k, v in x["by_source"].items(): a["by_source"][k] += v
+            for k, v in x["donors"].items():
+                d = a["donors"].setdefault(k, [0.0, 0, v[2]]); d[0] += v[0]; d[1] += v[1]
+        ftype = c["Financing Type"].strip()
+        clean = ftype == "MCEA Qualified"
+        # cross-check: Clean Elections candidates receive MCEA payments; traditionally financed ones should not
+        if clean and not a["mcea_n"]: mismatches.append((c["Candidate Name"], c["Office"], c["District"], ftype, "no MCEA Payment rows"))
+        if not clean and a["mcea_n"]: mismatches.append((c["Candidate Name"], c["Office"], c["District"], ftype, f"{a['mcea_n']} MCEA Payment rows (${a['mcea']:,.2f})"))
+        rec = {"legislator_id": lid, "cycle": cycle, "label": "2024 campaign (transactions dated 2023–2024)",
+               "candidate_name": c["Candidate Name"], "office": c["Office"], "district": c["District"], "party": c["Party"],
+               "financing_type": ftype, "clean_elections": clean,
+               "total_received": round(_money(c["Total Money Received"]), 2), "total_disbursed": round(_money(c["Total Disbursements"]), 2),
+               "contributions": round(a["contrib"], 2), "n_contributions": a["n"],
+               "by_source": [{"source": SOURCE_LABEL[k], "key": k, "amount": round(v, 2)} for k, v in sorted(a["by_source"].items(), key=lambda kv: -kv[1]) if v],
+               "public_funds": round(a["mcea"] - a["mcea_returned"], 2) if a["mcea_n"] else 0.0,
+               "top_contributors": [{"name": k, "type": v[2], "amount": round(v[0], 2), "count": v[1]}
+                                    for k, v in sorted(a["donors"].items(), key=lambda kv: -kv[1][0])[:8] if v[0] > 0],
+               "filer_ids": fids, "source_url": FILER_URL.format(id=fids[0]) if fids else SOURCE,
+               "note": "Totals raised and spent are the Ethics Commission's candidate totals for the 2024 election. Contributors are summed from itemized monetary and in-kind contributions dated 2023–2024."}
+        (out / f"{lid}.json").write_text(json.dumps(rec, ensure_ascii=False), encoding="utf-8")
+    (out / "index.json").write_text(json.dumps({"cycle": cycle, "ids": sorted(matched), "source": SOURCE}), encoding="utf-8")
+    RAW_F.mkdir(parents=True, exist_ok=True)
+    (RAW_F / "match_report.json").write_text(json.dumps({"matched": len(matched), "current": len(current), "unmatched": unmatched,
+        "ambiguous": ambiguous, "ambiguous_filers": ambiguous_filers, "clean_elections_mismatches": mismatches,
+        "filers_not_on_candidate_list": unmatched_filers, "other_campaign_filer_ids_left_out": other_campaigns}, indent=1, ensure_ascii=False), encoding="utf-8")
+    print(f"finance: {len(matched)} of {len(current)} current members matched (tribal representatives excluded: they are not elected in these races)")
+    for u in unmatched: print("  unmatched member:", u)
+    for a in ambiguous: print("  ambiguous member:", a)
+    for m in mismatches: print("  Clean Elections cross-check:", m)
 
 if __name__ == "__main__":
     run(sys.argv[1] if len(sys.argv) > 1 else "2024")
