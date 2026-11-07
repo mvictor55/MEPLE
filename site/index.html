@@ -590,7 +590,7 @@ function billRow(b){
       <h3 class="clamp2" title="${esc(b.title)}">${esc(b.title)}</h3>
       <div class="meta">${esc(legName(b.sponsor_id,false))} · ${esc(comName(b.committee_code))}${b.hearing_date?` · Hearing ${esc(b.hearing_date)}`:""}</div>
     </div>
-    <div class="right">${statusChip(b)}<span class="tcount">${tIcon()} ${fmtN(billTestimonyCount(b))} testimonies</span></div>
+    <div class="right">${statusChip(b)}<span class="tcount">${tIcon()} ${fmtN(billTestimonyCount(b))} testimonies</span>${lobbyCount(b)}</div>
   </a>`;
 }
 
@@ -604,11 +604,17 @@ function countsBar(c, opts={}){
       ${[["support","var(--support)"],["neutral","var(--neutral)"],["oppose","var(--oppose)"]].filter(([k])=>c[k]).map(([k,col])=>`<span style="width:${pct(k)}%;background:${col}"></span>`).join(`<span class="gap"></span>`)}</div>
     <div class="stance-legend sm"><span><b>${fmtN(c.support)}</b> support</span><span><b>${fmtN(c.neutral)}</b> neither</span><span><b>${fmtN(c.oppose)}</b> oppose</span>${opts.unknown?`<span>${fmtN(opts.unknown)} no position</span>`:""}</div>`;
 }
+const LOBBY_NOTE = "Organizations whose registered lobbyists listed this bill in their monthly reports to the Maine Ethics Commission during the 132nd Legislature. The reports don't say whether they supported or opposed it.";
+function lobbyCount(b){
+  const n = b.lobbying_clients||0;
+  return n ? `<span class="tcount" title="${esc(LOBBY_NOTE)}">${fmtN(n)} organization${n===1?"":"s"} lobbied</span>` : "";
+}
+const byLobbied = (a,b) => (b.lobbying_clients||0)-(a.lobbying_clients||0) || (b.lobbying_reports||0)-(a.lobbying_reports||0) || a.ld-b.ld;
 function billMini(b, extra=""){
   return `<a class="bill-mini" href="#/bill/${b.ld}">
     <span class="ld">LD ${b.ld}</span>
     <span class="t clamp2" title="${esc(b.title)}">${esc(b.title)}</span>
-    <span class="r">${statusChip(b)}<span class="tcount" title="Testimonies">${tIcon()} ${fmtN(b.testimony_count||0)}</span>${extra}</span>
+    <span class="r">${statusChip(b)}<span class="tcount" title="Testimonies">${tIcon()} ${fmtN(b.testimony_count||0)}</span>${lobbyCount(b)}${extra}</span>
   </a>`;
 }
 function moreBtn(param, shown, total, step=25){
@@ -786,9 +792,11 @@ function viewBills(params){
     const qok = !q || hay.includes(q) || (/^\d+$/.test(ldq) && String(b.ld)===ldq);
     return qok && (!com || b.committee_code===com) && (!st || b.status===st);
   });
+  // Newest = most recently printed (highest LD number); Most lobbied = distinct lobbying clients, then monthly reports (never pay)
   if(sort==="testimony") list.sort((a,b)=>(b.testimony_count||0)-(a.testimony_count||0) || a.ld-b.ld);
+  else if(sort==="newest") list.sort((a,b)=>b.ld-a.ld);
+  else if(sort==="lobbied") list.sort(byLobbied);
   else if(sort==="ld") list.sort((a,b)=>a.ld-b.ld);
-  else if(sort==="title") list.sort((a,b)=>a.title.localeCompare(b.title));
   const pages = Math.max(1, Math.ceil(list.length/PAGE));
   const slice = list.slice((page-1)*PAGE, page*PAGE);
   const sample = D.meta.sample;
@@ -809,12 +817,14 @@ function viewBills(params){
         <option value="">Any outcome</option>
         ${Object.entries(STATUS_LABELS).map(([k,v])=>`<option value="${k}" ${st===k?"selected":""}>${v}</option>`).join("")}
       </select>
-      <select onchange="updateParam('sort', this.value, true)" aria-label="Sort">
+      <select onchange="updateParam('sort', this.value, true)" aria-label="Sort" title="${esc(LOBBY_NOTE)}">
+        <option value="newest" ${sort==="newest"?"selected":""}>Newest</option>
         <option value="testimony" ${sort==="testimony"?"selected":""}>Most testimony</option>
+        <option value="lobbied" ${sort==="lobbied"?"selected":""}>Most lobbied</option>
         <option value="ld" ${sort==="ld"?"selected":""}>LD number</option>
-        <option value="title" ${sort==="title"?"selected":""}>Title</option>
       </select>
     </div>
+    ${sort==="lobbied"?`<div class="src" style="margin:-8px 0 14px;color:var(--ink-2)"><b>Most lobbied:</b> ${esc(LOBBY_NOTE)} Sorted by the number of organizations, then by the number of monthly reports. Lobbying pay is reported per client per month across all bills, so there's no per-bill dollar figure.</div>`:""}
     <div class="result-note"><span>${fmtN(list.length)} bill${list.length===1?"":"s"}${sample?" · demonstration data set":""}</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
     <div class="list">
       ${slice.length ? slice.map(billRow).join("") : `<div class="empty">No bills match those filters. <a href="#/bills">Clear filters</a></div>`}
@@ -1341,11 +1351,12 @@ async function viewCommittee(code, params=new URLSearchParams()){
   let body = "";
   if(tab==="bills"){
     const o = params.get("o")||"", s = params.get("sort")||"testimony";
-    const list = bills.filter(b=>!o || b.status===o).sort(s==="hearing" ? (a,b)=>String(b.hearing_date||"").localeCompare(String(a.hearing_date||"")) || a.ld-b.ld : s==="ld" ? (a,b)=>a.ld-b.ld : (a,b)=>(b.testimony_count||0)-(a.testimony_count||0) || a.ld-b.ld);
+    const list = bills.filter(b=>!o || b.status===o).sort(s==="hearing" ? (a,b)=>String(b.hearing_date||"").localeCompare(String(a.hearing_date||"")) || a.ld-b.ld : s==="ld" ? (a,b)=>a.ld-b.ld : s==="lobbied" ? byLobbied : (a,b)=>(b.testimony_count||0)-(a.testimony_count||0) || a.ld-b.ld);
     body = `<div class="panel"><div class="filters">
         <select onchange="updateParam('o', this.value, true)" aria-label="Filter by outcome"><option value="">Any outcome (${fmtN(bills.length)})</option>${byOutcome.map(([k,l,cnt])=>`<option value="${k}" ${o===k?"selected":""}>${l} (${fmtN(cnt)})</option>`).join("")}</select>
-        <select onchange="updateParam('sort', this.value, true)" aria-label="Sort"><option value="testimony">Most testimony</option><option value="hearing" ${s==="hearing"?"selected":""}>Hearing date (newest)</option><option value="ld" ${s==="ld"?"selected":""}>LD number</option></select>
+        <select onchange="updateParam('sort', this.value, true)" aria-label="Sort"><option value="testimony">Most testimony</option><option value="hearing" ${s==="hearing"?"selected":""}>Hearing date (newest)</option><option value="lobbied" ${s==="lobbied"?"selected":""}>Most lobbied</option><option value="ld" ${s==="ld"?"selected":""}>LD number</option></select>
         <span class="src" style="margin:0">${fmtN(list.length)} bill${list.length===1?"":"s"}</span></div>
+      ${s==="lobbied"?`<div class="src" style="margin:0 0 10px;color:var(--ink-2)"><b>Most lobbied:</b> ${esc(LOBBY_NOTE)} Sorted by organizations, then monthly reports; never by pay.</div>`:""}
       ${list.slice(0,n).map(b=>billMini(b, b.hearing_date?`<span class="tcount">Hearing ${esc(b.hearing_date)}</span>`:"")).join("")}
       ${moreBtn("n", Math.min(n, list.length), list.length)}</div>`;
   }
