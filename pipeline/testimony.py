@@ -19,13 +19,14 @@ committee/date walk covers every bill in fewer requests.
 
     python -m pipeline.testimony discover   # re-log the XHR calls (diagnostic)
     python -m pipeline.testimony index      # -> pipeline/raw/testimony/index.json
-    python -m pipeline.testimony extract [N]  # PDFs -> text/*.txt, inferred positions
+    python -m pipeline.testimony extract [N]  # PDFs -> text/*.txt, then positions
+    python -m pipeline.testimony positions    # shared documents + bill-specific inferred positions
 """
-import json, re, sys
+import hashlib, json, re, sys
 from datetime import datetime
 from pathlib import Path
 from . import config, fetch
-from .normalize import infer_position_from_text
+from .normalize import infer_position_for_ld
 from .pdftext import pdf_to_text
 
 RAW_T = config.RAW / "testimony"
@@ -115,7 +116,7 @@ def index():
     for r in rows:
         o = old.get(r["id"])
         if o:
-            for k in ("has_text", "position", "position_source", "fetch_error"):
+            for k in ("has_text", "position", "position_source", "fetch_error", "shared_with"):
                 if o.get(k) is not None:
                     r[k] = o[k]
     (RAW_T / "index.json").write_text(json.dumps(rows, indent=1), encoding="utf-8")
@@ -129,9 +130,39 @@ def clean_text(t: str) -> str:
 
 def _apply_text(r: dict, text: str):
     r["has_text"] = bool(text.strip())
-    if r.get("position_source") != "filed":
-        inf = infer_position_from_text(text) if text else None
-        r["position"], r["position_source"] = (inf, "inferred") if inf else (None, None)
+
+def _doc_key(r: dict, text: str):
+    """Same witness, same hearing, same committee, same text -> one document filed under several bills."""
+    body = re.sub(r"[^a-z0-9]", "", text.lower())
+    return (r["name"].lower(), r.get("hearing_date"), r.get("committee_code"), hashlib.sha1(body.encode()).hexdigest()) if body else None
+
+def positions():
+    """Find documents filed under several bills (shared_with) and infer each row's
+    position on its own bill. Re-runnable without re-extracting text."""
+    idx = RAW_T / "index.json"
+    rows = json.loads(idx.read_text(encoding="utf-8"))
+    txt_dir = RAW_T / "text"
+    texts, groups = {}, {}
+    for r in rows:
+        tp = txt_dir / f"{r['id']}.txt"
+        t = tp.read_text(encoding="utf-8") if tp.exists() else ""
+        texts[r["id"]] = t
+        k = _doc_key(r, t)
+        if k and r.get("ld"):
+            groups.setdefault(k, set()).add(r["ld"])
+    n = {"support": 0, "oppose": 0, "neutral": 0, None: 0}
+    shared = 0
+    for r in rows:
+        k = _doc_key(r, texts[r["id"]])
+        others = sorted(groups.get(k, set()) - {r.get("ld")}) if k else []
+        r["shared_with"] = others
+        shared += bool(others)
+        if r.get("position_source") != "filed":
+            inf = infer_position_for_ld(texts[r["id"]], r.get("ld"), others)
+            r["position"], r["position_source"] = (inf, "inferred") if inf else (None, None)
+        n[r.get("position")] = n.get(r.get("position"), 0) + 1
+    idx.write_text(json.dumps(rows, indent=1), encoding="utf-8")
+    print(f"positions: {n}; {shared} rows are documents also filed under other bills")
 
 def extract(limit: int | None = None):
     idx = RAW_T / "index.json"
@@ -164,7 +195,8 @@ def extract(limit: int | None = None):
     idx.write_text(json.dumps(rows, indent=1), encoding="utf-8")
     print(f"extracted {done} new documents; {failed} failed to download; "
           f"{sum(1 for r in rows if r.get('has_text'))}/{len(rows)} have text")
+    positions()
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "discover"
-    {"discover": discover, "index": index, "extract": lambda: extract(int(sys.argv[2]) if len(sys.argv) > 2 else None)}[cmd]()
+    {"discover": discover, "index": index, "positions": positions, "extract": lambda: extract(int(sys.argv[2]) if len(sys.argv) > 2 else None)}[cmd]()

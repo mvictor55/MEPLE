@@ -13,9 +13,12 @@
  "counts": {
   "bills_introduced": 2245,
   "bills_loaded": 2245,
-  "legislators": 189,
-  "house": 154,
+  "legislators": 187,
+  "house": 152,
+  "house_tribal": 2,
+  "house_vacancies": 1,
   "senate": 35,
+  "former": 3,
   "committees": 17,
   "testimony": 45054
  }

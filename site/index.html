@@ -442,6 +442,7 @@ function testimonyItem(t, text, opts={}){
       ${text!=null && opts.clamp && text.length>320 ? `<button onclick="document.getElementById('${id}').classList.toggle('clamp');this.textContent=this.textContent==='Read more'?'Show less':'Read more'">Read more</button>` : ""}
       ${t.url ? `<a href="${esc(t.url)}" target="_blank" rel="noopener">Official PDF ↗</a>` : ""}
       ${t.position_source==="inferred" ? `<span>* position inferred from the text</span>` : ""}
+      ${(t.shared_with||[]).length && !opts.showBill ? `<span>Also filed under ${t.shared_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}</span>` : ""}
     </div>
   </article>`;
 }
@@ -484,7 +485,7 @@ function viewHome(){
     <div class="stats">
       <div class="stat"><div class="n">${fmtN(loaded)}</div><div class="l">Bills on MEPLE${c.bills_introduced && c.bills_introduced!==loaded?` of ${fmtN(c.bills_introduced)} introduced`:""}, ${esc(D.meta.legislature)}</div></div>
       <div class="stat"><div class="n">${fmtN((c.testimony||0)+userTestimony.length)}</div><div class="l">Testimonies on record</div></div>
-      <div class="stat"><div class="n">${fmtN(c.legislators||D.legislators.length)}</div><div class="l">Legislators — ${fmtN(c.house||151)} House · ${fmtN(c.senate||35)} Senate</div></div>
+      <div class="stat"><div class="n">${fmtN(c.legislators||D.legislators.length)}</div><div class="l">Current legislators — ${fmtN(c.house||151)} House${c.house_tribal?` (incl. ${c.house_tribal} tribal)`:""} · ${fmtN(c.senate||35)} Senate</div></div>
       <div class="stat"><div class="n">${fmtN(c.committees||D.committees.length)}</div><div class="l">Joint standing committees</div></div>
     </div>
 
@@ -622,6 +623,7 @@ async function viewBill(ld){
           <h2>Public testimony · ${fmtN(all.length)} on record</h2>
           ${stanceBar(all)}
           ${filed.length && !b.sample?`<div class="src" style="margin-bottom:6px"><span class="record-tag">Legislature's record</span> Written testimony filed with the ${esc(b.committee_name||comName(b.committee_code))} Committee${b.hearing&&b.hearing.date?` for the ${esc(b.hearing.date)} public hearing`:""}.</div>`:""}
+          ${(b.heard_with||[]).length?`<div class="src" style="margin-bottom:6px">Heard with ${b.heard_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}: ${fmtN(filed.filter(t=>(t.shared_with||[]).length).length)} of these documents were also filed under those bills. Positions marked * are inferred for LD ${b.ld} only, and left blank when a document states no position on this bill.</div>`:""}
           <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px">
             ${all.length ? all.map(t=>testimonyItem(t, t.mine ? t.text : (texts[t.id] ?? null), {clamp:true})).join("") : `<div class="empty">No testimony on record for this bill.</div>`}
           </div>
@@ -698,14 +700,24 @@ async function viewTestimony(params){
 }
 
 function initials(name){ return name.split(" ").filter(w=>/^[A-Za-z]/.test(w)).map(w=>w[0]).slice(0,2).join(""); }
-function partyName(p){ return {D:"Democrat", R:"Republican", I:"Independent", U:"Unenrolled"}[p] || p || ""; }
+function partyName(p){ return {D:"Democrat", R:"Republican", I:"Independent", U:"Unenrolled", N:"", T:""}[p] ?? p ?? ""; }
+function fmtDate(iso){
+  const d = new Date(iso + "T12:00:00");
+  return isNaN(d) ? iso : d.toLocaleDateString("en-US", {month:"short", day:"numeric", year:"numeric"});
+}
+function seatLabel(l){ return l.district==="TRIBE" ? "Tribal Representative" : (l.district?`${l.chamber} District ${l.district}`:""); }
+function leftLabel(l){
+  if(l.current!==false) return "";
+  const how = l.left_reason==="died" ? "Died" : l.left_reason==="resigned" ? "Resigned" : "Left office";
+  return `${how}${l.served_until?` ${fmtDate(l.served_until)}`:""}`;
+}
 function legCard(l){
   return `<article class="leg-card" onclick="location.hash='#/legislator/${esc(l.id)}'">
     <div class="avatar ${(l.party||"u").toLowerCase()}">${esc(initials(l.name))}</div>
     <div>
-      ${l.role?`<div class="role">${esc(l.role)}</div>`:""}
+      ${l.current===false?`<div class="role">Former member · ${esc(leftLabel(l))}</div>`:l.role?`<div class="role">${esc(l.role)}</div>`:""}
       <h3>${l.chamber==="Senate"?"Sen.":"Rep."} ${esc(l.name)}</h3>
-      <div class="meta">${esc(partyName(l.party))} · ${esc(l.district?`${l.chamber} District ${l.district}`:"")}${l.town?` · ${esc(l.town)}`:""}</div>
+      <div class="meta">${esc([partyName(l.party), seatLabel(l), l.town].filter(Boolean).join(" · "))}</div>
     </div>
   </article>`;
 }
@@ -714,11 +726,12 @@ function viewLegislators(params){
   const ch = params.get("chamber")||"";
   const pt = params.get("party")||"";
   const list = D.legislators.filter(l => (!q || `${l.name} ${(l.towns||[]).join(" ")} ${l.district||""}`.toLowerCase().includes(q)) && (!ch || l.chamber===ch) && (!pt || l.party===pt))
-    .sort((a,b)=>(a.chamber===b.chamber?0:(a.chamber==="Senate"?-1:1)) || a.name.split(" ").pop().localeCompare(b.name.split(" ").pop()));
+    .sort((a,b)=>((a.current===false)-(b.current===false)) || (a.chamber===b.chamber?0:(a.chamber==="Senate"?-1:1)) || a.name.split(" ").pop().localeCompare(b.name.split(" ").pop()));
+  const nFormer = list.filter(l=>l.current===false).length;
   return `
   <div class="page-head"><div class="wrap">
     <h1>Legislators</h1>
-    <p>Maine's citizen Legislature: 151 Representatives and 35 Senators.${D.meta.sample?" This demonstration profiles leadership and the sponsors of featured bills.":""}</p>
+    <p>Maine's citizen Legislature: 151 Representatives, 35 Senators and non-voting tribal representatives.${D.meta.counts&&D.meta.counts.house_vacancies?` ${D.meta.counts.house_vacancies} House seat${D.meta.counts.house_vacancies>1?"s are":" is"} vacant.`:""}${D.meta.sample?" This demonstration profiles leadership and the sponsors of featured bills.":""}</p>
   </div></div>
   <div class="wrap">
     <div class="toolbar">
@@ -726,7 +739,7 @@ function viewLegislators(params){
       <select onchange="updateParam('chamber', this.value, true)"><option value="">Both chambers</option><option value="House" ${ch==="House"?"selected":""}>House</option><option value="Senate" ${ch==="Senate"?"selected":""}>Senate</option></select>
       <select onchange="updateParam('party', this.value, true)"><option value="">All parties</option><option value="D" ${pt==="D"?"selected":""}>Democrat</option><option value="R" ${pt==="R"?"selected":""}>Republican</option><option value="I" ${pt==="I"?"selected":""}>Independent</option><option value="U" ${pt==="U"?"selected":""}>Unenrolled</option></select>
     </div>
-    <div class="result-note"><span>${fmtN(list.length)} legislators</span></div>
+    <div class="result-note"><span>${fmtN(list.length-nFormer)} current legislators${nFormer?` · ${fmtN(nFormer)} former member${nFormer>1?"s":""} who left during the session (listed last)`:""}</span></div>
     <div class="grid-2" style="padding:0 0 64px">${list.map(legCard).join("")||`<div class="empty">No legislators match.</div>`}</div>
   </div>`;
 }
@@ -747,7 +760,8 @@ function viewLegislator(id){
           <div>
             ${l.role?`<div class="role" style="font-size:12.5px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em">${esc(l.role)}</div>`:""}
             <h1 style="font-family:var(--serif);font-size:28px">${l.chamber==="Senate"?"Sen.":"Rep."} ${esc(l.name)}</h1>
-            <div style="color:var(--ink-2);font-size:14.5px">${esc(partyName(l.party))}${l.district?` · ${esc(l.chamber)} District ${esc(l.district)}`:""}${(l.towns||[]).length?` · ${esc(l.towns.join(", "))}`:""}</div>
+            <div style="color:var(--ink-2);font-size:14.5px">${esc([partyName(l.party), seatLabel(l), (l.towns||[]).join(", ")].filter(Boolean).join(" · "))}</div>
+            ${l.current===false?`<div style="color:var(--ink-2);font-size:14.5px;margin-top:4px"><b>Former member.</b> ${esc(leftLabel(l))}.${l.replaced_by&&D.legById[l.replaced_by]?` Succeeded by ${legLink(l.replaced_by)}.`:" The seat is vacant."}</div>`:""}
           </div>
         </div>
         ${l.bio?`<div class="panel"><h2>About</h2><p class="summary">${esc(l.bio)}</p></div>`:""}

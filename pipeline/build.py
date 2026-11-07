@@ -84,6 +84,23 @@ def run(sample_notice: str | None = None):
         for c in m.get("committees", []):
             L["committees"].append({"code": c["code"], "role": c.get("role") or "Member"})
         roster_lids.append(lid)
+    # Members who left during the session: the House list page marks them Resigned/Deceased;
+    # their replacement (if one has been elected) is the current member for the same district.
+    for f in rosters.get("former", []):
+        cands = [l for l in by_district.get((f["chamber"], _dist(f.get("district"))), [])
+                 if _same_person(legislators[l]["name"], f["name"]) and not legislators[l].get("current")]
+        if not cands:
+            print(f"warning: former member {f['name']} not found in LegiScan people", file=sys.stderr)
+            continue
+        L = legislators[cands[0]]
+        succ = [l for l in roster_lids if legislators[l]["chamber"] == f["chamber"] and legislators[l]["district"] == _dist(f.get("district"))]
+        L.update({"served_until": f.get("served_until"), "left_reason": {"deceased": "died"}.get(f["status"], f["status"]),
+                  "replaced_by": succ[0] if succ else None, "url": f.get("url") or L["url"],
+                  "town": L["town"] or f.get("town")})
+        if not L["towns"] and f.get("town"): L["towns"] = [f["town"]]
+    for lid, L in legislators.items():
+        if not L.get("current") and "served_until" not in L:
+            print(f"warning: {L['name']} ({L['chamber']} {L['district']}) is in LegiScan but on no current roster", file=sys.stderr)
     # Name -> id for sources that only give a name (report signers, status-page sponsors).
     # Current members win a last-name collision; ambiguous names (two current members) are left out.
     counts = {}
@@ -108,7 +125,12 @@ def run(sample_notice: str | None = None):
         members.sort(key=lambda x: (order.get(x["role"], 2), legislators[x["id"]]["chamber"] != "Senate", last_name(legislators[x["id"]]["name"])))
         committees.append({"code": code, "name": name, "chamber": "joint", "members": members, "url": r.get("url"), "bill_count": 0})
     for L in legislators.values():
-        L.pop("current", None)
+        L["current"] = bool(L.get("current"))
+        if L["current"]:
+            for k in ("served_until", "left_reason", "replaced_by"):
+                L.pop(k, None)
+        else:
+            L.setdefault("served_until", None); L.setdefault("replaced_by", None)
     com_by_name = {c["name"].lower(): c["code"] for c in committees}
     com_members = {c["code"]: {m["id"] for m in c["members"]} for c in committees}
 
@@ -184,8 +206,11 @@ def run(sample_notice: str | None = None):
             "committee_reports": _link_signers(sp.get("committee_reports", []), by_key, by_full, com_members.get(code)),
             "chamber_actions": [{**a, "chamber": {"H": "House", "S": "Senate"}.get(a.get("chamber"), a.get("chamber"))} for a in lg.get("chamber_actions", [])],
             "roll_calls": rolls, "hearing": hearing,
+            # other bills whose testimony includes the same documents at the same hearing
+            # (one letter filed under several bills); see testimony.positions()
+            "heard_with": sorted({x for t in trows for x in (t.get("shared_with") or [])}),
             "tags": lg.get("subjects", []), "affected_statutes": sp.get("affected_statutes", []),
-            "testimony": [{k: t.get(k) for k in ("id", "name", "organization", "town", "position", "position_source", "date", "hearing_date", "url", "has_text")} for t in trows],
+            "testimony": [{k: t.get(k) for k in ("id", "name", "organization", "town", "position", "position_source", "date", "hearing_date", "url", "has_text", "shared_with")} for t in trows],
             "sources": list(dict.fromkeys((sp.get("sources") or []) + ([f"https://legiscan.com/ME/bill/LD{ld}/2025"] if lg else []))),
             "sample": False,
         }
@@ -209,9 +234,14 @@ def run(sample_notice: str | None = None):
     meta = {"session": config.SESSION, "legislature": config.LEGISLATURE_LABEL, "years": config.YEARS,
             "generated_at": date.today().isoformat(), "sample": bool(sample_notice), "notice": sample_notice,
             "featured": top,
-            "counts": {"bills_introduced": len(index), "bills_loaded": len(index), "legislators": len(legislators),
-                       "house": sum(1 for l in legislators.values() if l["chamber"] == "House"),
-                       "senate": sum(1 for l in legislators.values() if l["chamber"] == "Senate"),
+            # current members only; former members stay in legislators.json with current: false
+            "counts": {"bills_introduced": len(index), "bills_loaded": len(index),
+                       "legislators": sum(1 for l in legislators.values() if l["current"]),
+                       "house": sum(1 for l in legislators.values() if l["current"] and l["chamber"] == "House"),
+                       "house_tribal": sum(1 for l in legislators.values() if l["current"] and l["district"] == "TRIBE"),
+                       "house_vacancies": 151 - sum(1 for l in legislators.values() if l["current"] and l["chamber"] == "House" and l["district"] != "TRIBE"),
+                       "senate": sum(1 for l in legislators.values() if l["current"] and l["chamber"] == "Senate"),
+                       "former": sum(1 for l in legislators.values() if not l["current"]),
                        "committees": len(committees), "testimony": t_total}}
     (config.OUT / "meta.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
     print(f"built {len(index)} bills, {len(legislators)} legislators, {t_total} testimony rows -> {config.OUT}")

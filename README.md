@@ -47,6 +47,37 @@ stored and labeled separately. Positions are shown only when the Legislature
 recorded one (`position_source: filed`); if a position is inferred from the
 text of the testimony it is marked `inferred` and rendered with an asterisk.
 
+**How positions are inferred** (`python -m pipeline.testimony positions`,
+also run at the end of `extract`; rules in `pipeline/normalize.py`). Bills
+heard together often get the same letter filed under each of them, so a
+stance only counts for a bill when the phrase names that bill: "in support of
+LD 1822", "oppose LDs 1224, 1088, and 1284", "LD 1822 -- Ought to Pass",
+"Position on LD 1822: Against", a sponsor "introducing LD 1822", or "in
+opposition to the bills before the committee" (every bill the letter is filed
+under). A stance that names no bill ("please vote ought to pass") is used only
+when the document is filed under one bill and states no stance on any other.
+Otherwise the position is left blank. Documents are matched as the same letter
+when the witness, hearing date, committee and extracted text are identical;
+each row gets `shared_with` (the other LDs) and each bill gets `heard_with`.
+
+Measured 2026-11-07 against a manual read of every document (by Claude, while building this): LD 1822 (58
+documents, heard with LDs 1088/1224/1284) 57/58 correct, up from 46/58; a
+random sample of 60 documents from other bills 49/60 correct with the
+bill-specific rules alone and 54/60 after adding the "these bills" and closing
+-ask phrases found while reviewing that sample (that second figure is tuned on
+the same sample, so treat it as optimistic). In both sets every remaining
+error but one is a blank where the position is implicit ("we are concerned
+about LD 1822", "Stop these stupid bills") or stated only deep in a long
+letter; the other is a label from an ambiguous "vote in favor of these bills".
+No support/oppose reversals remained. Every labeled row says "inferred".
+
+**Legislators who left.** The House member list keeps former members marked
+"Resigned" or "Deceased"; `rosters.py` reads the date from each profile and
+`build.py` sets `current: false`, `served_until`, `left_reason` and
+`replaced_by` (the current member for the same district, or null while the seat
+is vacant). `meta.json` counts current members only. Tribal representatives are
+not in the House CSV export and are taken from the list page.
+
 ## Running the pipeline
 
 Needs Python 3.11+, `pip install -r requirements.txt`, `playwright install chromium`,
@@ -99,7 +130,7 @@ This was chosen because the data fits comfortably in git. Measured after the
 
 | | Size |
 |---|---|
-| `site/data` total | 228 MB |
+| `site/data` total | 230 MB |
 | testimony text (`site/data/testimony/LD*.json`, 2,121 files) | 172 MB |
 | largest file (`site/data/testimony/index.json`, 1.2 MB gzipped) | 13 MB |
 | largest per-bill text file (`LD210.json`) | 5.6 MB |

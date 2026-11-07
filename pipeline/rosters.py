@@ -5,7 +5,10 @@ Sources (verified 2026-11-06):
   House: /house/Home/ExportActiveMembers?format=csv
          Name, Party, District, County, Seat, Email, Phone, Residence (town),
          City, Zip, Position (leadership), Committees ("(Chair) Ethics|Judiciary")
-         /house/MemberProfiles/List?sort=alpha -> profile URL for each member
+         /house/MemberProfiles/List?sort=alpha -> profile URL for each member; it
+         also keeps former members, marked "Resigned"/"Deceased" (the date is on
+         the profile: "Resigned: Oct 31, 2025"), and tribal representatives, who
+         are not in the CSV export
   Senate: /senate/district-listing/9526 -> district, name, party, county, profile link
           each profile (/districtNN) -> towns in the district, committee assignments
           ("Judiciary (Chair)")
@@ -34,14 +37,46 @@ def _committee_code(name: str) -> str | None:
 
 _LEADERSHIP = re.compile(r"(?<![A-Za-z])(President|Speaker|Leader|Whip)(?![A-Za-z])")
 
-def house_members() -> list[dict]:
-    rows = list(csv.DictReader(io.StringIO(fetch.get(config.HOUSE_ROSTER_CSV, refresh=True).lstrip("\ufeff"))))
-    urls = {}
+def _house_list() -> list[dict]:
+    """Rows of the House list page: name, title, status ('Resigned'/'Deceased'/None),
+    party, district, town, committees, profile url."""
     soup = BeautifulSoup(fetch.get(config.HOUSE_ROSTER, refresh=True), "lxml")
-    for a in soup.select("a[href*='MemberProfiles/Details']"):
-        nm = _text(a)
-        if nm:
-            urls[nm.lower()] = config.BASE + a["href"] if a["href"].startswith("/") else a["href"]
+    heads = [_text(th) for th in soup.select("thead th")]
+    out = []
+    for tr in soup.select("tbody tr"):
+        cells = dict(zip(heads, tr.find_all("td")))
+        a = cells["Name"].select_one("a[href*='MemberProfiles/Details']") if "Name" in cells else None
+        if not a:
+            continue
+        parts = [x.strip() for x in cells["Name"].get_text("|", strip=True).split("|") if x.strip()]
+        status = next((x for x in parts if x in ("Resigned", "Deceased")), None)
+        coms = cells["Committees"].get_text("|", strip=True).split("|") if "Committees" in cells else []
+        out.append({"name": _text(a), "title": parts[1] if len(parts) > 1 else None, "status": status,
+                    "party": _text(cells.get("Party")) or None, "district": _text(cells.get("District")) or None,
+                    "town": _text(cells.get("Legal Residence")) or None,
+                    "committees": [c.strip() for c in coms if c.strip() and c.strip() != "None"],
+                    "url": config.BASE + a["href"] if a["href"].startswith("/") else a["href"]})
+    return out
+
+_MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
+
+def _left_on(url: str) -> str | None:
+    """'Resigned: Oct 31, 2025' / 'Deceased: Jan 10, 2026' on a House profile -> ISO date."""
+    t = re.sub(r"\s+", " ", BeautifulSoup(fetch.get(url, refresh=True), "lxml").get_text(" "))
+    m = re.search(r"(?:Resigned|Deceased)\s*:\s*([A-Z][a-z]{2})[a-z]*\.? (\d{1,2}), (\d{4})", t)
+    if not m or m.group(1) not in _MONTHS:
+        return None
+    return f"{m.group(3)}-{_MONTHS.index(m.group(1)) + 1:02d}-{int(m.group(2)):02d}"
+
+def house_former(listing: list[dict]) -> list[dict]:
+    """Members who left during the session; the list page keeps them, marked."""
+    return [{"chamber": "House", "name": r["name"], "party": r["party"], "district": r["district"],
+             "town": r["town"], "status": r["status"].lower(), "served_until": _left_on(r["url"]), "url": r["url"]}
+            for r in listing if r["status"]]
+
+def house_members(listing: list[dict]) -> list[dict]:
+    rows = list(csv.DictReader(io.StringIO(fetch.get(config.HOUSE_ROSTER_CSV, refresh=True).lstrip("\ufeff"))))
+    urls = {r["name"].lower(): r["url"] for r in listing}
     out = []
     for r in rows:
         name = (r.get("Name") or "").strip()
@@ -67,6 +102,14 @@ def house_members() -> list[dict]:
                     "email": (r.get("Email") or "").strip() or None,
                     "committees": committees, "other_committees": other,
                     "url": urls.get(name.lower())})
+    # Tribal representatives (non-voting; LegiScan district "TRIBE") are on the list page but not in the CSV.
+    in_csv = {m["name"].lower() for m in out}
+    for r in listing:
+        if not r["status"] and r["name"].lower() not in in_csv and "Tribal" in (r["title"] or ""):
+            coms = [{"code": c, "role": "Member"} for c in (_committee_code(x) for x in r["committees"]) if c]
+            out.append({"chamber": "House", "name": r["name"], "district": "TRIBE", "party": None,
+                        "town": r["town"], "county": None, "role": r["title"], "email": None,
+                        "committees": coms, "other_committees": [], "url": r["url"]})
     return out
 
 def senate_members() -> list[dict]:
@@ -135,8 +178,11 @@ if __name__ == "__main__":
         (d / "house_list.html").write_text(fetch.get(config.HOUSE_ROSTER), encoding="utf-8")
         (d / "senate.html").write_text(fetch.get(config.SENATE_ROSTER), encoding="utf-8")
         print("raw pages written to", d)
-    house, senate = house_members(), senate_members()
-    data = {"house": house, "senate": senate, "committees": committee_rosters(house, senate)}
+    listing = _house_list()
+    house, senate, former = house_members(listing), senate_members(), house_former(listing)
+    data = {"house": house, "senate": senate, "former": former, "committees": committee_rosters(house, senate)}
+    for f in former:
+        print(f"former member: {f['name']} (House {f['district']}) {f['status']} {f['served_until']}")
     (d / "rosters.json").write_text(json.dumps(data, indent=1), encoding="utf-8")
     sizes = {k: len(v["members"]) for k, v in data["committees"].items()}
     print(f"house={len(house)} senate={len(senate)} committees={len(data['committees'])} members per committee={sizes}")
