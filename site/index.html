@@ -185,6 +185,11 @@
   .com-card:hover{box-shadow:var(--shadow)}
   .com-card h3{font-family:var(--serif);font-size:16.5px;font-weight:600}
   .com-card .meta{font-size:13px;color:var(--ink-2);margin-top:4px}
+  a.bill-card,a.bill-row,a.leg-card,a.com-card{color:inherit;text-decoration:none;display:block}
+  a.bill-card{display:flex} a.bill-row{display:grid} a.leg-card{display:flex}
+  a.bill-card:hover,a.bill-row:hover,a.leg-card:hover,a.com-card:hover{text-decoration:none}
+  a.bill-card:focus-visible,a.bill-row:focus-visible,a.leg-card:focus-visible,a.com-card:focus-visible,.tabs a:focus-visible{outline:3px solid var(--pine-mid);outline-offset:2px}
+  .clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
   .prose{max-width:720px;padding:36px 0 72px}
   .prose h2{font-family:var(--serif);font-size:24px;margin:32px 0 10px}
@@ -388,9 +393,71 @@ const comName = code => (D.comByCode[code]||{}).name || code || "—";
 const STANCE_META = { support:{label:"Support", icon:"✓"}, oppose:{label:"Oppose", icon:"✗"}, neutral:{label:"Neither for nor against", icon:"–"} };
 const STATUS_LABELS = {enacted:"Enacted / signed", vetoed:"Vetoed", died:"Died", held:"Held by Governor", pending:"Pending / carried over", withdrawn:"Withdrawn"};
 
+// Plain-language final status. The raw label from the Legislature stays available as a tooltip.
+const STATUS_PLAIN = [
+  [/^enacted$/i, "Enacted"],
+  [/^emergency enacted$/i, "Enacted (emergency)"],
+  [/^finally passed$/i, "Finally passed"],
+  [/^emergency finally passed$/i, "Finally passed (emergency)"],
+  [/ought not to pass pursuant to joint rule (\d+)/i, "Died in committee (Joint Rule $1)"],
+  [/^accepted (majority|minority) \(ontp\) report$/i, (m,w)=>`Defeated (${w.toLowerCase()} Ought Not to Pass report)`],
+  [/^accepted report ([a-z]) \(ontp\)$/i, (m,x)=>`Defeated (Report ${x.toUpperCase()}, Ought Not to Pass)`],
+  [/^died on adjournment$/i, "Died on adjournment"],
+  [/^died between houses$/i, "Died between the House and Senate"],
+  [/^leave to withdraw$/i, "Withdrawn (leave to withdraw)"],
+  [/^automatic withdrawal pursuant to joint rule ([\d.]+)$/i, "Withdrawn automatically (Joint Rule $1)"],
+  [/^veto sustained$/i, "Vetoed (veto sustained)"],
+  [/^indefinitely postponed$/i, "Indefinitely postponed"],
+  [/^emergency enactment failed$/i, "Failed final vote (emergency)"],
+  [/^enactment failed$/i, "Failed final vote"],
+];
+function plainStatus(label){
+  const raw = String(label||"").trim();
+  for(const [re, out] of STATUS_PLAIN){ if(re.test(raw)) return raw.replace(re, out); }
+  return raw ? raw[0].toUpperCase() + raw.slice(1).toLowerCase() : raw;
+}
+// Roll-call motions as the Legislature abbreviates them -> words.
+function plainMotion(m){
+  let s = " " + String(m||"").trim() + " ";
+  const amend = (ch, letter, num) => `${ch.toLowerCase()==="h"?"House":"Senate"} Amendment ${letter.toUpperCase()} (${ch.toUpperCase()}-${num})`;
+  const R = [
+    [/\bRC #\s*(\d+)/gi, "(roll call $1)"],
+    // "Senate Amendment (sbs-468)" -> "Senate Amendment B (S-468)"; "Senate Amendment (s-292)" -> "Senate Amendment (S-292)"
+    [/\b(Senate|House) Amendment \(([sh])([a-z])\2-(\d+)\)/gi, (x,c,ch,l,n)=>`${c} Amendment ${l.toUpperCase()} (${ch.toUpperCase()}-${n})`],
+    [/\b(Senate|House) Amendment ([a-z]) \(([sh])-(\d+)\)/gi, (x,c,l,ch,n)=>`${c} Amendment ${l.toUpperCase()} (${ch.toUpperCase()}-${n})`],
+    [/\(([sh])-(\d+)\)/gi, (x,ch,n)=>`(${ch.toUpperCase()}-${n})`],
+    [/\bCa([hs])-(\d+)\b/gi, (x,c,n)=>`Committee Amendment (${c.toUpperCase()}-${n})`],
+    [/\bH([a-z])h-(\d+)\b/gi, (x,l,n)=>amend("h",l,n)],
+    [/\bS([a-z])s-(\d+)\b/gi, (x,l,n)=>amend("s",l,n)],
+    [/\bCa[ -]?["']?([a-c])["']?(?=\s|$)/gi, (x,l)=>`Committee Amendment ${l.toUpperCase()}`],
+    [/\bC A\b/g, "Committee Amendment"],
+    [/\bHa ["']([a-z])["']/gi, (x,l)=>`House Amendment ${l.toUpperCase()}`],
+    [/\bH["']([a-z])["']/gi, (x,l)=>`House Amendment ${l.toUpperCase()}`],
+    [/\b(Report|Rep) ["']?([a-c])["']?(?=\s|$)/gi, (x,r,l)=>`Report ${l.toUpperCase()}`],
+    [/\bAcc Of\b/gi, "Acceptance of"],
+    [/\bBe Indef Pp\b/gi, "be indefinitely postponed"],
+    [/\bOtp-am\b/gi, "Ought to Pass as Amended"], [/\bOtp\b/gi, "Ought to Pass"], [/\bOntp\b/gi, "Ought Not to Pass"],
+    [/\bIndef Pp\b|\bIpp\b/gi, "Indefinitely postpone"],
+    [/\bPTE\b/g, "Passed to be enacted"], [/\bPTBE\b/g, "Passed to be engrossed"],
+    [/\bAcc\b|\bAc\b/gi, "Accept"], [/\bMaj\b/gi, "Majority"], [/\bMin\b/gi, "Minority"], [/\bRep\b/gi, "Report"],
+    [/\bAs Amend\b/gi, "as Amended"], [/\bAmd\b|\bAm\b/gi, "amended"], [/\bRecon\b/gi, "Reconsideration"],
+    [/\bEnact-emer\b/gi, "Enactment — emergency"], [/\bEmer\b/gi, "emergency"], [/\bCon Res\b/gi, "concurrent resolution"], [/\bLd (\d+)/gi, "LD $1"],
+    [/\s*\b2\/3 Elect(ed)?\b/gi, ", two-thirds of members elected"], [/\(2\/3\)/g, "(two-thirds)"], [/\bCommitee\b/gi, "Committee"],
+    [/\s+-\s+|(?<=\w)-(?=emergency|bond|veto)/gi, " — "],
+  ];
+  for(const [re, out] of R) s = s.replace(re, out);
+  s = s.replace(/\s+/g," ").replace(/\s*—\s*(?=\(roll call|$)/," ").trim();
+  // sentence case, keeping the Legislature's terms of art and amendment letters capitalized
+  const keep = /^(Ought|Pass|Not|Amended|Committee|Amendment|House|Senate|Report|Majority|Minority|LD|Rule|Judiciary|[A-Z])$/;
+  s = s.split(" ").map((w,i)=> i===0 || keep.test(w.replace(/[^A-Za-z]/g,"")) || /[A-Z]-\d|\(|\d/.test(w) ? w : w.toLowerCase()).join(" ");
+  return s.replace(/\bOught To\b/g,"Ought to").replace(/\bNot To\b/g,"Not to").replace(/(?<!Pass as) Amended\b/g," amended")
+          .replace(/\bCommittee of conference\b/,"committee of conference").replace(/\b(refer|bill) to Committee\b/,"$1 to committee")
+          .replace(/\bCommittee Amendment ([A-C]) ([SH]-\d+)\b/,"Committee Amendment $1 ($2)");
+}
 function statusChip(b){
   const cls = ["enacted","vetoed","died","held","pending","withdrawn"].includes(b.status) ? b.status : "died";
-  return `<span class="chip ${cls}"><span class="dot"></span>${esc(b.status_label || STATUS_LABELS[b.status] || b.status)}</span>`;
+  const raw = b.status_label || STATUS_LABELS[b.status] || b.status;
+  return `<span class="chip ${cls}" title="${esc(raw)}"><span class="dot"></span>${esc(plainStatus(raw))}</span>`;
 }
 function stancePill(st, source){
   if(!st) return `<span class="stance-pill none">Position not recorded</span>`;
@@ -434,25 +501,25 @@ function stanceBar(items){
 /* ---------- shared pieces ---------- */
 function billCard(b){
   return `
-  <article class="bill-card" onclick="location.hash='#/bill/${b.ld}'">
+  <a class="bill-card" href="#/bill/${b.ld}">
     <div class="ld">LD ${b.ld} · ${esc(D.meta.legislature.toUpperCase())}</div>
-    <h3>${esc(b.title)}</h3>
+    <h3 class="clamp2" title="${esc(b.title)}">${esc(b.title)}</h3>
     <div class="meta">Sponsored by ${esc(legName(b.sponsor_id,false))} · ${esc(comName(b.committee_code))}</div>
     <div class="foot">
       ${statusChip(b)}
       <span class="tcount">${tIcon()} ${fmtN(billTestimonyCount(b))} testimonies</span>
     </div>
-  </article>`;
+  </a>`;
 }
 function billRow(b){
-  return `<article class="bill-row" onclick="location.hash='#/bill/${b.ld}'">
+  return `<a class="bill-row" href="#/bill/${b.ld}">
     <div>
       <div class="ld">LD ${b.ld}${b.paper?` · ${esc(b.paper)}`:""}</div>
-      <h3>${esc(b.title)}</h3>
+      <h3 class="clamp2" title="${esc(b.title)}">${esc(b.title)}</h3>
       <div class="meta">${esc(legName(b.sponsor_id,false))} · ${esc(comName(b.committee_code))}${b.hearing_date?` · Hearing ${esc(b.hearing_date)}`:""}</div>
     </div>
     <div class="right">${statusChip(b)}<span class="tcount">${tIcon()} ${fmtN(billTestimonyCount(b))} testimonies</span></div>
-  </article>`;
+  </a>`;
 }
 function testimonyItem(t, text, opts={}){
   const b = D.idxByLd[t.ld];
@@ -709,7 +776,7 @@ function historyList(b){
   for(const a of (b.chamber_actions||[])) ev.push({date:a.date, label:a.action, where:a.chamber});
   if(!ev.length && b.timeline) return b.timeline.map(e=>`<li class="${e.final?"final":""}"><b>${esc(e.label)}</b>${esc(e.date||"")}</li>`).join("");
   ev.sort((x,y)=>String(x.date).localeCompare(String(y.date)));
-  const fd = b.final_disposition && b.final_disposition.label ? `<li class="final"><b>${esc(b.final_disposition.label)}</b>${esc(b.final_disposition.date||"")}</li>` : "";
+  const fd = b.final_disposition && b.final_disposition.label ? `<li class="final"><b title="${esc(b.final_disposition.label)}">${esc(plainStatus(b.final_disposition.label))}</b>${esc(b.final_disposition.date||"")}</li>` : "";
   return ev.map(e=>`<li><b>${esc(e.label)}</b>${esc(e.date||"")}${e.where?` · ${esc(e.where)}`:""}</li>`).join("") + fd;
 }
 
@@ -778,7 +845,7 @@ async function viewBill(ld, params=new URLSearchParams()){
           ${amendments.map(a=>`<tr><td>${a.url?`<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.id)}</a>`:esc(a.id)}</td><td>${esc(a.status||"")}${a.sponsor?` · ${esc(a.sponsor)}`:""}${a.fiscal_note_url?` · <a href="${esc(a.fiscal_note_url)}" target="_blank" rel="noopener">fiscal note</a>`:""}</td></tr>`).join("")}
         </table></div>`:""}
         ${rolls.length?`<div class="panel"><h2>Roll-call votes</h2><table class="plain"><tr><th>Date</th><th>Vote</th></tr>
-          ${rolls.map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.chamber||"")} ${esc(r.motion||"")}<br><b>${esc(r.yea)}–${esc(r.nay)}</b>${r.result?` · ${esc(r.result)}`:""}${r.url?` · <a href="${esc(r.url)}" target="_blank" rel="noopener">record</a>`:""}</td></tr>`).join("")}
+          ${rolls.map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.chamber||"")} <span title="${esc(r.motion||"")}">${esc(plainMotion(r.motion))}</span><br><b>${esc(r.yea)}–${esc(r.nay)}</b>${r.result?` · ${esc(r.result)}`:""}${r.url?` · <a href="${esc(r.url)}" target="_blank" rel="noopener">record</a>`:""}</td></tr>`).join("")}
         </table></div>`:""}
         ${(b.tags||[]).length?`<div class="panel"><h2>Topics</h2><div style="display:flex;gap:8px;flex-wrap:wrap">
           ${b.tags.map(t=>`<a class="chip died" href="#/bills?q=${encodeURIComponent(t)}">${esc(t)}</a>`).join("")}</div></div>`:""}
@@ -843,14 +910,14 @@ function leftLabel(l){
   return `${how}${l.served_until?` ${fmtDate(l.served_until)}`:""}`;
 }
 function legCard(l){
-  return `<article class="leg-card" onclick="location.hash='#/legislator/${esc(l.id)}'">
+  return `<a class="leg-card" href="#/legislator/${esc(l.id)}">
     <div class="avatar ${(l.party||"u").toLowerCase()}" ${l.current===false?'style="opacity:.55"':""}>${esc(initials(l.name))}</div>
     <div>
       ${l.current===false?`<div class="role">Former member · ${esc(leftLabel(l))}</div>`:l.role?`<div class="role">${esc(l.role)}</div>`:""}
       <h3>${l.chamber==="Senate"?"Sen.":"Rep."} ${esc(l.name)}</h3>
       <div class="meta">${esc([partyName(l.party), seatLabel(l), l.town].filter(Boolean).join(" · "))}</div>
     </div>
-  </article>`;
+  </a>`;
 }
 function viewLegislators(params){
   const q = (params.get("q")||"").trim().toLowerCase();
@@ -958,10 +1025,10 @@ function viewCommittees(){
       ${D.committees.map(c=>{
         const n = D.index.filter(b=>b.committee_code===c.code).length;
         const t = D.index.filter(b=>b.committee_code===c.code).reduce((s,b)=>s+(b.testimony_count||0),0);
-        return `<article class="com-card" onclick="location.hash='#/committee/${esc(c.code)}'">
+        return `<a class="com-card" href="#/committee/${esc(c.code)}">
           <h3>${esc(c.name)}</h3>
           <div class="meta">${fmtN(n)} bill${n===1?"":"s"}${t?` · ${fmtN(t)} testimonies`:""}${(c.members||[]).length?` · ${c.members.length} members`:""}</div>
-        </article>`;
+        </a>`;
       }).join("")}
     </div>
   </div>`;
@@ -1049,11 +1116,11 @@ async function viewProfiles(params){
     </div>
     <div class="result-note"><span>${fmtN(list.length)} profiles · ordered by number of testimonies</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
     <div class="grid-2" style="padding-bottom:24px">
-      ${slice.map(p=>`<article class="com-card" onclick="location.hash='#/profile/${esc(p.id)}'">
+      ${slice.map(p=>`<a class="com-card" href="#/profile/${esc(p.id)}">
         <div class="role" style="font-size:12px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em">${esc(PROFILE_TYPES[p.type]||p.type)}</div>
         <h3>${esc(p.name)}</h3>
         <div class="meta">${p.type==="official"?`${officialRole(p,false)} · `:""}${fmtN(p.testimony_count)} testimon${p.testimony_count===1?"y":"ies"} on ${fmtN(p.bill_count)} bill${p.bill_count===1?"":"s"}</div>
-      </article>`).join("") || `<div class="empty">No profiles match.</div>`}
+      </a>`).join("") || `<div class="empty">No profiles match.</div>`}
     </div>
     ${pages>1?`<div class="pager"><button ${page<=1?"disabled":""} onclick="updateParam('page',${page-1})">← Previous</button><button ${page>=pages?"disabled":""} onclick="updateParam('page',${page+1})">Next →</button></div>`:`<div style="height:40px"></div>`}
   </div>`;
