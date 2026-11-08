@@ -196,9 +196,12 @@ def run(sample_notice: str | None = None):
                 if txt.strip(): texts[t["id"]] = txt
             t["has_text"] = t["id"] in texts
         t_total += len(trows)
-        # Public hearing: status page (getPHWS) first; else the date the testimony was filed for; else LegiScan's calendar
+        # Public hearing: status page (getPHWS) first; else the date the testimony was filed for; else LegiScan's calendar,
+        # but only when the status page's hearing list couldn't be fetched. When the Legislature lists the bill's hearings
+        # and work sessions and none is a public hearing, LegiScan's "hearing" entries are work sessions or withdrawals
+        # (checked on LD 595, 609, 302, 705, 1880), so they are not used.
         t_dates = sorted({t["hearing_date"] for t in trows if t.get("hearing_date")})
-        hearing = sp.get("hearing") or ({"date": t_dates[0], "committee_code": code} if t_dates else None) or next(({"date": c["date"], "time": c.get("time"), "location": c.get("location")} for c in lg.get("calendar", []) if "hearing" in (c.get("type") or c.get("description") or "").lower()), None)
+        hearing = sp.get("hearing") or ({"date": t_dates[0], "committee_code": code} if t_dates else None) or (None if sp.get("hearings") is not None else next(({"date": c["date"], "time": c.get("time"), "location": c.get("location")} for c in lg.get("calendar", []) if "hearing" in (c.get("type") or c.get("description") or "").lower()), None))
         full = {
             "ld": ld, "paper": sp.get("paper"), "session": config.SESSION, "title": title,
             "sponsor_id": sponsor_id, "cosponsor_ids": cos_ids,

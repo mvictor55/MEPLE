@@ -428,6 +428,7 @@ async function loadBill(ld){
 }
 async function loadTexts(ld){
   if(!D.texts[ld]){
+    if(D.idxByLd[ld] && !D.idxByLd[ld].testimony_count) return (D.texts[ld] = {});   // no file is written for bills without testimony
     try { D.texts[ld] = await getJSON(`testimony/LD${ld}.json`); } catch(e){ D.texts[ld] = {}; }
   }
   return D.texts[ld];
@@ -872,6 +873,44 @@ function mediaPanel(b){
   if(!items.length) return "";
   return `<div class="panel"><h2>Watch and read</h2>${items.map(i=>`<div style="font-size:14px;margin-bottom:6px">${i}</div>`).join("")}</div>`;
 }
+// "What didn't happen": sentences for bills with no roll calls or no testimony, built from the bill's own record.
+function committeeVoteSentence(b){
+  const v = [...(b.committee_actions||[])].reverse().find(a=>/^voted$/i.test(a.action||"") && a.result);
+  if(!v) return "";
+  const r = String(v.result).trim();
+  const what = /divided/i.test(r) ? "reached a divided report"
+    : /^ontp\b/i.test(r) ? "voted Ought Not to Pass"
+    : /^otp[- ]?am\b/i.test(r) ? "voted Ought to Pass as Amended"
+    : /^otp\b/i.test(r) ? "voted Ought to Pass" : `voted ${r}`;
+  return `The ${b.committee_name||comName(b.committee_code)} Committee ${what}${v.date?` on ${fmtDate(v.date)}`:""}.`;
+}
+function dispositionSentence(fd){
+  if(!fd || !fd.label) return "";
+  const raw = String(fd.label).trim(), on = fd.date ? ` on ${fmtDate(fd.date)}` : "";
+  const R = [
+    [/joint rule (\d+)/i, m=>`The bill died under Joint Rule ${m[1]}${on}.`],
+    [/^(emergency )?enacted$/i, m=>`The bill was enacted${m[1]?" as an emergency measure":""}${on}.`],
+    [/^(emergency )?finally passed$/i, m=>`The resolve was finally passed${m[1]?" as an emergency measure":""}${on}.`],
+    [/^accepted (majority|minority) \(ontp\) report$/i, m=>`The bill died when the Legislature accepted the ${m[1].toLowerCase()} Ought Not to Pass report${on}.`],
+    [/^accepted report ([a-z]) \(ontp\)$/i, m=>`The bill died when the Legislature accepted Report ${m[1].toUpperCase()}, Ought Not to Pass${on}.`],
+    [/^died on adjournment$/i, ()=>`The bill died when the Legislature adjourned${on}.`],
+    [/^died between houses$/i, ()=>`The bill died between the House and Senate${on}.`],
+    [/withdraw/i, ()=>`The bill was withdrawn${on}.`],
+    [/^veto sustained$/i, ()=>`The Governor vetoed the bill and the veto was sustained${on}.`],
+    [/^indefinitely postponed$/i, ()=>`The bill was indefinitely postponed${on}.`],
+    [/enactment failed$/i, ()=>`The bill failed its final vote${on}.`],
+  ];
+  for(const [re, f] of R){ const m = raw.match(re); if(m) return f(m); }
+  return `Final status: ${plainStatus(raw)}${fd.date?`, ${fmtDate(fd.date)}`:""}.`;
+}
+function noVotesSentence(b){
+  return ["No roll-call votes were taken.", committeeVoteSentence(b), dispositionSentence(b.final_disposition)].filter(Boolean).join(" ");
+}
+function noTestimonySentence(hearingDate){
+  return hearingDate
+    ? `A public hearing was held on ${fmtDate(hearingDate)}. No written testimony is on the Legislature's record for it.`
+    : "No public hearing was held, so there is no written testimony.";
+}
 function historyList(b){
   // Merge committee actions and chamber actions into one dated list; fall back to the hand-written timeline.
   const ev = [];
@@ -1016,14 +1055,18 @@ async function viewBill(ld, params=new URLSearchParams()){
         ${all.length?`<div class="panel" style="padding:16px 20px">
           <h2 style="margin-bottom:4px">Testimony at a glance · ${fmtN(all.length)} letters</h2>
           ${stanceBar(all)}
+          ${all.length>=8 && !(syn&&(syn.themes||[]).length)?`<p style="font-size:14px;color:var(--ink-2);margin:8px 0 0">No written summary of the testimony yet.</p>`:""}
           <div class="src"><a href="#testimony" onclick="event.preventDefault();document.getElementById('testimony').scrollIntoView({behavior:'smooth'})">Read the testimony ↓</a></div>
-        </div>`:""}
+        </div>`:`<div class="panel" style="padding:16px 20px">
+          <h2 style="margin-bottom:4px">Testimony at a glance</h2>
+          <p style="font-size:14.5px;color:var(--ink-2);margin:0">${esc(noTestimonySentence(hearingDate))}</p>
+        </div>`}
         ${synthesisPanel(syn, params)}
         <div class="panel" id="testimony">
           <h2>Public testimony · ${fmtN(all.length)} on record</h2>
           ${filed.length?`<div class="src" style="margin:0 0 6px"><span class="record-tag">Legislature's record</span> Written testimony filed with the ${esc(b.committee_name||comName(b.committee_code))} Committee${hearingDate?` for the ${esc(fmtDate(hearingDate))} public hearing`:""}.</div>`:""}
           ${(b.heard_with||[]).length?`<div class="src" style="margin-bottom:6px">Heard with ${b.heard_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}: ${fmtN(filed.filter(t=>(t.shared_with||[]).length).length)} of these documents were also filed under those bills. Positions marked * are inferred for LD ${b.ld} only, and left blank when a document states no position on this bill.</div>`:""}
-          ${testimonyList(all, texts, params, syn)}
+          ${all.length?testimonyList(all, texts, params, syn):`<p style="font-size:14.5px;color:var(--ink-2)">${esc(noTestimonySentence(hearingDate))}</p>`}
         </div>
         <div class="panel">
           <h2>History and votes</h2>
@@ -1032,7 +1075,7 @@ async function viewBill(ld, params=new URLSearchParams()){
             ${reports.map(r=>`<div style="font-size:14px;margin-bottom:10px"><b>${esc(r.label||"Report")}${r.recommendation?` — ${esc(r.recommendation)}`:""}</b>${r.signer_ids&&r.signer_ids.length?`<div style="color:var(--ink-2);margin-top:3px">${r.signer_ids.map(legLink).join(", ")}</div>`:(r.signers&&r.signers.length?`<div style="color:var(--ink-2);margin-top:3px">${r.signers.map(esc).join(", ")}</div>`:"")}</div>`).join("")}`:""}
           ${rolls.length?`<h3 class="subh">Roll-call votes</h3><table class="plain"><tr><th>Date</th><th>Vote</th></tr>
             ${rolls.map(r=>`<tr><td>${esc(r.date||"")}</td><td style="white-space:normal">${esc({H:"House",S:"Senate"}[r.chamber]||r.chamber||"")}: <span title="${esc(r.motion||"")}">${esc(plainMotion(r.motion))}</span><br><b>${esc(r.yea)}–${esc(r.nay)}</b>${r.result?` · ${esc(r.result)}`:""}${r.url?` · <a href="${esc(r.url)}" target="_blank" rel="noopener">record</a>`:""}</td></tr>`).join("")}
-          </table>`:""}
+          </table>`:`<h3 class="subh">Votes</h3><p style="font-size:14.5px;margin:0">${esc(noVotesSentence(b))}</p>`}
           ${amendments.length?`<h3 class="subh">Amendments</h3><table class="plain"><tr><th>Amendment</th><th>Status</th></tr>
             ${amendments.map(a=>`<tr><td>${a.url?`<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.id)}</a>`:esc(a.id)}</td><td style="white-space:normal">${esc(a.status||"")}${a.sponsor?` · ${esc(a.sponsor)}`:""}${a.fiscal_note_url?` · <a href="${esc(a.fiscal_note_url)}" target="_blank" rel="noopener">fiscal note</a>`:""}</td></tr>`).join("")}
           </table>`:""}
@@ -1246,18 +1289,23 @@ async function viewLegislator(id, params=new URLSearchParams()){
     const vf = params.get("v")||"", vc = params.get("vc")||"";
     const kind = v => /^(yea|yes|aye)/i.test(v||"") ? "yea" : /^(nay|no)/i.test(v||"") ? "nay" : "absent";
     const vcoms = [...new Set(votes.map(v=>(D.idxByLd[v.ld]||{}).committee_code).filter(Boolean))].sort((a,b)=>comName(a).localeCompare(comName(b)));
-    const list = votes.filter(v=>(!vf || kind(v.vote)===vf) && (!vc || (D.idxByLd[v.ld]||{}).committee_code===vc));
+    const vqRaw = params.get("q")||"", vq = vqRaw.trim().toLowerCase();
+    const ldq = (vq.match(/^(?:ld\s*)?(\d+)$/)||[])[1];
+    const list = votes.filter(v=>(!vf || kind(v.vote)===vf) && (!vc || (D.idxByLd[v.ld]||{}).committee_code===vc) &&
+      (!vq || (ldq ? String(v.ld)===ldq : `ld ${v.ld} ${v.title||""} ${v.motion||""} ${plainMotion(v.motion)}`.toLowerCase().includes(vq))));
+    const explain = ldq && !list.length ? await explainNoVote(l, Number(ldq), votes) : "";
     const voteCls = v => ({yea:"support", nay:"oppose"})[kind(v)] || "neutral";
     const nv = Math.max(50, Number(params.get("n"))||50);
     body = `<div class="panel">
+      <div class="toolbar" style="margin-bottom:10px"><input type="search" placeholder="Search these votes by LD number or keyword" value="${esc(vqRaw)}" oninput="updateParam('q', this.value, true)" aria-label="Search these votes by LD number or keyword"></div>
       <div class="filters">
         <select onchange="updateParam('v', this.value, true)" aria-label="Filter by vote"><option value="">All votes (${fmtN(votes.length)})</option>${["yea","nay","absent"].map(k=>`<option value="${k}" ${vf===k?"selected":""}>${k==="absent"?"Absent / not voting":k[0].toUpperCase()+k.slice(1)} (${fmtN(votes.filter(v=>kind(v.vote)===k).length)})</option>`).join("")}</select>
         <select onchange="updateParam('vc', this.value, true)" aria-label="Filter by committee"><option value="">All committees</option>${vcoms.map(c=>`<option value="${esc(c)}" ${vc===c?"selected":""}>${esc(comName(c))}</option>`).join("")}</select>
         <span class="src" style="margin:0">${fmtN(list.length)} roll-call vote${list.length===1?"":"s"}</span>
       </div>
-      <table class="plain"><tr><th>Date</th><th>Bill and motion</th><th>Vote</th></tr>
+      ${explain?`<p style="font-size:14.5px;margin:12px 0 4px">${explain}</p>`:!list.length?`<p style="font-size:14.5px;color:var(--ink-2)">No votes match.</p>`:`<table class="plain"><tr><th>Date</th><th>Bill and motion</th><th>Vote</th></tr>
       ${list.slice(0,nv).map(v=>`<tr><td>${esc(v.date||"")}</td><td style="white-space:normal"><a href="#/bill/${v.ld}">LD ${v.ld}</a> <span class="clamp2" style="font-size:12.5px;color:var(--ink-2)" title="${esc(v.title||"")}">${esc(v.title||"")}</span><div style="font-size:12.5px;color:var(--ink-3)" title="${esc(v.motion||"")}">${esc(plainMotion(v.motion))}${v.yea!=null?` · ${v.yea}–${v.nay}`:""}${v.result?` · ${esc(v.result)}`:""}</div></td><td><span class="stance-pill ${voteCls(v.vote)}">${esc(v.vote||"—")}</span></td></tr>`).join("")}
-      </table>${moreBtn("n", Math.min(nv, list.length), list.length, 50)}</div>`;
+      </table>`}${moreBtn("n", Math.min(nv, list.length), list.length, 50)}</div>`;
   }
   else if(tab==="committee"){
     body = `<div class="panel"><h2>Committee assignments</h2>${coms.length?coms.map(c=>`<div style="font-size:14.5px;margin-bottom:6px"><a href="#/committee/${esc(c.code)}">${esc(comName(c.code))}</a>${c.role?` <span style="color:var(--ink-3)">· ${esc(c.role)}</span>`:""}</div>`).join(""):`<p style="font-size:14px;color:var(--ink-2)">No current assignments.</p>`}</div>
@@ -1331,6 +1379,35 @@ async function viewLegislator(id, params=new URLSearchParams()){
   </div>`;
 }
 
+// Why a member has no roll-call vote on a bill, for the Votes tab search.
+async function explainNoVote(l, ld, votes){
+  const row = D.idxByLd[ld];
+  if(!row) return `No bill LD ${ld} in the ${esc(D.meta.legislature)}.`;
+  const link = `<a href="#/bill/${ld}">LD ${ld}</a>`;
+  const who = `${l.chamber==="Senate"?"Sen.":"Rep."} ${esc(l.name)}`;
+  let b; try { b = await loadBill(ld); } catch(e){ return ""; }
+  const rolls = b.roll_calls||[];
+  if(!rolls.length){
+    const fd = b.final_disposition||{};
+    return `${link} never came to a floor vote.${fd.label?` ${esc(plainStatus(fd.label))}${fd.date?`, ${esc(fmtDate(fd.date))}`:""}.`:""}`;
+  }
+  const ch = l.chamber==="Senate" ? "S" : "H";
+  const mine = rolls.filter(r=>r.chamber===ch);
+  if(!mine.length){
+    const other = l.chamber==="Senate" ? "House" : "Senate";
+    return `The only roll-call votes on ${link} were in the ${other}. ${who} serves in the ${esc(l.chamber)}.`;
+  }
+  // Recorded in the member's chamber but not on these roll calls: tribal representatives don't vote on roll calls,
+  // members seated mid-session missed earlier votes, and former members missed later ones.
+  let why = "";
+  const dates = votes.map(v=>v.date).filter(Boolean).sort();
+  const rd = mine.map(r=>r.date).filter(Boolean).sort();
+  if(l.district==="TRIBE") why = " Tribal representatives are not recorded on House roll calls.";
+  else if(!dates.length) why = ` No roll-call votes are recorded for ${who} in the ${esc(D.meta.legislature)}; the member may have been seated after the last one.`;
+  else if(rd.length && rd[rd.length-1] < dates[0]) why = ` These votes (${esc(fmtDate(rd[0]))}${rd.length>1&&rd[0]!==rd[rd.length-1]?`–${esc(fmtDate(rd[rd.length-1]))}`:""}) came before ${who}'s first recorded roll-call vote on ${esc(fmtDate(dates[0]))}.`;
+  else if(rd.length && rd[0] > dates[dates.length-1]) why = ` These votes came after ${who}'s last recorded roll-call vote on ${esc(fmtDate(dates[dates.length-1]))}.`;
+  return `${who} is not recorded on the roll calls for ${link}.${why}`;
+}
 const OUTCOMES = [["enacted","Enacted"],["died","Died"],["vetoed","Vetoed"],["withdrawn","Withdrawn"],["pending","Pending"],["held","Held by Governor"]];
 async function viewCommittee(code, params=new URLSearchParams()){
   const c = D.comByCode[code];
