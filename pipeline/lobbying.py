@@ -46,6 +46,46 @@ LOBBYING_ENDPOINTS = {"bills": API + "/bills-and-issues", "compensation": API + 
 SEARCH_URL = "https://mainelobbying.com/advanced-search"
 LOBBYING_YEARS = ("2025", "2026")    # lobbying years overlapping the 132nd
 
+# Lobbying client -> testimony profile, when the names differ (reviewed 2026-11-08). These only link the client
+# page and the profile; counts are never merged. Deliberately NOT linked: Maine Tourism Association (separate from
+# HospitalityMaine; the joint profile is their joint filings), United States of Care Action (vs United States of
+# Care) and Elevance Health (vs Anthem Blue Cross and Blue Shield), which are separate legal entities.
+CLIENT_PROFILE_ALIASES = {
+    "Oxford Casino - Churchill Downs Inc.": "Oxford Casino and Hotel",
+    "Pharmaceutical Research and Manufacturers of America (PhRMA)": "PhRMA",
+    "Charter Communications Operating, LLC": "Charter Communications",
+    "Cannabis Association of Maine, Inc., d/b/a CannabisME": "Cannabis Association of Maine",
+    "Maine Equal Justice Partners, Inc.": "Maine Equal Justice",
+    "Maine Vapors Association": "Maine Vapers Association",
+    "Alliance for Addiction and Mental Health Services, Maine": "Alliance for Addiction and Mental Health Services",
+    "Legal Services for the Elderly": "Legal Services for Maine Elders",   # renamed; its testimony says "formerly known as"
+    "Comcast Cable Communications Management, LLC": "Comcast",
+    "Bioscience Association of Maine (BioME)": "Bioscience Association of Maine",
+    "Maine Alliance of Boys & Girls Club": "Maine Alliance of Boys & Girls Clubs",
+    "CTIA - The Wireless Association": "CTIA",
+}
+
+def org_key(s) -> str:
+    """The name rule for client <-> profile links (same as the site used before links were built here)."""
+    s = str(s or "").lower().replace("&", " and ")
+    s = re.sub(r"[^a-z0-9 ]+", " ", s)
+    s = re.sub(r"\b(the|inc|llc|corp|corporation)\b", "", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+def client_profiles(clients) -> dict:
+    """client name -> profile id, by the name rule or CLIENT_PROFILE_ALIASES (organizations and agencies only)."""
+    p = config.OUT / "profiles" / "index.json"
+    if not p.exists(): return {}
+    by_key = {}
+    for x in json.loads(p.read_text(encoding="utf-8")):
+        if x["type"] != "official": by_key.setdefault(org_key(x["name"]), x["id"])
+    alias = {k.strip(): v for k, v in CLIENT_PROFILE_ALIASES.items()}
+    out = {}
+    for c in clients:
+        pid = by_key.get(org_key(alias.get(c.strip(), c)))
+        if pid: out[c] = pid
+    return out
+
 def discover():
     from playwright.sync_api import sync_playwright
     seen = []
@@ -196,13 +236,15 @@ def build():
         sl, i = base, 2
         while sl in used: sl, i = f"{base}-{i}", i + 1
         used.add(sl); slugs[k] = sl
+    prof_of = client_profiles(by_client)
+    print(f"lobbying: {len(prof_of)} of {len(by_client)} clients linked to a testimony profile")
     cdir = out / "clients"
     if cdir.exists():
         for p in cdir.glob("*.json"): p.unlink()
     cdir.mkdir(parents=True, exist_ok=True)
     for k, v in by_client.items():
         (cdir / f"{slugs[k]}.json").write_text(json.dumps({
-            "client": k, "slug": slugs[k], "reports": v["reports"],
+            "client": k, "slug": slugs[k], "reports": v["reports"], "profile_id": prof_of.get(k),
             "lobbyists": [{"lobbyist": a, "firm": f or None} for a, f in sorted(v["lobbyists"])],
             "bills": sorted(({"ld": ld, "months": sorted(v["months"].get(ld, ()))} for ld in v["bills"]), key=lambda x: (-len(x["months"]), x["ld"])),
             "source": PORTAL}, ensure_ascii=False), encoding="utf-8")
@@ -210,7 +252,7 @@ def build():
     idx = {
         "years": list(LOBBYING_YEARS),
         "most_lobbied": sorted(({"ld": ld, "reports": len(v), "clients": clients_of[ld]} for ld, v in by_ld.items()), key=lambda x: (-x["clients"], -x["reports"], x["ld"]))[:100],
-        "by_client": sorted(({"client": k, "slug": slugs[k], "reports": v["reports"], "bills": len(v["bills"])} for k, v in by_client.items()), key=lambda x: (-x["reports"], x["client"])),
+        "by_client": sorted(({"client": k, "slug": slugs[k], "reports": v["reports"], "bills": len(v["bills"]), **({"profile_id": prof_of[k]} if k in prof_of else {})} for k, v in by_client.items()), key=lambda x: (-x["reports"], x["client"])),
         "by_lobbyist": sorted(({"lobbyist": k, "firm": max(v["firms"], key=v["firms"].get) if v["firms"] else None, "reports": v["reports"],
                                 "clients": len(v["clients"]), "bills": len(v["bills"])} for k, v in by_lobbyist.items()), key=lambda x: (-x["reports"], x["lobbyist"])),
         "source": PORTAL,

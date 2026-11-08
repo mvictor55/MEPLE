@@ -84,6 +84,17 @@ COMMITTEE_TYPES = {"political_action_committee", "political_party_committee", "c
 SOURCE_LABEL = {"individual": "Individuals", "committee": "Committees (PACs, party and candidate committees)",
                 "candidate": "The candidate", "business": "Businesses and organizations"}
 FILER_URL = "https://www.mainecampaignfinancedisclosure.com/public/filers/{id}"
+# Members whose candidate rows can't be told apart by name, office and district: the campaign is pinned by filer ID
+# (checked by hand on the Commission's site), and only that filer's transactions are used.
+PINNED = {
+    "h-beck-matthew": {
+        # Two 2024 races for HD 122: the March 5, 2024 special election to finish Lois Reckitt's term in the 131st
+        # (filer ...fet941nj, $17,533.69, registered Dec 2023), and the 2024 primary/general that elected him to the 132nd.
+        "filer": "f_01k89h8gcqe2xs2kmpf81w2aga", "candidate_total": "$10,889.48",
+        "also": {"text": "He also won a March 2024 special election for this seat; that campaign reported receiving $17,534.",
+                 "filer": "f_01k89h8gcqe2xs2kmpfet941nj"},
+    },
+}
 
 def run(cycle: str):
     """Inputs (downloaded by hand from the public search; max 10,000 rows per CSV):
@@ -127,6 +138,14 @@ def run(cycle: str):
         if len(hits) == 1: filer_cand[fid] = hits[0]
         elif len(hits) > 1: ambiguous_filers.append((name, office, dist, [h["Candidate Name"] for h in hits]))
         else: unmatched_filers.append((name, office, dist))
+    # pinned campaigns: the filer goes to the candidate row with the given total, never to a same-named row
+    pinned_rows = {}
+    for lid, pin in PINNED.items():
+        row = next((c for c in cand_rows if c["Total Money Received"].strip() == pin["candidate_total"]
+                    and pin["filer"] in filers and _name_key(c["Candidate Name"]) == _name_key(filers[pin["filer"]][0])), None)
+        if row:
+            pinned_rows[lid] = row; filer_cand[pin["filer"]] = row
+            ambiguous_filers = [a for a in ambiguous_filers if _name_key(a[0]) != _name_key(row["Candidate Name"])]
     # A person can have several filer IDs in these files: the previous campaign closing out in 2023, the 2024
     # campaign, and the next campaign opened after the November 2024 election. Keep the one with the most
     # transactions dated 2024-01-01 .. election day; the others are different campaigns and are left out.
@@ -182,7 +201,8 @@ def run(cycle: str):
         if len(hits) > 1:
             fl = [c for c in hits if _first_last(c["Candidate Name"]).split()[0] == _first_last(l["name"]).split()[0]]
             hits = fl if len(fl) == 1 else hits
-        if len(hits) == 1: matched[l["id"]] = hits[0]
+        if l["id"] in pinned_rows: matched[l["id"]] = pinned_rows[l["id"]]
+        elif len(hits) == 1: matched[l["id"]] = hits[0]
         elif hits: ambiguous.append((l["name"], l["chamber"], l["district"], [h["Candidate Name"] for h in hits]))
         else: unmatched.append((l["name"], l["chamber"], l["district"]))
 
@@ -214,6 +234,7 @@ def run(cycle: str):
                "top_contributors": [{"name": k, "type": v[2], "amount": round(v[0], 2), "count": v[1]}
                                     for k, v in sorted(a["donors"].items(), key=lambda kv: -kv[1][0])[:8] if v[0] > 0],
                "filer_ids": fids, "source_url": FILER_URL.format(id=fids[0]) if fids else SOURCE,
+               **({"also": {"text": PINNED[lid]["also"]["text"], "url": FILER_URL.format(id=PINNED[lid]["also"]["filer"])}} if lid in PINNED else {}),
                "note": "Totals raised and spent are the Ethics Commission's candidate totals for the 2024 election. Contributors are summed from itemized monetary and in-kind contributions dated 2023–2024."}
         (out / f"{lid}.json").write_text(json.dumps(rec, ensure_ascii=False), encoding="utf-8")
     (out / "index.json").write_text(json.dumps({"cycle": cycle, "ids": sorted(matched), "source": SOURCE}), encoding="utf-8")

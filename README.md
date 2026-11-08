@@ -5,7 +5,7 @@ the Maine State Legislature, adapted from [MAPLE](https://mapletestimony.org)
 (Massachusetts). Stewarded by the Center for Engaged Citizenship at the
 University of Southern Maine.
 
-Live prototype: https://meple-v1.netlify.app
+Live site: https://me-ple.netlify.app
 
 ## Layout
 

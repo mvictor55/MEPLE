@@ -32,6 +32,8 @@ ORG_ALIASES: dict[str, str] = {
     # "variant as written": "canonical as written"   (add after reviewing profiles/review.json)
     "Alliance for Addiction & Mental Health Services, Maine": "Alliance for Addiction and Mental Health Services",
     "Alliance for Addiction and Mental Health Services, Maine": "Alliance for Addiction and Mental Health Services",
+    # the two joint filings are one profile; Maine Tourism Association and HospitalityMaine on their own stay separate
+    "HospitalityMaine and Maine Tourism Association": "HospitalityMaine/Maine Tourism Association",
 }
 JUNK_ORG = {"", "self", "myself", "none", "n a", "na", "citizen", "private citizen", "resident", "individual",
             "personal", "retired", "constituent", "concerned citizen", "parent", "voter", "student", "taxpayer",
@@ -52,6 +54,8 @@ def norm(s: str | None) -> str:
     s = re.sub(r"^the\s+", "", s)
     s = re.sub(ORG_SUFFIXES, "", s).strip()
     return s
+
+ORG_ALIASES_N = {norm(k): v for k, v in ORG_ALIASES.items()}   # aliases also match "&" vs "and", case and punctuation
 
 def norm_agency(s: str) -> str:
     s = norm(s)
@@ -261,7 +265,7 @@ def run():
     agency_rows = defaultdict(list)
 
     for r in rows:
-        raw_org = ORG_ALIASES.get(r.get("organization") or "", r.get("organization"))
+        raw_org = ORG_ALIASES.get(r.get("organization") or "") or ORG_ALIASES_N.get(norm(r.get("organization")), r.get("organization"))
         n_org = norm(raw_org)
         aid = match_agency(raw_org) if raw_org else None
         txt = text_for(r["ld"], r["id"]) if r.get("has_text") else None

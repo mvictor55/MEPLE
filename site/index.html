@@ -1387,6 +1387,7 @@ async function viewLegislator(id, params=new URLSearchParams()){
              <table class="plain"><tr><th>Contributor</th><th>Type</th><th style="text-align:right">Total</th></tr>
              ${fin.top_contributors.map(t=>`<tr><td style="white-space:normal">${esc(t.name)}</td><td>${esc(t.type)}</td><td style="text-align:right">${money(t.amount)}${t.count>1?` <span style="color:var(--ink-3)">(${t.count})</span>`:""}</td></tr>`).join("")}
              </table>`:""}`}
+      ${fin.also?`<p style="margin-top:12px;font-size:14px"><a href="${esc(fin.also.url)}" target="_blank" rel="noopener">${esc(fin.also.text)} ↗</a></p>`:""}
       <div class="src">${esc(fin.note||"")} <a href="${esc(fin.source_url||fin.source||"#")}" target="_blank" rel="noopener">Candidate page on mainecampaignfinancedisclosure.com ↗</a></div></div>`;
   }
   else {
@@ -1630,7 +1631,7 @@ async function viewProfile(id, params){
   const shown = [...items].reverse().slice(0, tn);
   const officials = (p.officials||[]).map(o=>byId[o]).filter(Boolean);
   const lobIdx = await loadOptional("lobbying/index.json");
-  const lobby = lobIdx && p.type!=="official" ? (lobIdx.by_client||[]).find(c=>orgKey(c.client)===orgKey(p.name)) : null;
+  const lobby = lobIdx && p.type!=="official" ? (lobIdx.by_client||[]).find(c=>c.profile_id===p.id) : null;
   const lobbyC = lobby && lobby.slug ? await loadOptional(`lobbying/clients/${encodeURIComponent(lobby.slug)}.json`) : null;
   const lbAll = params.get("lb")==="all";
   return `
@@ -1667,8 +1668,7 @@ async function viewProfile(id, params){
 }
 
 /* ---------- lobbying ---------- */
-// The name rule profile pages use to match an organization to a lobbying client.
-const orgKey = s => String(s||"").toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9 ]+/g," ").replace(/\b(the|inc|llc|corp|corporation)\b/g,"").replace(/\s+/g," ").trim();
+// Client <-> profile links are built in pipeline/lobbying.py (name rule plus reviewed aliases); counts are never merged.
 const ETHICS_SITE = "https://mainelobbying.com/public/dashboard";
 function fmtMonth(p){ return new Date(p+"-15T12:00:00").toLocaleDateString("en-US",{month:"short",year:"numeric"}); }
 function monthsLabel(ms){
@@ -1676,17 +1676,10 @@ function monthsLabel(ms){
   const s = [...ms].sort();
   return `${s.length} month${s.length===1?"":"s"} · ${fmtMonth(s[0])}${s.length>1?`–${fmtMonth(s[s.length-1])}`:""}`;
 }
-async function orgProfilesByKey(){
-  const idx = await loadOptional("profiles/index.json") || [];
-  const m = {};
-  for(const p of idx) if(p.type!=="official") m[orgKey(p.name)] ||= p;
-  return m;
-}
 const LOBBY_TOP_BILLS = 25, LOBBY_TOP = 50;
 async function viewLobbying(params){
   const idx = await loadOptional("lobbying/index.json");
   if(!idx) return `<div class="page-head"><div class="wrap"><h1>Lobbying</h1></div></div><div class="wrap"><div class="empty">Lobbying data hasn't been built yet.</div></div>`;
-  const prof = await orgProfilesByKey();
   const bsort = params.get("bsort")==="reports" ? "reports" : "clients";
   const q = (params.get("q")||"").trim().toLowerCase();
   const nc = Math.max(LOBBY_TOP, Number(params.get("nc"))||LOBBY_TOP), nl = Math.max(LOBBY_TOP, Number(params.get("nl"))||LOBBY_TOP);
@@ -1719,7 +1712,7 @@ async function viewLobbying(params){
     <div class="panel" id="lob-clients">
       <h2>${q?`Clients matching “${esc(params.get("q").trim())}” · ${fmtN(clients.length)}`:"Most active clients"}</h2>
       ${clients.length?`<table class="plain"><tr><th>Client</th><th style="text-align:right">Bills lobbied</th><th style="text-align:right">Monthly reports</th></tr>
-      ${clients.slice(0,nc).map(c=>{ const p = prof[orgKey(c.client)];
+      ${clients.slice(0,nc).map(c=>{ const p = c.profile_id ? {id:c.profile_id} : null;
         return `<tr><td style="white-space:normal"><a href="#/lobbying/client/${esc(c.slug)}">${esc(c.client)}</a>${p?` <span style="font-size:12.5px;color:var(--ink-3)">· <a href="#/profile/${esc(p.id)}">testimony profile</a></span>`:""}</td><td style="text-align:right">${fmtN(c.bills)}</td><td style="text-align:right">${fmtN(c.reports)}</td></tr>`; }).join("")}
       </table>${moreBtn("nc", Math.min(nc, clients.length), clients.length, LOBBY_TOP)}`:`<p style="font-size:14.5px;color:var(--ink-2)">No clients match.</p>`}
     </div>
@@ -1736,7 +1729,7 @@ async function viewLobbying(params){
 async function viewLobbyClient(slug, params){
   const c = await loadOptional(`lobbying/clients/${encodeURIComponent(slug)}.json`);
   if(!c) return `<div class="wrap"><div class="empty">Lobbying client not found. <a href="#/lobbying">Back to lobbying</a></div></div>`;
-  const prof = (await orgProfilesByKey())[orgKey(c.client)];
+  const prof = c.profile_id ? {id:c.profile_id} : null;
   const n = Math.max(50, Number(params.get("n"))||50);
   const rows = c.bills.map(x=>({...x, b:D.idxByLd[x.ld]}));
   return `
@@ -1744,7 +1737,7 @@ async function viewLobbyClient(slug, params){
     <div class="crumb" style="margin-top:22px"><a href="#/lobbying">Lobbying</a> / ${esc(c.client)}</div>
     <div class="role" style="font-size:12.5px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em;margin-top:8px">Lobbying client</div>
     <h1 style="font-family:var(--serif);font-size:28px;margin:4px 0 6px">${esc(c.client)}</h1>
-    <div style="color:var(--ink-2);font-size:15px;margin-bottom:14px">${fmtN(c.bills.length)} bill${c.bills.length===1?"":"s"} lobbied in ${fmtN(c.reports)} monthly report${c.reports===1?"":"s"}${prof?` · <a href="#/profile/${esc(prof.id)}">Testimony profile →</a> <span style="color:var(--ink-3);font-size:13px">(matched by name)</span>`:""}</div>
+    <div style="color:var(--ink-2);font-size:15px;margin-bottom:14px">${fmtN(c.bills.length)} bill${c.bills.length===1?"":"s"} lobbied in ${fmtN(c.reports)} monthly report${c.reports===1?"":"s"}${prof?` · <a href="#/profile/${esc(prof.id)}">Testimony profile →</a> `:""}</div>
     <div class="panel"><h2>Lobbyist${c.lobbyists.length===1?"":"s"}</h2>
       <div style="font-size:14.5px">${c.lobbyists.map(l=>esc(l.lobbyist)+(l.firm?` <span style="color:var(--ink-3)">· ${esc(l.firm)}</span>`:"")).join("<br>")}</div></div>
     <div class="panel"><h2>Bills lobbied · ${fmtN(rows.length)}</h2>

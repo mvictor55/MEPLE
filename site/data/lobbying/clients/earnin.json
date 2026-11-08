@@ -1,1 +1,1 @@
-{"client": "EarnIn", "slug": "earnin", "reports": 3, "lobbyists": [{"lobbyist": "BJ McCollister", "firm": null}, {"lobbyist": "Max Rush", "firm": null}], "bills": [{"ld": 1915, "months": ["2025-05", "2026-01", "2026-02"]}], "source": "https://mainelobbying.com/public/dashboard"}
+{"client": "EarnIn", "slug": "earnin", "reports": 3, "profile_id": null, "lobbyists": [{"lobbyist": "BJ McCollister", "firm": null}, {"lobbyist": "Max Rush", "firm": null}], "bills": [{"ld": 1915, "months": ["2025-05", "2026-01", "2026-02"]}], "source": "https://mainelobbying.com/public/dashboard"}
