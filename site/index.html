@@ -164,6 +164,11 @@
   .t-body.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
   .t-foot{margin-top:10px;font-size:12.5px;color:var(--ink-3);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
   .t-foot a,.t-foot button{font-weight:600;font-size:12.5px;color:var(--pine-mid);background:none;border:none;padding:0}
+  .t-foot button{cursor:pointer}
+  .t-foot .copy-url{font-size:12.5px;padding:3px 6px;width:min(100%,380px);border:1px solid var(--hairline-2);border-radius:6px;color:var(--ink)}
+  .t-item.flash{animation:letterflash 3s ease-out}
+  @keyframes letterflash{0%,55%{box-shadow:0 0 0 3px var(--maple);background:var(--pine-soft)}100%{box-shadow:0 0 0 0 transparent}}
+  @media (prefers-reduced-motion: reduce){ .t-item.flash{animation:none;box-shadow:0 0 0 3px var(--maple)} }
   .stance-pill{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:999px;padding:3px 11px}
   .stance-pill.support{background:var(--support-soft);color:var(--support-ink)}
   .stance-pill.oppose{background:var(--oppose-soft);color:var(--oppose-ink)}
@@ -837,12 +842,36 @@ function viewBills(params){
 }
 
 const STANCE_HEAD = {support:"Arguments for the bill", oppose:"Arguments against the bill", amend:"Changes requested", neutral:"Other points raised"};
-let pendingScroll = null;
+let pendingScroll = null, pendingLetter = null, pageTitle = null;
+const DEFAULT_TITLE = document.title;
+function copyLetterLink(btn, ld, id){
+  const url = location.href.split("#")[0] + `#/bill/${ld}?letter=${encodeURIComponent(id)}`;
+  const showUrl = () => {
+    const i = document.createElement("input");
+    i.type = "text"; i.readOnly = true; i.value = url; i.className = "copy-url"; i.setAttribute("aria-label", "Link to this letter");
+    btn.replaceWith(i); i.focus(); i.select();
+  };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(url).then(()=>{ btn.textContent = "Copied"; setTimeout(()=>{ btn.textContent = "Copy link"; }, 2000); }, showUrl);
+  } else showUrl();
+}
+// After a ?letter= render: scroll to the card, open its full text and highlight it for about three seconds.
+function revealLetter(id){
+  const el = document.getElementById("letter-" + id);
+  if(!el) return;
+  const btn = [...el.querySelectorAll(".t-foot button")].find(b=>b.textContent==="Read more");
+  if(btn) btn.click();
+  const hdr = document.querySelector("header.site");
+  const off = (hdr && getComputedStyle(hdr).position==="sticky" ? hdr.offsetHeight : 0) + 12;
+  window.scrollTo({top: el.getBoundingClientRect().top + window.scrollY - off, behavior: "instant"});
+  el.classList.add("flash");
+  setTimeout(()=>el.classList.remove("flash"), 3000);
+}
 function showTheme(i){ pendingScroll = "testimony"; updateParam("theme", String(i), true); }
 const T_FIRST = 25, T_MORE = 50;
 function clearTestimonyFilters(){
   const [path, qs] = location.hash.slice(1).split("?");
-  const p = new URLSearchParams(qs||""); ["tpos","tq","tn","theme"].forEach(k=>p.delete(k));
+  const p = new URLSearchParams(qs||""); ["tpos","tq","tn","theme","letter"].forEach(k=>p.delete(k));
   const s = p.toString(); history.replaceState(null,"","#"+path+(s?"?"+s:"")); render(false);
 }
 function lobbyingPanel(lob){
@@ -939,12 +968,13 @@ function testimonyItem(t, text, opts={}){
     ? `<div class="t-body ${opts.clamp?"clamp":""}" id="${id}">${esc(lead)}</div>${opts.clamp&&lead!==text?`<div class="t-body" id="${id}-full" hidden>${esc(text)}</div>`:""}`
     : `<div class="t-body" style="color:var(--ink-3)">Text not yet extracted (likely a scanned PDF).${t.url?` <a href="${esc(t.url)}" target="_blank" rel="noopener">Open the official PDF →</a>`:""}</div>`;
   const toggle = `(function(btn){var a=document.getElementById('${id}'),f=document.getElementById('${id}-full');var open=btn.textContent==='Read more';if(f){a.hidden=open;f.hidden=!open;}else{a.classList.toggle('clamp',!open);}btn.textContent=open?'Show less':'Read more';})(this)`;
-  return `<article class="t-item">
+  return `<article class="t-item" id="letter-${esc(t.id)}">
     <div class="t-head">${stancePill(t.position, t.position_source)}<span class="who">${whoHtml}</span><span class="where">${esc(where)}</span></div>
     ${body}
     <div class="t-foot">
-      ${opts.showBill && b ? `<a href="#/bill/${b.ld}" style="font-weight:400;color:var(--ink-2)">LD ${b.ld} — ${esc(b.title.length>76?b.title.slice(0,74)+"…":b.title)}</a>` : ""}
+      ${opts.showBill && b ? `<a href="#/bill/${b.ld}?letter=${encodeURIComponent(t.id)}" style="font-weight:400;color:var(--ink-2)">LD ${b.ld} — ${esc(b.title.length>76?b.title.slice(0,74)+"…":b.title)}</a>` : ""}
       ${text!=null && opts.clamp && text.length>320 ? `<button onclick="${toggle}">Read more</button>` : ""}
+      ${!t.mine && t.ld ? `<button type="button" onclick="copyLetterLink(this, ${Number(t.ld)}, '${esc(String(t.id))}')">Copy link</button>` : ""}
       ${t.url ? `<a href="${esc(t.url)}" target="_blank" rel="noopener">Official PDF ↗</a>` : ""}
       ${t.position_source==="inferred" ? `<span>* position inferred from the text</span>` : ""}
       ${(t.shared_with||[]).length && !opts.showBill ? `<span>Also filed under ${t.shared_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}</span>` : ""}
@@ -977,11 +1007,23 @@ function synthesisPanel(syn, params){
 const T_SORTS = {rel:"Most relevant", new:"Newest", old:"Oldest", name:"Name"};
 function testimonyList(all, texts, params, syn){
   if(!all.length) return `<div class="empty">No testimony on record for this bill.</div>`;
-  const th = syn && params.get("theme")!=null ? (syn.themes||[])[Number(params.get("theme"))] : null;
-  const themeIds = th ? new Set(th.testimony_ids) : null;
-  const tpos = params.get("tpos")||"";
-  const tqRaw = params.get("tq")||"";
-  const tq = tqRaw.trim().toLowerCase();
+  const filtersOf = p => {
+    const th = syn && p.get("theme")!=null ? (syn.themes||[])[Number(p.get("theme"))] : null;
+    const themeIds = th ? new Set(th.testimony_ids) : null;
+    const tpos = p.get("tpos")||"", tqRaw = p.get("tq")||"", tq = tqRaw.trim().toLowerCase();
+    const passes = t => (!themeIds || themeIds.has(t.id)) && (!tpos || (tpos==="unknown" ? !t.position : t.position===tpos)) &&
+      (!tq || `${t.name||""} ${t.organization||""} ${t.town||""}`.toLowerCase().includes(tq));
+    return {th, tpos, tqRaw, tq, passes};
+  };
+  // ?letter=ID: the linked letter is always shown. If a filter would hide it, the filters are dropped (and the URL updated).
+  const focusId = params.get("letter");
+  const focus = focusId ? all.find(t=>String(t.id)===focusId) : null;
+  let cleared = false;
+  if(focus && !filtersOf(params).passes(focus)){
+    params = new URLSearchParams(params); ["tpos","tq","theme"].forEach(k=>params.delete(k)); cleared = true;
+    history.replaceState(null, "", "#" + location.hash.slice(1).split("?")[0] + "?" + params.toString());
+  }
+  const {th, tpos, tqRaw, tq, passes} = filtersOf(params);
   const tsort = T_SORTS[params.get("tsort")] ? params.get("tsort") : "rel";
   const tn = Math.max(T_FIRST, Number(params.get("tn"))||T_FIRST);
   // Most relevant: readable letters with a position on this bill, then readable letters without one,
@@ -991,10 +1033,11 @@ function testimonyList(all, texts, params, syn){
   const byDate = (a,b) => String(a.date||"").localeCompare(String(b.date||""));
   const sorters = {rel:(a,b)=>rank(a)-rank(b) || byDate(a,b) || String(a.name||"").localeCompare(String(b.name||"")),
                    new:(a,b)=>byDate(b,a), old:byDate, name:(a,b)=>String(a.name||"").localeCompare(String(b.name||""))};
-  const list = all.filter(t => (!themeIds || themeIds.has(t.id)) &&
-    (!tpos || (tpos==="unknown" ? !t.position : t.position===tpos)) &&
-    (!tq || `${t.name||""} ${t.organization||""} ${t.town||""}`.toLowerCase().includes(tq))).sort(sorters[tsort]);
-  const visible = list.slice(0, tn);
+  const list = all.filter(passes).sort(sorters[tsort]);
+  let visible = list.slice(0, tn);
+  // A linked letter past the first page moves to the top rather than expanding the whole list.
+  if(focus && !visible.includes(focus)) visible = [focus, ...list.filter(t=>t!==focus).slice(0, tn-1)];
+  if(focus) pendingLetter = String(focus.id);
   const left = list.length - visible.length;
   const c = positionCounts(all);
   const controls = all.length > 10 ? `
@@ -1011,6 +1054,7 @@ function testimonyList(all, texts, params, syn){
         ${Object.entries(T_SORTS).map(([k,v])=>`<option value="${k}" ${tsort===k?"selected":""}>${v}</option>`).join("")}
       </select>
     </div>
+    ${cleared?`<div class="src" style="margin:0 0 6px;color:var(--ink)">Filters were cleared to show the linked letter.</div>`:""}
     ${th?`<div class="src" style="margin:0 0 6px;color:var(--ink)"><b>Letters making this point:</b> ${esc(th.label)}</div>`:""}
     <div class="result-note" style="margin-bottom:10px"><span>Showing ${fmtN(visible.length)} of ${fmtN(list.length)}${list.length!==all.length?` matching (${fmtN(all.length)} total)`:""}${tsort==="rel"?" · letters with a position on this bill first":""}</span>${tpos||tq||th?`<a href="#" onclick="event.preventDefault();clearTestimonyFilters()">Clear filters</a>`:""}</div>` : `<div style="height:14px"></div>`;
   return `${controls}
@@ -1040,6 +1084,8 @@ async function viewBill(ld, params=new URLSearchParams()){
   const cos = b.cosponsor_ids||[];
   const sp = D.legById[b.sponsor_id];
   const hearingDate = (b.hearing&&b.hearing.date) || row.hearing_date;
+  const linked = params.get("letter") ? all.find(t=>String(t.id)===params.get("letter")) : null;
+  if(linked) pageTitle = `Testimony of ${linked.name||linked.organization||"a member of the public"} on LD ${b.ld} — MEPLE`;
   return `
   <div class="wrap">
     <div class="bd-grid">
@@ -1746,6 +1792,7 @@ function updateParam(k,v,resetPage){
   const p = new URLSearchParams(qs||"");
   if(v) p.set(k,v); else p.delete(k);
   if(resetPage){ p.delete("page"); p.delete("tn"); }
+  if(k!=="letter") p.delete("letter");   // a linked letter stays pinned only until the reader changes the list
   const s = p.toString();
   history.replaceState(null,"","#"+path+(s?"?"+s:""));
   render(false);
@@ -1759,6 +1806,7 @@ async function render(scroll=true){
   const params = new URLSearchParams(qs||"");
   const seg = path.split("/").filter(Boolean);
   let html, nav="";
+  pendingLetter = null; pageTitle = null;
   try{
     if(seg.length===0){ html = viewHome(); }
     else if(seg[0]==="bills"){ html = viewBills(params); nav="bills"; }
@@ -1788,7 +1836,9 @@ async function render(scroll=true){
     if(el){ el.focus(); if(el.setSelectionRange && focusId.pos!=null){ try{el.setSelectionRange(focusId.pos,focusId.pos);}catch(e){} } }
   }
   document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("active", a.dataset.nav===nav));
-  if(pendingScroll){ const el = document.getElementById(pendingScroll); pendingScroll = null; if(el) el.scrollIntoView({behavior:"smooth", block:"start"}); }
+  document.title = pageTitle || DEFAULT_TITLE;
+  if(pendingLetter){ const id = pendingLetter; pendingLetter = null; pendingScroll = null; revealLetter(id); }
+  else if(pendingScroll){ const el = document.getElementById(pendingScroll); pendingScroll = null; if(el) el.scrollIntoView({behavior:"smooth", block:"start"}); }
   else if(scroll && !samePath) window.scrollTo(0,0);
 }
 
