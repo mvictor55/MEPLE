@@ -355,6 +355,7 @@
       <a href="#/legislators" data-nav="legislators">Legislators</a>
       <a href="#/committees" data-nav="committees">Committees</a>
       <a href="#/profiles" data-nav="profiles">Who testified</a>
+      <a href="#/lobbying" data-nav="lobbying">Lobbying</a>
       <a href="#/about" data-nav="about">About</a>
     </nav>
     <a class="hdr-cta" id="hdr-cta" href="https://legislature.maine.gov/testimony" target="_blank" rel="noopener" title="Submit testimony on the Maine Legislature's own site">Testify ↗</a>
@@ -377,6 +378,7 @@
         <a href="#/legislators">Find your legislators</a>
         <a href="#/committees">Committees</a>
         <a href="#/profiles">Organizations &amp; officials</a>
+        <a href="#/lobbying">Lobbying</a>
       </div>
       <div>
         <h4>Project</h4>
@@ -1582,8 +1584,9 @@ async function viewProfile(id, params){
   const shown = [...items].reverse().slice(0, tn);
   const officials = (p.officials||[]).map(o=>byId[o]).filter(Boolean);
   const lobIdx = await loadOptional("lobbying/index.json");
-  const key = s => String(s||"").toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9 ]+/g," ").replace(/\b(the|inc|llc|corp|corporation)\b/g,"").replace(/\s+/g," ").trim();
-  const lobby = lobIdx && p.type!=="official" ? (lobIdx.by_client||[]).find(c=>key(c.client)===key(p.name)) : null;
+  const lobby = lobIdx && p.type!=="official" ? (lobIdx.by_client||[]).find(c=>orgKey(c.client)===orgKey(p.name)) : null;
+  const lobbyC = lobby && lobby.slug ? await loadOptional(`lobbying/clients/${encodeURIComponent(lobby.slug)}.json`) : null;
+  const lbAll = params.get("lb")==="all";
   return `
   <div class="wrap">
     <div class="bd-grid">
@@ -1608,11 +1611,109 @@ async function viewProfile(id, params){
       <aside>
         ${officials.length?`<div class="panel"><h2>Officials who testified</h2>${officials.map(o=>`<div style="font-size:14px;margin-bottom:6px"><a href="#/profile/${esc(o.id)}">${esc(o.name)}</a>${o.title?` <span style="color:var(--ink-3)">· ${esc(o.title)}</span>`:""}</div>`).join("")}</div>`:""}
         ${(p.people||[]).length?`<div class="panel"><h2>Testified on its behalf</h2><div style="font-size:14px;color:var(--ink-2)">${p.people.map(esc).join(", ")}</div></div>`:""}
-        ${lobby?`<div class="panel"><h2>Lobbying</h2><p style="font-size:14px;color:var(--ink-2)">Also a registered lobbying client: ${fmtN(lobby.reports)} monthly reports on ${fmtN(lobby.bills)} bills.</p><div class="src">From the Maine Ethics Commission's lobbyist disclosures. Matched by name.</div></div>`:""}
+        ${lobby?`<div class="panel"><h2>Lobbying</h2><p style="font-size:14px;color:var(--ink-2);margin:0">Also a registered lobbying client: ${fmtN(lobby.reports)} monthly reports on ${fmtN(lobby.bills)} bills.</p>
+          ${lobbyC?`${lobbyBillsTable(lobbyC, lbAll)}${lobbyC.bills.length>10?`<div style="margin-top:8px"><button class="btn ghost sm" onclick="updateParam('lb', '${lbAll?"":"all"}')">${lbAll?"Show fewer":`Show all ${fmtN(lobbyC.bills.length)}`}</button></div>`:""}`:""}
+          <div class="src">${lobby.slug?`<a href="#/lobbying/client/${esc(lobby.slug)}">Lobbying client page →</a> · `:""}From the Maine Ethics Commission's lobbyist disclosures. Matched by name.</div></div>`:""}
         ${(p.aliases||[]).length&&p.type==="organization"?`<div class="panel"><h2>Also written as</h2><div style="font-size:13.5px;color:var(--ink-2)">${p.aliases.map(esc).join("; ")}</div></div>`:""}
       </aside>
     </div>
   </div>`;
+}
+
+/* ---------- lobbying ---------- */
+// The name rule profile pages use to match an organization to a lobbying client.
+const orgKey = s => String(s||"").toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9 ]+/g," ").replace(/\b(the|inc|llc|corp|corporation)\b/g,"").replace(/\s+/g," ").trim();
+const ETHICS_SITE = "https://mainelobbying.com/public/dashboard";
+function fmtMonth(p){ return new Date(p+"-15T12:00:00").toLocaleDateString("en-US",{month:"short",year:"numeric"}); }
+function monthsLabel(ms){
+  if(!ms || !ms.length) return "";
+  const s = [...ms].sort();
+  return `${s.length} month${s.length===1?"":"s"} · ${fmtMonth(s[0])}${s.length>1?`–${fmtMonth(s[s.length-1])}`:""}`;
+}
+async function orgProfilesByKey(){
+  const idx = await loadOptional("profiles/index.json") || [];
+  const m = {};
+  for(const p of idx) if(p.type!=="official") m[orgKey(p.name)] ||= p;
+  return m;
+}
+const LOBBY_TOP_BILLS = 25, LOBBY_TOP = 50;
+async function viewLobbying(params){
+  const idx = await loadOptional("lobbying/index.json");
+  if(!idx) return `<div class="page-head"><div class="wrap"><h1>Lobbying</h1></div></div><div class="wrap"><div class="empty">Lobbying data hasn't been built yet.</div></div>`;
+  const prof = await orgProfilesByKey();
+  const bsort = params.get("bsort")==="reports" ? "reports" : "clients";
+  const q = (params.get("q")||"").trim().toLowerCase();
+  const nc = Math.max(LOBBY_TOP, Number(params.get("nc"))||LOBBY_TOP), nl = Math.max(LOBBY_TOP, Number(params.get("nl"))||LOBBY_TOP);
+  const lobbied = D.index.filter(b=>b.lobbying_clients);
+  const bills = [...lobbied].sort(bsort==="reports"
+    ? (a,b)=>(b.lobbying_reports||0)-(a.lobbying_reports||0) || (b.lobbying_clients||0)-(a.lobbying_clients||0) || a.ld-b.ld
+    : byLobbied).slice(0, LOBBY_TOP_BILLS);
+  const clients = (idx.by_client||[]).filter(c=>c.client!=="—" && (!q || c.client.toLowerCase().includes(q)));
+  const lobbyists = (idx.by_lobbyist||[]).filter(l=>l.lobbyist!=="—" && (!q || l.lobbyist.toLowerCase().includes(q)));
+  const nReports = (idx.by_client||[]).reduce((s,c)=>s+c.reports,0);
+  const sortLink = (k, label) => k===bsort ? `<b>${label}</b>` : `<a href="#" onclick="event.preventDefault();updateParam('bsort','${k==="clients"?"":k}')">${label}</a>`;
+  return `
+  <div class="page-head"><div class="wrap">
+    <h1>Lobbying</h1>
+    <p>Registered lobbyists file a monthly report with the <a href="${ETHICS_SITE}" target="_blank" rel="noopener">Maine Ethics Commission</a> for each client, naming the bills they lobbied on that month. These are the reports for the ${esc(D.meta.legislature)}, shown by calendar month. The reports name bills but don't record whether the client supported or opposed them, and MEPLE doesn't show what lobbyists were paid.</p>
+  </div></div>
+  <div class="wrap" style="padding-bottom:48px">
+    ${tiles([[fmtN(lobbied.length),"Bills lobbied"],[fmtN((idx.by_client||[]).length),"Clients"],[fmtN((idx.by_lobbyist||[]).length),"Lobbyists"],[fmtN(nReports),"Monthly reports"]])}
+    <div class="panel">
+      <h2>Most lobbied bills</h2>
+      <div class="src" style="margin:0 0 10px">Sort by ${sortLink("clients","organizations")} · ${sortLink("reports","monthly reports")}. Organizations are clients whose lobbyists listed the bill at least once; monthly reports count each client's report that named it.</div>
+      <table class="plain"><tr><th>Bill</th><th style="text-align:right">Organizations</th><th style="text-align:right">Monthly reports</th></tr>
+      ${bills.map(b=>`<tr><td style="white-space:normal"><a href="#/bill/${b.ld}">LD ${b.ld}</a> <span class="clamp2" style="font-size:13px;color:var(--ink-2)">${esc(b.title)}</span></td><td style="text-align:right">${fmtN(b.lobbying_clients)}</td><td style="text-align:right">${fmtN(b.lobbying_reports)}</td></tr>`).join("")}
+      </table>
+      <div class="src"><a href="#/bills?sort=lobbied">All ${fmtN(lobbied.length)} lobbied bills on the Bills page →</a></div>
+    </div>
+    <div class="toolbar" style="margin-top:8px">
+      <input type="search" placeholder="Search clients and lobbyists by name…" value="${esc(params.get("q")||"")}" oninput="updateParam('q', this.value)" aria-label="Search lobbying clients and lobbyists">
+    </div>
+    <div class="panel" id="lob-clients">
+      <h2>${q?`Clients matching “${esc(params.get("q").trim())}” · ${fmtN(clients.length)}`:"Most active clients"}</h2>
+      ${clients.length?`<table class="plain"><tr><th>Client</th><th style="text-align:right">Bills lobbied</th><th style="text-align:right">Monthly reports</th></tr>
+      ${clients.slice(0,nc).map(c=>{ const p = prof[orgKey(c.client)];
+        return `<tr><td style="white-space:normal"><a href="#/lobbying/client/${esc(c.slug)}">${esc(c.client)}</a>${p?` <span style="font-size:12.5px;color:var(--ink-3)">· <a href="#/profile/${esc(p.id)}">testimony profile</a></span>`:""}</td><td style="text-align:right">${fmtN(c.bills)}</td><td style="text-align:right">${fmtN(c.reports)}</td></tr>`; }).join("")}
+      </table>${moreBtn("nc", Math.min(nc, clients.length), clients.length, LOBBY_TOP)}`:`<p style="font-size:14.5px;color:var(--ink-2)">No clients match.</p>`}
+    </div>
+    <div class="panel" id="lob-lobbyists">
+      <h2>${q?`Lobbyists matching “${esc(params.get("q").trim())}” · ${fmtN(lobbyists.length)}`:"Most active lobbyists"}</h2>
+      ${lobbyists.length?`<table class="plain"><tr><th>Lobbyist</th><th style="text-align:right">Clients</th><th style="text-align:right">Bills</th><th style="text-align:right">Monthly reports</th></tr>
+      ${lobbyists.slice(0,nl).map(l=>`<tr><td style="white-space:normal">${esc(l.lobbyist)}${l.firm?` <span style="font-size:12.5px;color:var(--ink-3)">· ${esc(l.firm)}</span>`:""}</td><td style="text-align:right">${fmtN(l.clients)}</td><td style="text-align:right">${fmtN(l.bills||0)}</td><td style="text-align:right">${fmtN(l.reports)}</td></tr>`).join("")}
+      </table>${moreBtn("nl", Math.min(nl, lobbyists.length), lobbyists.length, LOBBY_TOP)}`:`<p style="font-size:14.5px;color:var(--ink-2)">No lobbyists match.</p>`}
+      <div class="src">The monthly reports list the lobbyist who filed each one; they don't name the lobbyist's firm.</div>
+    </div>
+    <div class="src">Source: <a href="${esc(idx.source||ETHICS_SITE)}" target="_blank" rel="noopener">Maine Ethics Commission lobbyist disclosures ↗</a>. Lobbying years run December to November; reports here run from ${esc(fmtMonth(idx.first_period||"2024-12"))} to ${esc(fmtMonth(idx.last_period||"2026-10"))}.</div>
+  </div>`;
+}
+async function viewLobbyClient(slug, params){
+  const c = await loadOptional(`lobbying/clients/${encodeURIComponent(slug)}.json`);
+  if(!c) return `<div class="wrap"><div class="empty">Lobbying client not found. <a href="#/lobbying">Back to lobbying</a></div></div>`;
+  const prof = (await orgProfilesByKey())[orgKey(c.client)];
+  const n = Math.max(50, Number(params.get("n"))||50);
+  const rows = c.bills.map(x=>({...x, b:D.idxByLd[x.ld]}));
+  return `
+  <div class="wrap" style="padding-bottom:48px">
+    <div class="crumb" style="margin-top:22px"><a href="#/lobbying">Lobbying</a> / ${esc(c.client)}</div>
+    <div class="role" style="font-size:12.5px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em;margin-top:8px">Lobbying client</div>
+    <h1 style="font-family:var(--serif);font-size:28px;margin:4px 0 6px">${esc(c.client)}</h1>
+    <div style="color:var(--ink-2);font-size:15px;margin-bottom:14px">${fmtN(c.bills.length)} bill${c.bills.length===1?"":"s"} lobbied in ${fmtN(c.reports)} monthly report${c.reports===1?"":"s"}${prof?` · <a href="#/profile/${esc(prof.id)}">Testimony profile →</a> <span style="color:var(--ink-3);font-size:13px">(matched by name)</span>`:""}</div>
+    <div class="panel"><h2>Lobbyist${c.lobbyists.length===1?"":"s"}</h2>
+      <div style="font-size:14.5px">${c.lobbyists.map(l=>esc(l.lobbyist)+(l.firm?` <span style="color:var(--ink-3)">· ${esc(l.firm)}</span>`:"")).join("<br>")}</div></div>
+    <div class="panel"><h2>Bills lobbied · ${fmtN(rows.length)}</h2>
+      <table class="plain"><tr><th>Bill</th><th>Committee</th><th>Status</th><th>Months reported</th></tr>
+      ${rows.slice(0,n).map(x=>`<tr><td style="white-space:normal"><a href="#/bill/${x.ld}">LD ${x.ld}</a> <span class="clamp2" style="font-size:13px;color:var(--ink-2)">${esc(x.b?x.b.title:"")}</span></td><td style="white-space:normal;font-size:13px">${x.b?esc(comName(x.b.committee_code)):""}</td><td style="font-size:13px;white-space:normal">${x.b?esc(plainStatus(x.b.status_label||STATUS_LABELS[x.b.status]||x.b.status)):""}</td><td style="font-size:13px">${esc(monthsLabel(x.months))}</td></tr>`).join("")}
+      </table>${moreBtn("n", Math.min(n, rows.length), rows.length, 50)}
+      <div class="src">Ordered by the number of months the bill was reported. The reports don't say whether the client supported or opposed a bill. <a href="${esc(c.source||ETHICS_SITE)}" target="_blank" rel="noopener">Maine Ethics Commission ↗</a></div>
+    </div>
+  </div>`;
+}
+function lobbyBillsTable(c, all){
+  const rows = (all ? c.bills : c.bills.slice(0,10));
+  return `<table class="plain" style="margin-top:8px"><tr><th>Bill</th><th>Months</th></tr>
+    ${rows.map(x=>{ const b = D.idxByLd[x.ld]; return `<tr><td style="white-space:normal"><a href="#/bill/${x.ld}">LD ${x.ld}</a> <span class="clamp2" style="font-size:12.5px;color:var(--ink-2)">${esc(b?b.title:"")}</span></td><td style="font-size:12.5px">${esc(monthsLabel(x.months))}</td></tr>`; }).join("")}
+  </table>`;
 }
 
 function viewAbout(){
@@ -1670,6 +1771,8 @@ async function render(scroll=true){
     else if(seg[0]==="committee"){ html = await viewCommittee(decodeURIComponent(seg[1]||""), params); nav="committees"; }
     else if(seg[0]==="profiles"){ html = await viewProfiles(params); nav="profiles"; }
     else if(seg[0]==="profile"){ html = await viewProfile(decodeURIComponent(seg[1]||""), params); nav="profiles"; }
+    else if(seg[0]==="lobbying" && seg[1]==="client"){ html = await viewLobbyClient(decodeURIComponent(seg[2]||""), params); nav="lobbying"; }
+    else if(seg[0]==="lobbying"){ html = await viewLobbying(params); nav="lobbying"; }
     else if(seg[0]==="about"){ html = viewAbout(); nav="about"; }
     else { html = viewHome(); }
   }catch(e){ console.error(e); html = `<div class="wrap"><div class="empty">Something went wrong loading this page.</div></div>`; }

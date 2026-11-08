@@ -169,13 +169,17 @@ def build():
     # Compensation is reported per client per month across every bill in the report, so nothing here is
     # summed, sorted or ranked by pay, and per-bill files carry no dollar figures.
     by_ld = defaultdict(list)
-    by_client = defaultdict(lambda: {"reports": 0, "bills": set()})
-    by_lobbyist = defaultdict(lambda: {"reports": 0, "clients": set()})
+    by_client = defaultdict(lambda: {"reports": 0, "bills": set(), "months": defaultdict(set), "lobbyists": set()})
+    by_lobbyist = defaultdict(lambda: {"reports": 0, "clients": set(), "bills": set(), "firms": defaultdict(int)})
     for r in rows:
         for ld in r["bills"]:
             by_ld[ld].append({k: r.get(k) for k in ("report_id", "lobbyist", "firm", "client", "year", "month", "period", "url")} | {"bills_in_report": len(r["bills"])})
         c = by_client[r["client"] or "—"]; c["reports"] += 1; c["bills"].update(r["bills"])
-        l = by_lobbyist[r["lobbyist"] or "—"]; l["reports"] += 1; l["clients"].add(r["client"] or "—")
+        c["lobbyists"].add((r["lobbyist"] or "", r["firm"] or ""))
+        for ld in r["bills"]:
+            if r.get("period"): c["months"][ld].add(r["period"])
+        l = by_lobbyist[r["lobbyist"] or "—"]; l["reports"] += 1; l["clients"].add(r["client"] or "—"); l["bills"].update(r["bills"])
+        if r["firm"]: l["firms"][r["firm"]] += 1
     # Distinct clients per bill: the client name exactly as filed, the same grouping the bill page's lobbying panel uses.
     clients_of = {ld: len({i["client"] for i in v if i["client"]}) for ld, v in by_ld.items()}
     for ld, items in by_ld.items():
@@ -185,12 +189,33 @@ def build():
             "clients": sorted({i["client"] for i in items if i["client"]}),
             "note": "Monthly lobbyist reports filed with the Maine Ethics Commission name the bills lobbied that month. Compensation is reported per client per month across all bills in a report, so there is no per-bill dollar figure. The reports do not state a position on the bill.",
             "source": PORTAL}, ensure_ascii=False), encoding="utf-8")
+    # One file per client (lobbyists, bills and the calendar months each bill was reported), kept out of the main index.
+    slugs, used = {}, set()
+    for k in sorted(by_client):
+        base = re.sub(r"[^a-z0-9]+", "-", k.lower()).strip("-")[:80] or "client"
+        sl, i = base, 2
+        while sl in used: sl, i = f"{base}-{i}", i + 1
+        used.add(sl); slugs[k] = sl
+    cdir = out / "clients"
+    if cdir.exists():
+        for p in cdir.glob("*.json"): p.unlink()
+    cdir.mkdir(parents=True, exist_ok=True)
+    for k, v in by_client.items():
+        (cdir / f"{slugs[k]}.json").write_text(json.dumps({
+            "client": k, "slug": slugs[k], "reports": v["reports"],
+            "lobbyists": [{"lobbyist": a, "firm": f or None} for a, f in sorted(v["lobbyists"])],
+            "bills": sorted(({"ld": ld, "months": sorted(v["months"].get(ld, ()))} for ld in v["bills"]), key=lambda x: (-len(x["months"]), x["ld"])),
+            "source": PORTAL}, ensure_ascii=False), encoding="utf-8")
+    (cdir / "index.json").write_text(json.dumps({k: slugs[k] for k in sorted(by_client)}, ensure_ascii=False), encoding="utf-8")
     idx = {
         "years": list(LOBBYING_YEARS),
         "most_lobbied": sorted(({"ld": ld, "reports": len(v), "clients": clients_of[ld]} for ld, v in by_ld.items()), key=lambda x: (-x["clients"], -x["reports"], x["ld"]))[:100],
-        "by_client": sorted(({"client": k, "reports": v["reports"], "bills": len(v["bills"])} for k, v in by_client.items()), key=lambda x: (-x["reports"], x["client"])),
-        "by_lobbyist": sorted(({"lobbyist": k, "reports": v["reports"], "clients": len(v["clients"])} for k, v in by_lobbyist.items()), key=lambda x: (-x["reports"], x["lobbyist"])),
+        "by_client": sorted(({"client": k, "slug": slugs[k], "reports": v["reports"], "bills": len(v["bills"])} for k, v in by_client.items()), key=lambda x: (-x["reports"], x["client"])),
+        "by_lobbyist": sorted(({"lobbyist": k, "firm": max(v["firms"], key=v["firms"].get) if v["firms"] else None, "reports": v["reports"],
+                                "clients": len(v["clients"]), "bills": len(v["bills"])} for k, v in by_lobbyist.items()), key=lambda x: (-x["reports"], x["lobbyist"])),
         "source": PORTAL,
+        "first_period": min((r["period"] for r in rows if r.get("period")), default=None),
+        "last_period": max((r["period"] for r in rows if r.get("period")), default=None),
         "lds": sorted(by_ld.keys()),   # which LD{n}.json files exist, so the site never requests a missing one
     }
     (out / "index.json").write_text(json.dumps(idx, ensure_ascii=False), encoding="utf-8")
