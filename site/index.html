@@ -18,8 +18,8 @@
 <style>
   :root{
     --pine:#14503C; --pine-deep:#0E3B2C; --pine-soft:#EAF2EE; --pine-mid:#1B6A50;
-    --maple:#C9762B; --maple-soft:#FBF1E6;
-    --paper:#FAF9F6; --card:#FFFFFF; --ink:#1A1A17; --ink-2:#52514E; --ink-3:#898781;
+    --maple:#C9762B; --maple-soft:#FBF1E6; --maple-ink:#9A5620;   /* --maple for large type and decoration only; --maple-ink for small text (5.6:1 on white) */
+    --paper:#FAF9F6; --card:#FFFFFF; --ink:#1A1A17; --ink-2:#52514E; --ink-3:#6B6964;
     --hairline:#E5E3DC; --hairline-2:#D8D5CC;
     --support:#0CA30C; --support-ink:#066306; --support-soft:#E9F6E9;
     --oppose:#D03B3B; --oppose-ink:#9E2323; --oppose-soft:#FBEBEB;
@@ -65,8 +65,10 @@
   .hero .leafbg{position:absolute;right:-40px;top:-30px;opacity:.10;pointer-events:none}
   .searchbar{margin-top:30px;display:flex;max-width:600px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.18)}
   .searchbar input{flex:1;min-width:0;border:none;outline:none;padding:16px 18px;font-size:16px;color:var(--ink)}
-  .searchbar button{border:none;background:var(--maple);color:#fff;font-weight:600;font-size:15px;padding:0 24px}
-  .searchbar button:hover{background:#B3661F}
+  .searchbar button{border:none;background:var(--maple-ink);color:#fff;font-weight:600;font-size:15px;padding:0 24px}
+  .searchbar button:hover{background:#84491B}
+  .searchbar:focus-within{outline:3px solid #F3C98B;outline-offset:3px}
+  .searchbar input:focus-visible{box-shadow:inset 0 0 0 2px var(--pine-mid)}
   .hero .hint{margin-top:12px;font-size:13px;color:#A9C4B7}
   .hero .hint a{color:#E9D9A8;text-decoration:underline}
 
@@ -84,7 +86,7 @@
 
   .bill-card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .15s,border-color .15s;cursor:pointer}
   .bill-card:hover{box-shadow:var(--shadow);border-color:var(--hairline-2)}
-  .ld{font-size:12.5px;font-weight:700;letter-spacing:.05em;color:var(--maple)}
+  .ld{font-size:12.5px;font-weight:700;letter-spacing:.05em;color:var(--maple-ink)}
   .bill-card h3{font-family:var(--serif);font-size:17.5px;line-height:1.32;font-weight:600}
   .bill-card .meta{font-size:13px;color:var(--ink-2)}
   .bill-card .foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;gap:8px;flex-wrap:wrap}
@@ -193,7 +195,7 @@
   .avatar{flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff}
   .avatar.d{background:var(--pine-mid)} .avatar.r{background:#8A5314} .avatar.i{background:#52514E} .avatar.u{background:#52514E}
   .leg-card h3{font-size:16px}
-  .leg-card .role{font-size:12.5px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em}
+  .leg-card .role{font-size:12.5px;font-weight:600;color:var(--maple-ink);text-transform:uppercase;letter-spacing:.04em}
   .leg-card .meta{font-size:13px;color:var(--ink-2);margin-top:2px}
 
   .com-card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:18px 20px;cursor:pointer;transition:box-shadow .15s}
@@ -253,6 +255,10 @@
   .f-brand em{font-style:normal;color:#F3C98B}
 
   #app{min-height:60vh}
+  #app:focus{outline:none}
+  .skip{position:absolute;left:12px;top:-60px;z-index:200;background:var(--pine);color:#fff;padding:10px 16px;border-radius:8px;font-weight:600}
+  .skip:focus{top:10px;text-decoration:none}
+  a:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--pine-mid);outline-offset:2px}
   #testimony{scroll-margin-top:84px}
   .empty{padding:48px;text-align:center;color:var(--ink-3)}
   .loading{padding:48px;text-align:center;color:var(--ink-3);font-size:14px}
@@ -290,7 +296,7 @@
   .prof-head{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:20px 22px;display:flex;gap:18px;align-items:flex-start;margin-top:6px}
   .prof-head h1{font-family:var(--serif);font-size:27px;line-height:1.2;margin:2px 0 4px}
   .prof-head .sub{color:var(--ink-2);font-size:14.5px}
-  .prof-head .kicker{font-size:12px;font-weight:700;color:var(--maple);text-transform:uppercase;letter-spacing:.05em}
+  .prof-head .kicker{font-size:12px;font-weight:700;color:var(--maple-ink);text-transform:uppercase;letter-spacing:.05em}
   .badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
   .badge{display:inline-flex;align-items:center;font-size:12.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--pine-soft);color:var(--pine)}
   .badge:hover{text-decoration:none;filter:brightness(.96)}
@@ -476,6 +482,7 @@
 </style>
 </head>
 <body>
+<a class="skip" href="#" onclick="event.preventDefault();var m=document.getElementById('app');m.focus();m.scrollIntoView()">Skip to content</a>
 <div class="ribbon" id="ribbon"></div>
 
 <header class="site">
@@ -501,11 +508,11 @@
       <a href="#/about" data-nav="about">About</a>
     </nav>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav" onclick="toggleMenu()"><span aria-hidden="true">☰</span> Menu</button>
-    <a class="hdr-cta" id="hdr-cta" href="https://legislature.maine.gov/testimony" target="_blank" rel="noopener" title="Submit testimony on the Maine Legislature's own site">Testify ↗</a>
+    <a class="hdr-cta" id="hdr-cta" href="https://legislature.maine.gov/testimony" target="_blank" rel="noopener" title="Submit testimony on the Maine Legislature's own site">Testify <span aria-hidden="true">↗</span></a>
   </div>
 </header>
 
-<main id="app" aria-live="polite"><div class="loading">Loading…</div></main>
+<main id="app" tabindex="-1" aria-live="polite"><div class="loading">Loading…</div></main>
 
 <footer class="site">
   <div class="wrap">
@@ -810,10 +817,10 @@ function stancePill(st, source){
   if(!st) return `<span class="stance-pill none">Position not recorded</span>`;
   const m = STANCE_META[st] || {label:st, icon:""};
   const title = source==="inferred" ? ' title="Position inferred from the text of the testimony"' : '';
-  return `<span class="stance-pill ${esc(st)}"${title}>${m.icon} ${esc(m.label)}${source==="inferred"?"*":""}</span>`;
+  return `<span class="stance-pill ${esc(st)}"${title}>${m.icon?`<span aria-hidden="true">${m.icon}</span> `:""}${esc(m.label)}${source==="inferred"?"*":""}</span>`;
 }
 function tIcon(){
-  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
 }
 function billTestimonyCount(row){ return (row.testimony_count||0) + userTestimony.filter(t=>t.ld===row.ld).length; }
 
@@ -1023,7 +1030,7 @@ function viewHome(){
   },0);
   return `
   <div class="hero">
-    <svg class="leafbg" width="420" height="420" viewBox="0 0 34 34" fill="none">
+    <svg class="leafbg" width="420" height="420" viewBox="0 0 34 34" fill="none" aria-hidden="true">
       <path d="M17 6l1.8 4.2 4.4-1-2.4 3.8 3.7 2.4-4.3 1 .5 4.4-3.7-2.5-3.7 2.5.5-4.4-4.3-1 3.7-2.4-2.4-3.8 4.4 1L17 6z" fill="#fff"/>
     </svg>
     <div class="wrap">
@@ -1072,7 +1079,7 @@ function viewHome(){
 
     <div class="steward">
       <div class="seal">
-        <svg width="40" height="40" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="16" fill="#14503C"/><path d="M17 6l1.8 4.2 4.4-1-2.4 3.8 3.7 2.4-4.3 1 .5 4.4-3.7-2.5-3.7 2.5.5-4.4-4.3-1 3.7-2.4-2.4-3.8 4.4 1L17 6z" fill="#F3C98B"/></svg>
+        <svg width="40" height="40" viewBox="0 0 34 34" fill="none" aria-hidden="true"><circle cx="17" cy="17" r="16" fill="#14503C"/><path d="M17 6l1.8 4.2 4.4-1-2.4 3.8 3.7 2.4-4.3 1 .5 4.4-3.7-2.5-3.7 2.5.5-4.4-4.3-1 3.7-2.4-2.4-3.8 4.4 1L17 6z" fill="#F3C98B"/></svg>
       </div>
       <div>
         <h3>Stewarded by the Center for Engaged Citizenship at the University of Southern Maine</h3>
@@ -2173,7 +2180,7 @@ async function viewProfiles(params){
     <div class="result-note"><span>${fmtN(list.length)} profiles · ordered by number of testimonies</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
     <div class="grid-2" style="padding-bottom:24px">
       ${slice.map(p=>`<a class="com-card" href="#/profile/${esc(p.id)}">
-        <div class="role" style="font-size:12px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em">${esc(PROFILE_TYPES[p.type]||p.type)}</div>
+        <div class="role" style="font-size:12px;font-weight:600;color:var(--maple-ink);text-transform:uppercase;letter-spacing:.04em">${esc(PROFILE_TYPES[p.type]||p.type)}</div>
         <h3>${esc(p.name)}</h3>
         <div class="meta">${p.type==="official"?`${officialRole(p,false)} · `:""}${fmtN(p.testimony_count)} testimon${p.testimony_count===1?"y":"ies"} on ${fmtN(p.bill_count)} bill${p.bill_count===1?"":"s"}</div>
       </a>`).join("") || `<div class="empty">No profiles match.</div>`}
@@ -2201,7 +2208,7 @@ async function viewProfile(id, params){
     <div class="bd-grid">
       <div class="bd-main">
         <div class="crumb"><a href="#/profiles">Who testified</a> / ${esc(p.name)}</div>
-        <div class="role" style="font-size:12.5px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em;margin-top:8px">${esc(PROFILE_TYPES[p.type]||p.type)}</div>
+        <div class="role" style="font-size:12.5px;font-weight:600;color:var(--maple-ink);text-transform:uppercase;letter-spacing:.04em;margin-top:8px">${esc(PROFILE_TYPES[p.type]||p.type)}</div>
         <h1 style="font-family:var(--serif);font-size:28px;margin:4px 0 6px">${esc(p.name)}</h1>
         ${p.type==="official"?`<div style="color:var(--ink-2);font-size:15px;margin-bottom:16px">${officialRole(p)}</div>`:`<div style="height:10px"></div>`}
         <div class="panel">
@@ -2305,7 +2312,7 @@ async function viewLobbyClient(slug, params){
   return `
   <div class="wrap" style="padding-bottom:48px">
     <div class="crumb" style="margin-top:22px"><a href="#/lobbying">Lobbying</a> / ${esc(c.client)}</div>
-    <div class="role" style="font-size:12.5px;font-weight:600;color:var(--maple);text-transform:uppercase;letter-spacing:.04em;margin-top:8px">Lobbying client</div>
+    <div class="role" style="font-size:12.5px;font-weight:600;color:var(--maple-ink);text-transform:uppercase;letter-spacing:.04em;margin-top:8px">Lobbying client</div>
     <h1 style="font-family:var(--serif);font-size:28px;margin:4px 0 6px">${esc(c.client)}</h1>
     <div style="color:var(--ink-2);font-size:15px;margin-bottom:14px">${fmtN(c.bills.length)} bill${c.bills.length===1?"":"s"} lobbied in ${fmtN(c.reports)} monthly report${c.reports===1?"":"s"}${prof?` · <a href="#/profile/${esc(prof.id)}">Testimony profile →</a> `:""}</div>
     <div class="panel"><h2>Lobbyist${c.lobbyists.length===1?"":"s"}</h2>
@@ -2463,7 +2470,7 @@ async function render(scroll=true){
   const active = document.activeElement;
   const keepFocus = active && (active.tagName==="INPUT"||active.tagName==="SELECT") && app.contains(active);
   const focusId = keepFocus ? {tag:active.tagName, idx:[...app.querySelectorAll(active.tagName)].indexOf(active), pos:active.selectionStart} : null;
-  app.innerHTML = html;
+  app.innerHTML = html.replace(/ ?([↗→←])(?![^<]*>)/g, m=>`<span aria-hidden="true">${m}</span>`);
   if(focusId){
     const el = [...app.querySelectorAll(focusId.tag)][focusId.idx];
     if(el){ el.focus(); if(el.setSelectionRange && focusId.pos!=null){ try{el.setSelectionRange(focusId.pos,focusId.pos);}catch(e){} } }
