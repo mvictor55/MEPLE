@@ -461,6 +461,13 @@
     .t-foot .t-bill{flex-basis:100%}
   }
   .t-where-m{display:none;font-size:12.5px;color:var(--ink-3);margin-bottom:6px}
+  .gl{color:inherit;text-decoration:underline dotted var(--ink-3);text-underline-offset:3px}
+  .gl:hover{color:var(--pine-mid)}
+  .g-entry{padding:14px 0;border-bottom:1px solid var(--hairline);scroll-margin-top:76px}
+  .g-entry h3{font-size:17px;margin-bottom:4px}
+  .g-entry.flash{animation:letterflash 3s ease-out}
+  .g-entry .w{font-size:13px;color:var(--ink-3);margin-top:6px}
+  .g-index{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;margin:6px 0 10px}
   .subh{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);font-weight:600;margin:18px 0 8px}
 </style>
 </head>
@@ -515,6 +522,7 @@
       <div>
         <h4>Project</h4>
         <a href="#/about">About MEPLE</a>
+        <a href="#/glossary">Glossary</a>
         <a href="#/about">Stewardship &amp; governance</a>
         <a href="#/about">Open source</a>
       </div>
@@ -668,10 +676,88 @@ function plainMotion(m){
           .replace(/\bCommittee of conference\b/,"committee of conference").replace(/\b(refer|bill) to Committee\b/,"$1 to committee")
           .replace(/\bCommittee Amendment ([A-C]) ([SH]-\d+)\b/,"Committee Amendment $1 ($2)");
 }
-function statusChip(b){
+/* ---------- glossary ----------
+   Every definition is based on the Legislature's own published glossary, the Joint Rules of the 132nd Legislature,
+   the Legislature's digest and staff guidance, or the Maine statutes as published by the Legislature. */
+const GSRC = {
+  glossary: ["Maine Legislature, Glossary of legislative terms", "https://legislature.maine.gov/LawMakerVWeb/glossary"],
+  jr: ["Joint Rules of the 132nd Legislature", "https://legislature.maine.gov/uploads/visual_edit/132nd-joint-rules-2.pdf"],
+  digest: ["Legislative Digest, key to final actions (129th Legislature)", "https://legislature.maine.gov/doc/4675"],
+  carry: ["Carry Over Bills, nonpartisan committee staff (2020)", "https://legislature.maine.gov/doc/4880"],
+  s312a: ["3 MRSA §312-A, Lobbyist Disclosure definitions", "https://legislature.maine.gov/statutes/3/title3sec312-A.html"],
+  s317: ["3 MRSA §317, Lobbyist reports", "https://legislature.maine.gov/statutes/3/title3sec317.html"],
+  s1122: ["21-A MRSA §1122, Maine Clean Election Act definitions", "https://legislature.maine.gov/statutes/21-A/title21-Asec1122.html"],
+};
+// [id, group, term, definition, sources (key or [key, "pinpoint"]), Legislature's wording]
+const GLOSS = [
+  ["ld","Bills and papers","LD (Legislative Document)","A bill or resolve in its official printed form, numbered by the Clerk of the House or the Secretary of the Senate. MEPLE uses the LD number to name each bill.",[["glossary","L.D. (Legislative Document)"]],["LD 1822", "L.D. 1822"]],
+  ["paper","Bills and papers","HP / SP (House Paper / Senate Paper)","A document before the Legislature, numbered by the chamber where it was filed: HP for a House Paper, SP for a Senate Paper. Each bill has both a paper number and an LD number.",[["glossary","Paper"]],["HP 1220","SP 262"]],
+  ["publaw","Bills and papers","Public law / resolve","A public law is a law of general application, added to the Maine Revised Statutes. A resolve is a law with a temporary or limited purpose that doesn't amend the general laws; a private and special law covers particular people or institutions.",[["glossary","Laws, public; Laws, resolve; Laws, private and special"]],["PUBLIC XXX","RESOLVE XXX","P&S XXX"]],
+  ["hearing","In committee","Public hearing","A committee meeting where members of the public are invited to testify on a bill. The written testimony on MEPLE was filed for these hearings.",[["glossary","Hearing, public"]],["Public Hearing"]],
+  ["worksession","In committee","Work session","A committee meeting to discuss and work on bills; the committee's reports are developed here. The public may attend, but testimony generally isn't taken.",[["glossary","Work session"]],["Work Session Held"]],
+  ["otp","In committee","Ought to Pass","A committee report recommending that the bill pass as printed.",[["jr","Rule 310.2"],["glossary","Report, committee"]],["OTP"]],
+  ["otpa","In committee","Ought to Pass as Amended","A committee report recommending that the bill pass with a committee amendment.",[["jr","Rule 310.2"],["glossary","Report, committee"]],["OTP-AM","Ought To Pass As Amended"]],
+  ["ontp","In committee","Ought Not to Pass","A committee report recommending that the bill not pass. When the Legislature accepts an Ought Not to Pass report, the bill dies.",[["jr","Rule 310.2"],["digest","ONTP, accepted"]],["ONTP","Ought Not To Pass","Accepted Majority (ONTP) Report","Accepted Minority (ONTP) Report","Accepted Report A (ONTP)","Accepted Report B (ONTP)"]],
+  ["divided","In committee","Divided report (majority / minority, Report A, B, C)","When a committee's recommendation isn't unanimous, a minority report or reports are required, and members sign the report they support: a majority and a minority report, or Reports A, B and C. The House and Senate then vote on which report to accept.",[["jr","Rule 310.2"],["digest","ONTP, accepted, majority, minority or Report X"]],["Divided Report","OTP-AM/ONTP","Majority report","Minority report","Report A"]],
+  ["comamend","In committee","Committee amendment","An amendment proposed by all or part of the committee the bill was referred to. Committee amendments are lettered C-A, C-B and so on.",[["glossary","Amendment, committee"]],["C-A (H-716)","Committee Amendment A"]],
+  ["jr310","In committee","Joint Rule 310","The rule for committee reports. When a committee votes unanimously Ought Not to Pass, the bill goes to the legislative files without a floor vote; a member absent from the vote may register a vote with the clerk until noon on the second business day after, so a unanimous report doesn't mean every member voted.",[["jr","Rule 310.3 and 310.4"]],["Ought Not to Pass Pursuant To Joint Rule 310"]],
+  ["ltw","In committee","Leave to withdraw","A sponsor's request, granted by both committee chairs before the hearing is advertised, to withdraw a bill. The bill is reported out as Leave to Withdraw and placed in the legislative files. A concept draft is withdrawn automatically when its sponsor doesn't file the required amendment (Joint Rule 305.6).",[["jr","Rules 310.5 and 305.6"]],["Leave to Withdraw","LTW","Automatic Withdrawal Pursuant to Joint Rule 305.6"]],
+  ["carried","In committee","Carried over","A bill the presiding officers let a committee hold past the end of a session, to finish in the next session of the same Legislature, for example from the First to the Second Regular Session.",[["carry"],["digest","Carried over"]],["Carry Over Requested","Carry Over Approved","CARRIED OVER"]],
+  ["engrossed","On the floor","Engrossed","The bill printed with all adopted amendments. The engrossed bill is what goes on to be passed to be enacted.",[["glossary","Engrossed"]],["Passed to be Engrossed","PTBE"]],
+  ["enacted","On the floor","Enacted / finally passed","Enactment is the last vote in each chamber before the President and Speaker sign a bill and send it to the Governor. Resolves that reach this stage are said to be finally passed.",[["glossary","Enactment"]],["Enacted","Finally Passed","Passed to be Enacted","PTE","Enactment Failed"]],
+  ["emergency","On the floor","Emergency measure (two-thirds)","A bill that takes effect when the Governor signs it, or on a date earlier than 90 days after adjournment. It needs the votes of two-thirds of the elected members of each chamber.",[["glossary","Emergency bill"]],["Emergency Enacted","Emergency Finally Passed","Emergency Enactment Failed"]],
+  ["dbh","On the floor","Died between houses / nonconcurrence","Nonconcurrence is when one chamber has voted differently from the other on a bill. When the House and Senate can't agree on the same action, the bill dies between houses.",[["glossary","Nonconcurrence"],["digest","Died between houses"]],["Died Between Houses","Non-concurrent matter"]],
+  ["recede","On the floor","Recede and concur","A chamber takes back its earlier vote on a bill (recedes) and agrees with the other chamber's action (concurs).",[["glossary","Concur; Recede"]],["Recede and Concur"]],
+  ["ipp","On the floor","Indefinitely postpone","A floor motion to defeat a bill: “I move that the bill and all its accompanying papers be indefinitely postponed.”",[["glossary","Indefinite postponement"],["digest","Indef PP"]],["Indefinitely Postponed","Indef Pp"]],
+  ["tabled","On the floor","Tabled","Action put off until later in the day, until a set date, or with no date (unassigned). Committees also table bills at work sessions.",[["glossary","Table"]],["TABLED","Tabled Unassigned"]],
+  ["rollcall","On the floor","Roll call","A vote that records how each member voted, also called the yeas and nays. Any legislator may ask for one; one-fifth of the members must agree.",[["glossary","Roll call vote"]],["RC #571"]],
+  ["veto","On the floor","Veto and override","The Governor's rejection of a bill the Legislature passed. Overriding a veto takes a two-thirds vote of each chamber; if the override fails, the veto is sustained and the bill dies.",[["glossary","Veto; Override"],["digest","Veto sustained"]],["Veto Sustained"]],
+  ["dadj","On the floor","Died on adjournment","Action on the bill wasn't finished when the session ended, so the bill died.",[["digest","Died on adjournment"]],["Died On Adjournment"]],
+  ["mcea","Money and lobbying","Clean Elections (MCEA)","Under the Maine Clean Election Act, a candidate for Governor, State Senator or State Representative may choose to take part and, once certified, receives money from the Maine Clean Election Fund.",[["s1122","subsections 1 and 4"]],["Maine Clean Election Act candidate"]],
+  ["lobbyist","Money and lobbying","Registered lobbyist","Someone paid by another person to lobby for more than 8 hours in a calendar month, or a regular employee who spends more than 8 hours in a month lobbying. Lobbying means communicating directly with officials to influence legislative action; representing a group at a public hearing isn't lobbying in itself.",[["s312a","subsections 9 and 10"],["glossary","Lobbyist"]],[]],
+  ["client","Money and lobbying","Lobbying client","The person or organization that pays a lobbyist. The law calls it the lobbyist's employer; MEPLE calls it the client.",[["s312a","subsection 5, “Employer”"]],["Employer"]],
+  ["monthly","Money and lobbying","Monthly lobbying report","While the Legislature is in session, each registered lobbyist reports to the Ethics Commission by the 15th of each month on the previous month, for each client, listing every legislative action lobbied on by LD number. The reports don't record whether the client supported or opposed a bill.",[["s317","subsection 1, paragraph H"]],[]],
+];
+const GLOSS_BY = Object.fromEntries(GLOSS.map(g=>[g[0], {id:g[0], group:g[1], term:g[2], def:g[3], src:g[4], wording:g[5]}]));
+const glossDef = id => (GLOSS_BY[id]||{}).def || "";
+function glossLink(id, text, extraTitle=""){
+  const g = GLOSS_BY[id];
+  if(!g) return esc(text);
+  return `<a class="gl" href="#/glossary?term=${id}" title="${esc(g.def + extraTitle)}">${esc(text)}</a>`;
+}
+function statusGlossId(raw){
+  raw = String(raw||"");
+  return /joint rule 310/i.test(raw) ? "jr310" : /withdraw/i.test(raw) ? "ltw" : /emergency/i.test(raw) ? "emergency"
+    : /enact|finally passed/i.test(raw) ? "enacted" : /ontp/i.test(raw) ? "ontp" : /between houses/i.test(raw) ? "dbh"
+    : /adjournment/i.test(raw) ? "dadj" : /veto/i.test(raw) ? "veto" : /indefinitely/i.test(raw) ? "ipp" : null;
+}
+function motionGlossId(m){
+  const s = plainMotion(m);
+  return /recede/i.test(s) ? "recede" : /indefinitely postpone/i.test(s) ? "ipp" : /veto|override/i.test(s) ? "veto"
+    : /\btabl/i.test(s) ? "tabled" : /\bReport [A-C]\b|Majority|Minority/.test(s) ? "divided" : /Ought Not to Pass/.test(s) ? "ontp"
+    : /Ought to Pass as Amended/.test(s) ? "otpa" : /Ought to Pass/.test(s) ? "otp" : /emergency/i.test(s) ? "emergency"
+    : /enact|final passage|finally pass/i.test(s) ? "enacted" : /engross/i.test(s) ? "engrossed" : "rollcall";
+}
+function committeeGlossId(r){
+  r = String(r||"").trim();
+  return /divided|\//i.test(r) ? "divided" : /^ontp$/i.test(r) ? "ontp" : /^otp-?am$/i.test(r) ? "otpa" : /^otp$/i.test(r) ? "otp"
+    : /^ltw$/i.test(r) ? "ltw" : /^tabled?$/i.test(r) ? "tabled" : null;
+}
+function actionGlossId(a){
+  a = String(a||"");
+  return /carry over|carried over/i.test(a) ? "carried" : /work session/i.test(a) ? "worksession" : /public hearing/i.test(a) ? "hearing"
+    : /engross/i.test(a) ? "engrossed" : /enact/i.test(a) ? "enacted" : /tabl/i.test(a) ? "tabled" : /recede/i.test(a) ? "recede"
+    : /non-?concur/i.test(a) ? "dbh" : /indefinitely postponed/i.test(a) ? "ipp" : /veto/i.test(a) ? "veto" : null;
+}
+// Status chips: the short definition is the tooltip (the Legislature's wording is in the glossary entry).
+// Chips inside a linked card stay plain spans, since a link can't sit inside another link.
+function statusChip(b, link=false){
   const cls = ["enacted","vetoed","died","held","pending","withdrawn"].includes(b.status) ? b.status : "died";
   const raw = b.status_label || STATUS_LABELS[b.status] || b.status;
-  return `<span class="chip ${cls}" title="${esc(raw)}"><span class="dot"></span>${esc(plainStatus(raw))}</span>`;
+  const gid = statusGlossId(raw), def = glossDef(gid);
+  const inner = `<span class="dot"></span>${esc(plainStatus(raw))}`;
+  return link && gid ? `<a class="chip ${cls}" href="#/glossary?term=${gid}" title="${esc(def)}">${inner}</a>`
+                     : `<span class="chip ${cls}" title="${esc(def || raw)}">${inner}</span>`;
 }
 function stancePill(st, source){
   if(!st) return `<span class="stance-pill none">Position not recorded</span>`;
@@ -1006,7 +1092,7 @@ function viewBills(params){
 
 const STANCE_HEAD = {support:"Arguments for the bill", oppose:"Arguments against the bill", amend:"Changes requested", neutral:"Other points raised"};
 let tfOpen = false;   // testimony archive filter panel (mobile), kept open across re-renders while filtering
-let pendingScroll = null, pendingLetter = null, pageTitle = null;
+let pendingScroll = null, pendingLetter = null, pageTitle = null, pendingFlash = null;
 const DEFAULT_TITLE = document.title;
 function copyLetterLink(btn, ld, id){
   const url = location.href.split("#")[0] + `#/bill/${ld}?letter=${encodeURIComponent(id)}`;
@@ -1079,12 +1165,12 @@ function rollCallList(b, openId){
       const g = {yea:vs.filter(v=>kind(v.vote)==="yea"), nay:vs.filter(v=>kind(v.vote)==="nay"), absent:vs.filter(v=>kind(v.vote)==="absent")};
       return `<details class="rc" id="rc-${esc(r.id)}"${String(r.id)===String(openId)?" open":""}>
         <summary><span class="rc-date">${esc(r.date?fmtDate(r.date):"")} · ${esc({H:"House",S:"Senate"}[r.chamber]||r.chamber||"")}</span>
-          <span class="rc-motion" title="${esc(r.motion||"")}">${esc(plainMotion(r.motion))}</span>
+          <span class="rc-motion" title="${esc(glossDef(motionGlossId(r.motion)))} Recorded as: ${esc(r.motion||"")}">${esc(plainMotion(r.motion))}</span>
           <span class="rc-tally"><b>${esc(r.yea)}–${esc(r.nay)}</b>${r.result?` · ${esc(r.result)}`:""}</span></summary>
         <div class="rc-body">
           ${vs.length?`<div class="rc-g"><h4>Yea (${g.yea.length})</h4>${group(g.yea)}</div><div class="rc-g"><h4>Nay (${g.nay.length})</h4>${group(g.nay)}</div>${g.absent.length?`<div class="rc-g"><h4>Absent, excused or not voting (${g.absent.length})</h4>${group(g.absent)}</div>`:""}`
             :`<p class="src">Individual votes aren't recorded for this roll call.</p>`}
-          <div class="src"><a href="#/bill/${b.ld}?rc=${encodeURIComponent(r.id)}" onclick="event.preventDefault();copyText(this, location.href.split('#')[0]+this.getAttribute('href'))">Copy link to this vote</a>${r.url?` · <a href="${esc(r.url)}" target="_blank" rel="noopener">Official record ↗</a>`:""}</div>
+          <div class="src">Glossary: ${glossLink(motionGlossId(r.motion), GLOSS_BY[motionGlossId(r.motion)].term)} · <a href="#/bill/${b.ld}?rc=${encodeURIComponent(r.id)}" onclick="event.preventDefault();copyText(this, location.href.split('#')[0]+this.getAttribute('href'))">Copy link to this vote</a>${r.url?` · <a href="${esc(r.url)}" target="_blank" rel="noopener">Official record ↗</a>`:""}</div>
         </div>
       </details>`; }).join("")}</div>`;
 }
@@ -1176,24 +1262,26 @@ function billMilestones(b, hearingDate){
   const ms = [];
   const cname = b.committee_name||comName(b.committee_code);
   const ref = (b.chamber_actions||[]).find(a=>/referred to the committee|reference to the committee/i.test(a.action||""));
+  const cg = r => isJR310(b) && /^ontp$/i.test(String(r||"").trim()) ? "jr310" : committeeGlossId(r);
   if(ref) ms.push({date:ref.date, label:`Referred to the ${cname} Committee`, where:ref.chamber});
-  if(hearingDate) ms.push({date:hearingDate, label:"Public hearing", where:`${cname} Committee`});
+  if(hearingDate) ms.push({date:hearingDate, label:"Public hearing", where:`${cname} Committee`, g:"hearing"});
   for(const a of (b.committee_actions||[])){
-    if(/^voted$/i.test(a.action||"")) ms.push({date:a.date, label:`Committee vote: ${committeeResultPlain(a.result, b)}`, where:`${cname} Committee`});
-    else if(/^reported out$/i.test(a.action||"")) ms.push({date:a.date, label:`Committee report: ${committeeResultPlain(a.result, b)}`, where:`${cname} Committee`});
+    if(/^voted$/i.test(a.action||"")) ms.push({date:a.date, label:`Committee vote: ${committeeResultPlain(a.result, b)}`, where:`${cname} Committee`, g:cg(a.result)});
+    else if(/^reported out$/i.test(a.action||"")) ms.push({date:a.date, label:`Committee report: ${committeeResultPlain(a.result, b)}`, where:`${cname} Committee`, g:cg(a.result)});
   }
-  for(const r of (b.roll_calls||[])) ms.push({date:r.date, label:`Roll call: ${plainMotion(r.motion)} — ${r.yea}–${r.nay}${r.result?`, ${r.result.toLowerCase()}`:""}`, where:{H:"House",S:"Senate"}[r.chamber]||r.chamber, rc:r.id});
+  for(const r of (b.roll_calls||[])) ms.push({date:r.date, label:`${plainMotion(r.motion)} — ${r.yea}–${r.nay}${r.result?`, ${r.result.toLowerCase()}`:""}`, where:{H:"House",S:"Senate"}[r.chamber]||r.chamber, rc:r.id, g:motionGlossId(r.motion)});
   const fd = b.final_disposition;
   ms.sort((x,y)=>String(x.date).localeCompare(String(y.date)));
-  if(fd && fd.label) ms.push({date:fd.date, label:plainStatus(fd.label), raw:fd.label, final:true});
+  if(fd && fd.label) ms.push({date:fd.date, label:plainStatus(fd.label), raw:fd.label, final:true, g:statusGlossId(fd.label)});
   return ms;
 }
 function historyList(b, hearingDate){
   const ms = billMilestones(b, hearingDate);
   const {total, runs} = billActions(b);
-  const li = e => `<li class="${e.final?"final":""}"><b${e.raw?` title="${esc(e.raw)}"`:""}>${e.rc?`<a href="#" onclick="event.preventDefault();openRollCall('${esc(e.rc)}')">${esc(e.label)}</a>`:esc(e.label)}</b>${esc(e.date?fmtDate(e.date):"")}${e.where?` · ${esc(e.where)}`:""}</li>`;
-  const runLi = r => `<li><b>${esc(r.label)}${r.n>1?` ×${r.n}`:""}</b>${r.n>1&&r.from!==r.to?`${esc(fmtShort(r.from, r.from.slice(0,4)!==r.to.slice(0,4)))}–${esc(fmtShort(r.to, true))}`:esc(r.date?fmtDate(r.date):"")}${r.where?` · ${esc(r.where)}`:""}</li>`;
-  const fd = b.final_disposition && b.final_disposition.label ? li({date:b.final_disposition.date, label:plainStatus(b.final_disposition.label), raw:b.final_disposition.label, final:true}) : "";
+  // Each milestone links to its glossary entry; a roll call's motion opens that vote, and "Roll call" links to the glossary.
+  const li = e => `<li class="${e.final?"final":""}"><b>${e.rc?`${glossLink("rollcall","Roll call")}: <a href="#" onclick="event.preventDefault();openRollCall('${esc(e.rc)}')" title="${esc(glossDef(e.g))}">${esc(e.label)}</a>`:glossLink(e.g, e.label)}</b>${esc(e.date?fmtDate(e.date):"")}${e.where?` · ${esc(e.where)}`:""}</li>`;
+  const runLi = r => `<li><b>${glossLink(actionGlossId(r.label) || (m=>m==="rollcall"?null:m)(motionGlossId(r.label)), r.label)}${r.n>1?` ×${r.n}`:""}</b>${r.n>1&&r.from!==r.to?`${esc(fmtShort(r.from, r.from.slice(0,4)!==r.to.slice(0,4)))}–${esc(fmtShort(r.to, true))}`:esc(r.date?fmtDate(r.date):"")}${r.where?` · ${esc(r.where)}`:""}</li>`;
+  const fd = b.final_disposition && b.final_disposition.label ? li({date:b.final_disposition.date, label:plainStatus(b.final_disposition.label), final:true, g:statusGlossId(b.final_disposition.label)}) : "";
   if(!ms.length && !runs.length && b.timeline) return `<ul class="timeline">${b.timeline.map(e=>`<li class="${e.final?"final":""}"><b>${esc(e.label)}</b>${esc(e.date||"")}</li>`).join("")}</ul>`;
   return `<div class="hist">
     <ul class="timeline hist-ms">${ms.map(li).join("")}</ul>
@@ -1396,7 +1484,7 @@ async function viewBill(ld, params=new URLSearchParams()){
     <div class="ld">LD ${b.ld}${b.paper?` · ${esc(b.paper)}`:""} · ${esc(D.meta.legislature.toUpperCase())}</div>
     <h1 class="bill-h1">${esc(b.title)}</h1>
     <div class="bd-meta">
-      <span>${statusChip(b)}</span>
+      <span>${statusChip(b, true)}</span>
       <span>Sponsor: <b>${legLink(b.sponsor_id)}</b>${sp?` (${esc(sp.party||"")}-${esc(sp.town||"")})`:""}</span>
       <span>Committee: <b><a href="#/committee/${esc(b.committee_code)}">${esc(cname)}</a></b></span>
       <span>${hearingDate?`Public hearing: <b>${esc(fmtDate(hearingDate))}</b>`:"No public hearing"}</span>
@@ -1696,7 +1784,7 @@ async function viewLegislator(id, params=new URLSearchParams()){
       </div>
       ${comLine?`<p class="com-line" style="font-size:14.5px;margin:12px 0 4px"><b>Committee:</b> ${comLine}</p>`:""}
       ${explain?`<p style="font-size:14.5px;margin:12px 0 4px">${explain}</p>`:!list.length?`<p style="font-size:14.5px;color:var(--ink-2)">No votes match.</p>`:`<table class="plain votes-tbl"><tr><th>Date</th><th>Bill and motion</th><th>Vote</th></tr>
-      ${list.slice(0,nv).map(v=>`<tr><td>${esc(v.date||"")}</td><td style="white-space:normal"><div class="m-date">${esc(v.date?fmtDate(v.date):"")}</div><a href="#/bill/${v.ld}">LD ${v.ld}</a> <span class="clamp2" style="font-size:12.5px;color:var(--ink-2)" title="${esc(v.title||"")}">${esc(v.title||"")}</span><div style="font-size:12.5px;color:var(--ink-3)" title="${esc(v.motion||"")}">${esc(plainMotion(v.motion))}${v.yea!=null?` · ${v.yea}–${v.nay}`:""}${v.result?` · ${esc(v.result)}`:""}</div></td><td><span class="stance-pill ${voteCls(v.vote)}">${esc(v.vote||"—")}</span></td></tr>`).join("")}
+      ${list.slice(0,nv).map(v=>`<tr><td>${esc(v.date||"")}</td><td style="white-space:normal"><div class="m-date">${esc(v.date?fmtDate(v.date):"")}</div><a href="#/bill/${v.ld}">LD ${v.ld}</a> <span class="clamp2" style="font-size:12.5px;color:var(--ink-2)" title="${esc(v.title||"")}">${esc(v.title||"")}</span><div style="font-size:12.5px;color:var(--ink-3)">${glossLink(motionGlossId(v.motion), plainMotion(v.motion), ` Recorded as: ${v.motion||""}`)}${v.yea!=null?` · ${v.yea}–${v.nay}`:""}${v.result?` · ${esc(v.result)}`:""}</div></td><td><span class="stance-pill ${voteCls(v.vote)}">${esc(v.vote||"—")}</span></td></tr>`).join("")}
       </table>`}${moreBtn("n", Math.min(nv, list.length), list.length, 50)}</div>`;
   }
   else if(tab==="committee"){
@@ -2118,6 +2206,29 @@ function lobbyBillsTable(c, all){
   </table>`;
 }
 
+function viewGlossary(params){
+  setTitle("Glossary");
+  const want = params.get("term");
+  if(want && GLOSS_BY[want]) pendingScroll = "g-" + want, pendingFlash = "g-" + want;
+  const groups = [...new Set(GLOSS.map(g=>g[1]))];
+  const srcHtml = list => list.map(([k, pin])=>`<a href="${esc(GSRC[k][1])}" target="_blank" rel="noopener">${esc(GSRC[k][0])}</a>${pin?` (${esc(pin)})`:""}`).join("; ");
+  return `
+  <div class="page-head"><div class="wrap">
+    <h1>Glossary</h1>
+    <p>The Legislature's terms as MEPLE uses them, in one or two plain sentences each. Every definition is based on the Legislature's own glossary, the Joint Rules or the statutes, linked under each entry.</p>
+  </div></div>
+  <div class="wrap"><div class="prose" style="padding-top:20px">
+    ${groups.map(gr=>`<div class="g-index"><b>${esc(gr)}:</b> ${GLOSS.filter(g=>g[1]===gr).map(g=>`<a href="#/glossary?term=${g[0]}">${esc(g[2])}</a>`).join(" · ")}</div>`).join("")}
+    ${groups.map(gr=>`<h2>${esc(gr)}</h2>${GLOSS.filter(g=>g[1]===gr).map(g=>{ const e = GLOSS_BY[g[0]]; return `<section class="g-entry" id="g-${e.id}">
+      <h3>${esc(e.term)}</h3>
+      <p style="margin:0;color:var(--ink)">${esc(e.def)}</p>
+      ${e.wording.length?`<div class="w">Legislature's wording: ${e.wording.map(w=>`“${esc(w)}”`).join(", ")}</div>`:""}
+      <div class="w">Source: ${srcHtml(e.src)}</div>
+    </section>`; }).join("")}`).join("")}
+    <p class="src" style="margin-top:20px">Unanimous committee reports don't name members; the journal lists Joint Rule 310 bills under “has voted unanimously to report the following bills out Ought Not to Pass.” Divided reports are printed with the members who signed each one.</p>
+  </div></div>`;
+}
+
 function viewAbout(){
   setTitle("About");
   const m = D.meta;
@@ -2134,7 +2245,7 @@ function viewAbout(){
     <p>MAPLE — the Massachusetts Platform for Legislative Engagement — launched in Massachusetts in 2023, built by <b>Code for Boston</b> volunteers with <b>NuLawLab at Northeastern University School of Law</b> and collaborators from the Harvard Berkman Klein Center. It is open source, nonpartisan, and free, and it has helped thousands of residents publish testimony to the Massachusetts Legislature.</p>
     <p>MEPLE adapts that working codebase for Maine: our LD numbering, our 17 joint standing committees, our public hearing process, and our citizen Legislature.</p>
     <h2>Where the data comes from</h2>
-    <p>Bills, sponsors, committee actions, reports, amendments, votes, and written testimony are drawn from the Maine Legislature's public record at legislature.maine.gov, with bill metadata cross-checked against LegiScan and Open States. Each bill page links to its sources. All testimony shown was filed with a committee through the Legislature's own submission system. Summaries marked "AI-written" are generated from the letters they cite; read the letters before relying on them.</p>
+    <p>Bills, sponsors, committee actions, reports, amendments, votes, and written testimony are drawn from the Maine Legislature's public record at legislature.maine.gov, with bill metadata cross-checked against LegiScan and Open States. Each bill page links to its sources. All testimony shown was filed with a committee through the Legislature's own submission system. Summaries marked "AI-written" are generated from the letters they cite; read the letters before relying on them. The <a href="#/glossary">glossary</a> explains the Legislature's terms, with a source for each.</p>
     <h2>Stewardship</h2>
     <p>MEPLE is stewarded by the <b>Center for Engaged Citizenship at the University of Southern Maine</b>, which provides nonpartisan editorial standards, student-powered civic education programming, and institutional continuity. The platform's code remains open source; its data remains public.</p>
     <h2>Why it matters for Maine</h2>
@@ -2220,6 +2331,7 @@ async function render(scroll=true){
     else if(seg[0]==="lobbying" && seg[1]==="client"){ html = await viewLobbyClient(decodeURIComponent(seg[2]||""), params); nav="lobbying"; }
     else if(seg[0]==="lobbying"){ html = await viewLobbying(params); nav="lobbying"; }
     else if(seg[0]==="about"){ html = viewAbout(); nav="about"; }
+    else if(seg[0]==="glossary"){ html = viewGlossary(params); nav="about"; }
     else { html = viewNotFound(); }
   }catch(e){ console.error(e); html = `<div class="wrap"><div class="empty">Something went wrong loading this page.</div></div>`; }
   if(seq!==renderSeq) return; // a newer render superseded this one
@@ -2242,7 +2354,8 @@ async function render(scroll=true){
   initTabStrips();
   document.title = pageTitle || DEFAULT_TITLE;
   if(pendingLetter){ const id = pendingLetter; pendingLetter = null; pendingScroll = null; revealLetter(id); }
-  else if(pendingScroll){ const el = document.getElementById(pendingScroll); pendingScroll = null; if(el) el.scrollIntoView({behavior:"smooth", block:"start"}); }
+  else if(pendingScroll){ const el = document.getElementById(pendingScroll); pendingScroll = null; if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+    if(pendingFlash){ const f = document.getElementById(pendingFlash); pendingFlash = null; if(f){ f.classList.add("flash"); setTimeout(()=>f.classList.remove("flash"), 3000); } } }
   else if(restoreY!=null && scroll) window.scrollTo({top: restoreY, behavior: "instant"});
   else if(scroll && !samePath) window.scrollTo({top: 0, behavior: "instant"});
 }
