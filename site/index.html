@@ -461,6 +461,8 @@
     .t-foot .t-bill{flex-basis:100%}
   }
   .t-where-m{display:none;font-size:12.5px;color:var(--ink-3);margin-bottom:6px}
+  .filter-banner{background:var(--pine-soft);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:14px;margin:12px 0 10px}
+  .filter-banner .n{color:var(--ink-2)}
   .csv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}
   .csv-btn{font-size:13px;padding:5px 10px}
   .gl{color:inherit;text-decoration:underline dotted var(--ink-3);text-underline-offset:3px}
@@ -1127,6 +1129,8 @@ function viewBills(params){
       </select>
     </div>
     ${sort==="lobbied"?`<div class="src" style="margin:-8px 0 14px;color:var(--ink-2)"><b>Most lobbied:</b> ${esc(LOBBY_NOTE)} Sorted by the number of organizations, then by the number of monthly reports. Lobbying pay is reported per client per month across all bills, so there's no per-bill dollar figure.</div>`:""}
+    ${filterBanner([quoted((params.get("q")||"").trim()), com?comName(com):"", st?STATUS_LABELS[st]:"", sort!=="testimony"?`sorted by ${({newest:"Newest", lobbied:"Most lobbied", ld:"LD number"})[sort]||sort}`:""],
+      list.length, ["q","committee","status","sort"], list.length===1?"bill":"bills")}
     <div class="result-note"><span>${fmtN(list.length)} bill${list.length===1?"":"s"}${sample?" · demonstration data set":""}</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
     <div class="list">
       ${slice.length ? slice.map(billRow).join("") : `<div class="empty">No bills match those filters. <a href="#/bills">Clear filters</a></div>`}
@@ -1165,6 +1169,19 @@ function revealLetter(id){
 // "N letters →" on a synthesis point opens the Testimony tab filtered to the letters that make it.
 function showTheme(i){ const ld = location.hash.split("?")[0].split("/")[2]; pendingScroll = "testimony"; location.hash = `#/bill/${ld}?tab=testimony&theme=${i}`; }
 const T_FIRST = 25, T_MORE = 50;
+// One-line banner on a filtered list: "Showing Oppose (9) · Clear filters". Clear drops the filter keys from the URL.
+function filterBanner(parts, count, keys, noun=""){
+  parts = parts.filter(Boolean);
+  if(!parts.length) return "";
+  return `<div class="filter-banner" role="status">Showing ${parts.map(x=>`<b>${esc(x)}</b>`).join(", ")} <span class="n">(${fmtN(count)}${noun?" "+esc(noun):""})</span> · <a href="#" onclick="event.preventDefault();clearParams('${keys.join(",")}')">Clear filters</a></div>`;
+}
+function clearParams(keys){
+  const [path, qs] = location.hash.slice(1).split("?");
+  const p = new URLSearchParams(qs||"");
+  [...keys.split(","), "page", "n", "tn", "letter"].forEach(k=>p.delete(k));
+  const s = p.toString(); history.replaceState(history.state, "", "#"+path+(s?"?"+s:"")); render(false);
+}
+const quoted = q => q ? `“${q}”` : "";
 function clearTestimonyFilters(){
   const [path, qs] = location.hash.slice(1).split("?");
   const p = new URLSearchParams(qs||""); ["tpos","tq","tn","theme","letter"].forEach(k=>p.delete(k));
@@ -1456,7 +1473,10 @@ function testimonyList(all, texts, params, syn){
   const ldNum = all[0] && all[0].ld;
   const csv = csvButton("bill-testimony", ()=>({name:[`LD${ldNum}`, "testimony", tpos, tq?"search-"+tq:"", th?"theme-"+params.get("theme"):""], cols:letterCols, rows:list}),
     list.length!==all.length ? `Download CSV (${fmtN(list.length)})` : "Download CSV");
-  const controls = all.length > 10 ? `
+  const banner = filterBanner([tpos ? ({support:"Support", neutral:"Neither for nor against", oppose:"Oppose", unknown:"Position not recorded"})[tpos] : "",
+      quoted(tqRaw.trim()), th ? `letters making the point “${th.label}”` : "", tsort!=="rel" ? `sorted by ${T_SORTS[tsort]}` : ""],
+    list.length, ["tpos","tq","theme","tsort"], list.length===1?"letter":"letters");
+  const controls = all.length > 10 ? `${banner}
     <div class="toolbar" style="margin:14px 0 6px">
       <input type="search" placeholder="Search by name, organization, or town…" value="${esc(tqRaw)}" oninput="updateParam('tq', this.value, true)" aria-label="Search testimony on this bill">
       <select onchange="updateParam('tpos', this.value, true)" aria-label="Filter testimony by position">
@@ -1473,7 +1493,7 @@ function testimonyList(all, texts, params, syn){
     ${cleared?`<div class="src" style="margin:0 0 6px;color:var(--ink)">Filters were cleared to show the linked letter.</div>`:""}
     ${all.some(t=>t.position_source==="inferred")?`<div class="src" style="margin:0 0 6px">* position inferred from the text of the letter.</div>`:""}
     ${th?`<div class="src" style="margin:0 0 6px;color:var(--ink)"><b>Letters making this point:</b> ${esc(th.label)}</div>`:""}
-    <div class="result-note" style="margin-bottom:10px"><span>Showing ${fmtN(visible.length)} of ${fmtN(list.length)}${list.length!==all.length?` matching (${fmtN(all.length)} total)`:""}${tsort==="rel"?" · letters with a position on this bill first":""}</span><span class="csv-row" style="margin:0">${tpos||tq||th?`<a href="#" onclick="event.preventDefault();clearTestimonyFilters()">Clear filters</a>`:""}${csv}</span></div>` : `<div style="height:14px"></div>${all.some(t=>t.position_source==="inferred")?`<div class="src" style="margin:-6px 0 8px">* position inferred from the text of the letter.</div>`:""}<div class="csv-row">${csv}</div>`;
+    <div class="result-note" style="margin-bottom:10px"><span>Showing ${fmtN(visible.length)} of ${fmtN(list.length)}${list.length!==all.length?` matching (${fmtN(all.length)} total)`:""}${tsort==="rel"?" · letters with a position on this bill first":""}</span><span class="csv-row" style="margin:0">${csv}</span></div>` : `<div style="height:14px"></div>${banner}${all.some(t=>t.position_source==="inferred")?`<div class="src" style="margin:-6px 0 8px">* position inferred from the text of the letter.</div>`:""}<div class="csv-row">${csv}</div>`;
   return `${controls}
     <div style="display:flex;flex-direction:column;gap:12px">
       ${visible.length ? visible.map(t=>testimonyItem(t, t.mine ? t.text : (texts[t.id] ?? null), {clamp:true})).join("") : `<div class="empty">No testimony matches those filters.</div>`}
@@ -1654,7 +1674,7 @@ async function viewTestimony(params){
   setTitle("Testimony archive");
   const rows = await loadTestimonyIndex();
   const towns = await loadTowns();
-  const st = params.get("position")||"";
+  const st = params.get("position")||params.get("tpos")||"";
   const com = params.get("committee")||"";
   const q = (params.get("q")||"").trim().toLowerCase();
   const page = Math.max(1, Number(params.get("page")||1));
@@ -1685,6 +1705,8 @@ async function viewTestimony(params){
     <p>Every piece of written testimony on the Legislature's public record for the ${esc(D.meta.legislature)}. What Mainers tell their Legislature shouldn't disappear into a filing cabinet.</p>
   </div></div>
   <div class="wrap">
+    ${filterBanner([({support:"Support", neutral:"Neither for nor against", oppose:"Oppose"})[st]||"", com?comName(com):"", dk?districtLabel(dk):"", ...townList, quoted((params.get("q")||"").trim())],
+      all.length, ["position","tpos","committee","district","towns","q"], all.length===1?"testimony":"testimonies")}
     <div class="toolbar">
       <input type="search" placeholder="Search by name, organization, town, or LD number…" value="${esc(params.get("q")||"")}" oninput="updateParam('q', this.value, true)" aria-label="Search testimony">
       <button type="button" class="btn ghost sm filters-btn" aria-expanded="${tfOpen?"true":"false"}" aria-controls="t-filters" onclick="tfOpen=document.getElementById('t-filters').classList.toggle('open');this.setAttribute('aria-expanded',tfOpen)">Filters${nActive?` (${nActive})`:""}</button>
@@ -1695,7 +1717,7 @@ async function viewTestimony(params){
         <option value="">All committees</option>
         ${D.committees.map(c=>`<option ${c.code===com?"selected":""} value="${esc(c.code)}">${esc(c.name)}</option>`).join("")}
       </select>
-      <select class="half" onchange="updateParam('position', this.value, true)" aria-label="Filter by position">
+      <select class="half" onchange="var p=new URLSearchParams(location.hash.split('?')[1]||'');if(p.has('tpos')){p.delete('tpos');history.replaceState(history.state,'','#'+location.hash.slice(1).split('?')[0]+'?'+p.toString());}updateParam('position', this.value, true)" aria-label="Filter by position">
         <option value="">All positions</option>
         <option value="support" ${st==="support"?"selected":""}>✓ Support</option>
         <option value="neutral" ${st==="neutral"?"selected":""}>– Neither for nor against</option>
@@ -1803,6 +1825,7 @@ async function viewLegislators(params){
       <select class="half" onchange="updateParam('party', this.value, true)" aria-label="Party"><option value="">All parties</option><option value="D" ${pt==="D"?"selected":""}>Democrat</option><option value="R" ${pt==="R"?"selected":""}>Republican</option><option value="I" ${pt==="I"?"selected":""}>Independent</option><option value="U" ${pt==="U"?"selected":""}>Unenrolled</option></select>
       ${anyFormer?`<select onchange="updateParam('members', this.value, true)" aria-label="Current or former members"><option value="current" ${ms==="current"?"selected":""}>Current members</option><option value="former" ${ms==="former"?"selected":""}>Former members this session</option><option value="all" ${ms==="all"?"selected":""}>All who served</option></select>`:""}
     </div>
+    ${filterBanner([quoted((params.get("q")||"").trim()), ch, pt?partyName(pt)+"s":"", ms!=="current"?({former:"Former members", all:"All who served"})[ms]:""], list.length, ["q","chamber","party","members"], "legislators")}
     <div class="result-note"><span>${ms==="former"?`${fmtN(nFormer)} former member${nFormer===1?"":"s"} who left during the session`:`${fmtN(list.length-nFormer)} current legislators${nFormer?` · ${fmtN(nFormer)} former (listed last)`:""}`}</span></div>
     <div class="grid-2" style="padding:0 0 64px">${list.map(legCard).join("")||`<div class="empty">No legislators match.</div>`}</div>
   </div>`;
@@ -1859,6 +1882,7 @@ async function viewLegislator(id, params=new URLSearchParams()){
     const voteCls = v => ({yea:"support", nay:"oppose"})[kind(v)] || "neutral";
     const nv = Math.max(50, Number(params.get("n"))||50);
     body = `<div class="panel">
+      ${filterBanner([vf?({yea:"Yea", nay:"Nay", absent:"Absent / not voting"})[vf]:"", vc?comName(vc):"", ldq?`LD ${ldq}`:quoted(vqRaw.trim())], list.length, ["v","vc","q"], list.length===1?"vote":"votes")}
       <div class="toolbar" style="margin-bottom:10px"><input type="search" placeholder="Search these votes by LD number or keyword" value="${esc(vqRaw)}" oninput="updateParam('q', this.value, true)" aria-label="Search these votes by LD number or keyword"></div>
       <div class="filters">
         <select onchange="updateParam('v', this.value, true)" aria-label="Filter by vote"><option value="">All votes (${fmtN(votes.length)})</option>${["yea","nay","absent"].map(k=>`<option value="${k}" ${vf===k?"selected":""}>${k==="absent"?"Absent / not voting":k[0].toUpperCase()+k.slice(1)} (${fmtN(votes.filter(v=>kind(v.vote)===k).length)})</option>`).join("")}</select>
@@ -2013,7 +2037,7 @@ async function viewCommittee(code, params=new URLSearchParams()){
   if(tab==="bills"){
     const o = params.get("o")||"", s = params.get("sort")||"testimony";
     const list = bills.filter(b=>!o || b.status===o).sort(s==="hearing" ? (a,b)=>String(b.hearing_date||"").localeCompare(String(a.hearing_date||"")) || a.ld-b.ld : s==="ld" ? (a,b)=>a.ld-b.ld : s==="lobbied" ? byLobbied : (a,b)=>(b.testimony_count||0)-(a.testimony_count||0) || a.ld-b.ld);
-    body = `<div class="panel"><div class="filters">
+    body = `<div class="panel">${filterBanner([o?(OUTCOMES.find(x=>x[0]===o)||[,o])[1]:"", s!=="testimony"?`sorted by ${({hearing:"Hearing date", lobbied:"Most lobbied", ld:"LD number"})[s]||s}`:""], list.length, ["o","sort"], list.length===1?"bill":"bills")}<div class="filters">
         <select onchange="updateParam('o', this.value, true)" aria-label="Filter by outcome"><option value="">Any outcome (${fmtN(bills.length)})</option>${byOutcome.map(([k,l,cnt])=>`<option value="${k}" ${o===k?"selected":""}>${l} (${fmtN(cnt)})</option>`).join("")}</select>
         <select onchange="updateParam('sort', this.value, true)" aria-label="Sort"><option value="testimony">Most testimony</option><option value="hearing" ${s==="hearing"?"selected":""}>Hearing date (newest)</option><option value="lobbied" ${s==="lobbied"?"selected":""}>Most lobbied</option><option value="ld" ${s==="ld"?"selected":""}>LD number</option></select>
         <span class="src" style="margin:0">${fmtN(list.length)} bill${list.length===1?"":"s"}</span>
@@ -2145,6 +2169,7 @@ async function viewProfiles(params){
         <option value="official" ${ty==="official"?"selected":""}>Public officials (${fmtN(n("official"))})</option>
       </select>
     </div>
+    ${filterBanner([({organization:"Organizations", agency:"State agencies and public bodies", official:"Public officials"})[ty]||"", quoted((params.get("q")||"").trim())], list.length, ["type","q"], "profiles")}
     <div class="result-note"><span>${fmtN(list.length)} profiles · ordered by number of testimonies</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
     <div class="grid-2" style="padding-bottom:24px">
       ${slice.map(p=>`<a class="com-card" href="#/profile/${esc(p.id)}">
@@ -2246,6 +2271,7 @@ async function viewLobbying(params){
       <div class="src"><a href="#/bills?sort=lobbied">All ${fmtN(lobbied.length)} lobbied bills on the Bills page →</a></div>
       <div class="csv-row">${csvButton("lob-bills", ()=>({name:["lobbied-bills"], cols:billCols, rows:[...lobbied].sort(byLobbied)}), `Download CSV (all ${fmtN(lobbied.length)} bills)`)}</div>
     </div>
+    ${filterBanner([quoted((params.get("q")||"").trim())], clients.length + lobbyists.length, ["q"], "clients and lobbyists")}
     <div class="toolbar" style="margin-top:8px">
       <input type="search" placeholder="Search clients and lobbyists by name…" value="${esc(params.get("q")||"")}" oninput="updateParam('q', this.value)" aria-label="Search lobbying clients and lobbyists">
     </div>
