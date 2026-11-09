@@ -222,13 +222,6 @@ def build():
         if r["firm"]: l["firms"][r["firm"]] += 1
     # Distinct clients per bill: the client name exactly as filed, the same grouping the bill page's lobbying panel uses.
     clients_of = {ld: len({i["client"] for i in v if i["client"]}) for ld, v in by_ld.items()}
-    for ld, items in by_ld.items():
-        items.sort(key=lambda x: (x.get("period") or "", x["client"] or ""))
-        (out / f"LD{ld}.json").write_text(json.dumps({
-            "ld": ld, "reports": items,
-            "clients": sorted({i["client"] for i in items if i["client"]}),
-            "note": "Monthly lobbyist reports filed with the Maine Ethics Commission name the bills lobbied that month. Compensation is reported per client per month across all bills in a report, so there is no per-bill dollar figure. The reports do not state a position on the bill.",
-            "source": PORTAL}, ensure_ascii=False), encoding="utf-8")
     # One file per client (lobbyists, bills and the calendar months each bill was reported), kept out of the main index.
     slugs, used = {}, set()
     for k in sorted(by_client):
@@ -238,6 +231,32 @@ def build():
         used.add(sl); slugs[k] = sl
     prof_of = client_profiles(by_client)
     print(f"lobbying: {len(prof_of)} of {len(by_client)} clients linked to a testimony profile")
+    # Each client's written testimony on the same LD: a letter filed under this LD (the bill's own testimony list, so a
+    # jointly heard bill's letters count only where they were filed) whose organization is the client's testimony profile,
+    # or whose organization name matches the client by the same name rule and aliases. Lobbying reports state no position;
+    # positions come from the letters.
+    alias = {k.strip(): v for k, v in CLIENT_PROFILE_ALIASES.items()}
+    n_matched = 0
+    for ld, items in by_ld.items():
+        items.sort(key=lambda x: (x.get("period") or "", x["client"] or ""))
+        clients = sorted({i["client"] for i in items if i["client"]})
+        bp = config.OUT / "bills" / f"LD{ld}.json"
+        letters = json.loads(bp.read_text(encoding="utf-8")).get("testimony", []) if bp.exists() else []
+        testimony = {}
+        for c in clients:
+            pid, ck = prof_of.get(c), org_key(alias.get(c.strip(), c))
+            hit = [t for t in letters if t.get("organization") and ((pid and t.get("org_profile_id") == pid) or org_key(t["organization"]) == ck)]
+            if hit:
+                testimony[c] = [{"id": t["id"], "position": t.get("position"), "position_source": t.get("position_source"),
+                                 "name": t.get("name"), "organization": t.get("organization")} for t in hit]
+        n_matched += len(testimony)
+        (out / f"LD{ld}.json").write_text(json.dumps({
+            "ld": ld, "reports": items,
+            "clients": clients,
+            "testimony": testimony,
+            "note": "Monthly lobbyist reports filed with the Maine Ethics Commission name the bills lobbied that month. Compensation is reported per client per month across all bills in a report, so there is no per-bill dollar figure. The reports do not state a position on the bill.",
+            "source": PORTAL}, ensure_ascii=False), encoding="utf-8")
+    print(f"lobbying: {n_matched} bill-client pairs also have written testimony on that bill")
     cdir = out / "clients"
     if cdir.exists():
         for p in cdir.glob("*.json"): p.unlink()

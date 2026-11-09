@@ -1127,24 +1127,48 @@ function clearTestimonyFilters(){
 }
 // Lobbying on one bill: one row per client, months shown as a count and range (every month in the tooltip),
 // sorted by months reported. 15 rows, then "Show all". Self-contained, so the bill page can place it in any tab.
+const LOB_POS_ORDER = ["Support","Oppose","Neither","Mixed","Letter, no position","No letter found"];
+// The client's written testimony on this bill (matched in pipeline/lobbying.py by testimony profile, name rule and aliases;
+// only letters filed under this LD). Lobbying reports state no position; positions come from the letters.
+function lobbyTestimony(letters){
+  if(!letters || !letters.length) return {label:"No letter found", letters:[]};
+  const ps = [...new Set(letters.map(t=>t.position).filter(Boolean))];
+  const label = !ps.length ? "Letter, no position" : ps.length>1 ? "Mixed" : ({support:"Support", oppose:"Oppose", neutral:"Neither"})[ps[0]];
+  return {label, letters, inferred: letters.some(t=>t.position && t.position_source==="inferred")};
+}
 function lobbyingPanel(lob, opts={}){
   if(!lob || !(lob.reports||[]).length) return "";
+  const ld = lob.ld, sortBy = opts.sort==="position" ? "position" : "months";
   const byClient = {};
   for(const r of lob.reports){ (byClient[r.client||"—"] ||= []).push(r); }
   const rows = Object.entries(byClient).map(([c, rs])=>{
     const months = [...new Set(rs.map(r=>r.period).filter(Boolean))].sort();
     const who = [...new Set(rs.map(r=>[r.lobbyist, r.firm].filter(Boolean).join(", ")).filter(Boolean))].join("; ");
-    return {c, who, months, n: rs.length};
-  }).sort((a,b)=>b.months.length-a.months.length || b.n-a.n || a.c.localeCompare(b.c));
+    return {c, who, months, n: rs.length, t: lobbyTestimony((lob.testimony||{})[c])};
+  });
+  const byMonths = (a,b)=>b.months.length-a.months.length || b.n-a.n || a.c.localeCompare(b.c);
+  rows.sort(sortBy==="position" ? (a,b)=>LOB_POS_ORDER.indexOf(a.t.label)-LOB_POS_ORDER.indexOf(b.t.label) || byMonths(a,b) : byMonths);
+  const nT = rows.filter(x=>x.t.letters.length).length;
   const SHOW = 15;
-  const row = (x, i) => `<tr class="${i>=SHOW?"lob-more":""}"><td style="white-space:normal"><b>${esc(x.c)}</b><div class="lob-who">${esc(x.who)}</div></td><td class="lob-who-col">${esc(x.who)}</td><td title="${esc(x.months.map(fmtMonth).join(", "))}" style="white-space:nowrap">${esc(monthsLabel(x.months))}</td></tr>`;
+  const POS_CLS = {Support:"support", Oppose:"oppose", Neither:"neutral", Mixed:"neutral"};
+  const posCell = x => {
+    const t = x.t;
+    if(!t.letters.length) return `<span style="color:var(--ink-3)">No letter found</span>`;
+    const pill = POS_CLS[t.label] ? `<span class="stance-pill ${POS_CLS[t.label]}"${t.inferred?' title="Inferred from the text of the letter"':""}>${esc(t.label)}${t.inferred?"*":""}</span>` : `<span class="stance-pill none">${esc(t.label)}</span>`;
+    const links = t.letters.map(l=>`<a href="#/bill/${ld}?letter=${encodeURIComponent(l.id)}" title="${esc(l.position?STANCE_META[l.position].label+(l.position_source==="inferred"?" (inferred)":""):"No position stated")}">${esc(l.name||l.organization||"Letter")}</a>`).join(", ");
+    return `${pill}<div style="font-size:12.5px;margin-top:3px">${links}</div>`;
+  };
+  const row = (x, i) => `<tr class="${i>=SHOW?"lob-more":""}"><td style="white-space:normal"><b>${esc(x.c)}</b><div class="lob-who">${esc(x.who)}<br>${esc(monthsLabel(x.months))}</div></td><td class="lob-who-col">${esc(x.who)}</td><td class="lob-who-col" title="${esc(x.months.map(fmtMonth).join(", "))}" style="white-space:nowrap">${esc(monthsLabel(x.months))}</td><td style="white-space:normal">${posCell(x)}</td></tr>`;
+  const sortLink = (k, label) => k===sortBy ? `<b>${label}</b>` : `<a href="#" onclick="event.preventDefault();updateParam('lsort','${k==="months"?"":k}')">${label}</a>`;
   return `<div class="panel lob-panel" id="lobbying">
     <h2>Lobbying on this bill · ${fmtN(rows.length)} organization${rows.length===1?"":"s"}</h2>
-    <table class="plain lob-tbl"><tr><th>Client</th><th class="lob-who-col">Lobbyist</th><th>Months reported</th></tr>
+    <p style="font-size:14.5px;margin:0 0 8px"><b>${fmtN(nT)} of ${fmtN(rows.length)}</b> organizations also filed written testimony on this bill. Maine's lobbying reports don't record a position; positions here come from their testimony and are inferred from its text.</p>
+    <div class="src" style="margin:0 0 8px">Sort by ${sortLink("months","months reported")} · ${sortLink("position","position in their testimony")}${opts.csv?` · ${opts.csv}`:""}</div>
+    <table class="plain lob-tbl"><tr><th>Client</th><th class="lob-who-col">Lobbyist</th><th class="lob-who-col">Months reported</th><th>Position in their testimony on this bill</th></tr>
     ${rows.map(row).join("")}
     </table>
     ${rows.length>SHOW?`<div style="margin-top:10px"><button class="btn ghost sm" onclick="this.closest('.lob-panel').classList.add('all');this.remove()">Show all ${fmtN(rows.length)}</button></div>`:""}
-    <div class="src">${esc(LOBBY_NOTE)} Hover a month range for the months. ${esc(lob.note||"")} <a href="${esc(lob.source||"#")}" target="_blank" rel="noopener">Source: Maine Ethics Commission lobbyist disclosures ↗</a></div>
+    <div class="src">${esc(LOBBY_NOTE)} Letters are matched to clients by organization name, using the same rules and aliases as the testimony profiles, and counted only when filed under LD ${ld}. * inferred from the text of the letter. ${esc(lob.note||"")} <a href="${esc(lob.source||"#")}" target="_blank" rel="noopener">Source: Maine Ethics Commission lobbyist disclosures ↗</a></div>
   </div>`;
 }
 // Roll calls, each expandable to Yea / Nay / Absent grouped by party, every name linked. ?rc=<id> opens one.
@@ -1522,7 +1546,7 @@ async function viewBill(ld, params=new URLSearchParams()){
     </div>`;
   }
   else if(tab==="lobbying"){
-    body = lobbyingPanel(lob);
+    body = lobbyingPanel(lob, {sort: params.get("lsort")});
   }
   else if(tab==="text"){
     const textLinks = [...docs.map(d=>({label:d.label, url:d.url})), ...amendments.filter(a=>a.url).map(a=>({label:`Amendment ${a.id}${a.status?` (${a.status})`:""}`, url:a.url}))];
