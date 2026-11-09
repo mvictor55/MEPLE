@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MEPLE — The Maine Platform for Legislative Engagement</title>
-<meta name="description" content="Search the bills, votes, lobbying reports and written public testimony of the Maine Legislature. Free, nonpartisan and built in the open.">
+<meta name="description" content="Search the bills, votes, lobbying reports and written public testimony of the Maine Legislature. Free and nonpartisan.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MEPLE">
 <meta property="og:title" content="MEPLE — The Maine Platform for Legislative Engagement">
-<meta property="og:description" content="Search the bills, votes, lobbying reports and written public testimony of the Maine Legislature. Free, nonpartisan and built in the open.">
+<meta property="og:description" content="Search the bills, votes, lobbying reports and written public testimony of the Maine Legislature. Free and nonpartisan.">
 <meta property="og:url" content="https://me-ple.netlify.app/">
 <meta property="og:image" content="https://me-ple.netlify.app/og.png">
 <meta property="og:image:width" content="1200">
@@ -519,7 +519,7 @@
     <div class="cols">
       <div>
         <div class="f-brand">ME<em>PLE</em></div>
-        <p style="margin-top:10px;max-width:380px">An open civic platform to read and search the public testimony on the bills before the Maine State Legislature — free, nonpartisan, and built in the open.</p>
+        <p style="margin-top:10px;max-width:380px">An open civic platform to read and search the public testimony on the bills before the Maine State Legislature — free and nonpartisan. Adapted from MAPLE, which is open source; MEPLE's code will be published.</p>
       </div>
       <div>
         <h4>Explore</h4>
@@ -535,7 +535,7 @@
         <a href="#/about">About MEPLE</a>
         <a href="#/glossary">Glossary</a>
         <a href="#/about">Stewardship &amp; governance</a>
-        <a href="#/about">Open source</a>
+        <a href="https://github.com/codeforboston/maple" target="_blank" rel="noopener">MAPLE's open-source code ↗</a>
       </div>
     </div>
     <div class="fine" id="footfine">
@@ -1558,6 +1558,10 @@ async function viewBill(ld, params=new URLSearchParams()){
   const cname = b.committee_name||comName(b.committee_code);
   const nOrgs = lob ? new Set((lob.reports||[]).map(r=>r.client||"—")).size : 0;
   const c = positionCounts(all);
+  // Fiscal status in the header only when it shows a fiscal impact; the note on the printed bill, else the latest adopted amendment's.
+  const fnAmd = [...amendments].reverse().find(a=>a.fiscal_note_url && /adopted/i.test(a.status||""));
+  const fiscalNote = b.fiscal_note_url ? {url:b.fiscal_note_url, label:"fiscal note"} : fnAmd ? {url:fnAmd.fiscal_note_url, label:`fiscal note (${fnAmd.id.split(" ")[0]})`} : null;
+  const fiscalHead = /^fiscal impact$/i.test(b.fiscal_status||"") ? `<span>Fiscal impact${fiscalNote?` · <a href="${esc(fiscalNote.url)}" target="_blank" rel="noopener">${esc(fiscalNote.label)} ↗</a>`:""}</span>` : "";
 
   // Which tab: ?tab= wins; otherwise a deep link picks it (letter/filters -> Testimony, rc -> History & votes, theme -> Overview).
   const TABS = ["overview","testimony","votes","lobbying","text"];
@@ -1593,6 +1597,7 @@ async function viewBill(ld, params=new URLSearchParams()){
       <span>Sponsor: <b>${legLink(b.sponsor_id)}</b>${sp?` (${esc(sp.party||"")}-${esc(sp.town||"")})`:""}</span>
       <span>Committee: <b><a href="#/committee/${esc(b.committee_code)}">${esc(cname)}</a></b></span>
       <span>${hearingDate?`Public hearing: <b>${esc(fmtDate(hearingDate))}</b>`:"No public hearing"}</span>
+      ${fiscalHead}
       ${cos.length?`<details class="cos"><summary>${fmtN(cos.length)} cosponsor${cos.length===1?"":"s"}</summary><div style="margin-top:6px">${cos.map(legLink).join(", ")}</div></details>`:""}
     </div>
     ${(b.heard_with||[]).length?`<div class="src" style="margin:-10px 0 12px">Heard with ${b.heard_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}</div>`:""}
@@ -1639,7 +1644,9 @@ async function viewBill(ld, params=new URLSearchParams()){
       <div class="panel"><h2>Bill text and amendments</h2>
         ${textLinks.length?textLinks.map(d=>`<div style="font-size:14px;margin-bottom:6px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.label)} ↗</a></div>`).join(""):`<p style="font-size:14px;color:var(--ink-2)">No documents linked.</p>`}
       </div>
-      <div class="panel"><h2>Fiscal status</h2><p style="font-size:14.5px">${esc(b.fiscal_status||"Not recorded")}</p></div>
+      <div class="panel"><h2>Fiscal status</h2><p style="font-size:14.5px">${esc(b.fiscal_status||"Not recorded")}</p>
+        ${b.fiscal_note_url||amendments.some(a=>a.fiscal_note_url)?`<div style="font-size:14px;margin-top:8px">${b.fiscal_note_url?`<div><a href="${esc(b.fiscal_note_url)}" target="_blank" rel="noopener">Fiscal note on the printed bill ↗</a></div>`:""}${amendments.filter(a=>a.fiscal_note_url).map(a=>`<div><a href="${esc(a.fiscal_note_url)}" target="_blank" rel="noopener">Fiscal note on amendment ${esc(a.id)}${a.status?` (${esc(a.status)})`:""} ↗</a></div>`).join("")}</div>`:""}
+        <div class="src"><a href="${esc(GSRC.glossary[1])}" target="_blank" rel="noopener">The Legislature's glossary</a>: a fiscal note describes a measure's fiscal impact; Joint Rule 312 requires one on favorable reports for bills affecting state revenue, appropriations or local spending.</div></div>
       ${(b.sources||[]).length?`<div class="panel"><h2>Sources</h2>${b.sources.map(s=>`<div style="font-size:13px;margin-bottom:6px;word-break:break-all"><a href="${esc(s)}" target="_blank" rel="noopener">${esc(s.replace(/^https?:\/\//,""))}</a></div>`).join("")}</div>`:""}`;
   }
   else {
@@ -2361,7 +2368,7 @@ function viewAbout(){
   return `
   <div class="page-head"><div class="wrap">
     <h1>About MEPLE</h1>
-    <p>A public commons for legislative testimony — built in the open, owned by no one, useful to everyone.</p>
+    <p>A public commons for legislative testimony: free, nonpartisan and useful to everyone. Adapted from <a href="https://github.com/codeforboston/maple" target="_blank" rel="noopener">MAPLE, which is open source</a>; MEPLE's code will be published.</p>
   </div></div>
   <div class="wrap"><div class="prose">
     <h2>The idea</h2>
@@ -2373,7 +2380,7 @@ function viewAbout(){
     <h2>Where the data comes from</h2>
     <p>Bills, sponsors, committee actions, reports, amendments, votes, and written testimony are drawn from the Maine Legislature's public record at legislature.maine.gov, with bill metadata cross-checked against LegiScan and Open States. Each bill page links to its sources. All testimony shown was filed with a committee through the Legislature's own submission system. Summaries marked "AI-written" are generated from the letters they cite; read the letters before relying on them. The <a href="#/glossary">glossary</a> explains the Legislature's terms, with a source for each.</p>
     <h2>Stewardship</h2>
-    <p>MEPLE is stewarded by the <b>Center for Engaged Citizenship at the University of Southern Maine</b>, which provides nonpartisan editorial standards, student-powered civic education programming, and institutional continuity. The platform's code remains open source; its data remains public.</p>
+    <p>MEPLE is stewarded by the <b>Center for Engaged Citizenship at the University of Southern Maine</b>, which provides nonpartisan editorial standards, student-powered civic education programming, and institutional continuity. MEPLE is adapted from <a href="https://github.com/codeforboston/maple" target="_blank" rel="noopener">MAPLE, which is open source</a> (MIT license); MEPLE's own code will be published. Its data comes from the public record.</p>
     <h2>Why it matters for Maine</h2>
     <p>Maine has one of the most accessible legislatures in the country — every bill gets a public hearing, and anyone may testify. But accessibility on paper isn't accessibility in practice when hearings happen on weekday mornings in Augusta. A farmer in Fort Kent, a sternman in Jonesport, and a nurse on the night shift in Bangor deserve the same voice as anyone who can spend a Tuesday at the State House.</p>
     ${m.sample?`<p><i>This site is a demonstration prototype. The bills shown are real measures from the ${esc(m.legislature)}; testimony, counts, and organizational names are illustrative samples.</i></p>`:`<p><i>Data last updated ${esc(m.generated_at)}.</i></p>`}

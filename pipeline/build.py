@@ -220,6 +220,7 @@ def run(sample_notice: str | None = None):
             "summary": summary, "status": status, "status_label": status_label,
             "final_disposition": sp.get("final_disposition") or {"label": status_label, "date": lg.get("status_date")},
             "fiscal_status": sp.get("fiscal_status"),
+            "fiscal_note_url": sp.get("fiscal_note_url"),
             "documents": sp.get("documents") or [{"label": t["label"] or "Bill text", "url": t["url"]} for t in lg.get("texts", []) if t.get("url")],
             "amendments": sp.get("amendments", []),
             "committee_actions": sp.get("committee_actions", []),

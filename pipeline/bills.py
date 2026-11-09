@@ -138,6 +138,9 @@ def parse_status_page(html: str, ld: int) -> dict:
     b["status"], b["status_label"] = normalize_disposition(label)
     fis = soup.select_one("span.tlnk-fiscal span[style*='nowrap']")
     b["fiscal_status"] = _text(fis) or None
+    # The fiscal note on the printed bill, when the Legislature has posted one (FN{ld}01.pdf)
+    fnb = soup.select_one("span.tlnk-fiscal a[href*='fiscalpdfs']") or soup.select_one("span.tlnk-fiscal a[href*='fiscalnotes']")
+    b["fiscal_note_url"] = _abs(fnb["href"]) if fnb else None
 
     # Amendments (div#sec1): one span.tlnk-amdblk per amendment
     amendments = []
