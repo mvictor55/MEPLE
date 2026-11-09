@@ -492,9 +492,11 @@
   .v2-phead{font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;padding-top:0;padding-bottom:0}
   .v2-plabel{font-size:14px;font-weight:600;color:var(--ink);padding-right:8px}
   .v2-dv{display:flex;align-items:center;gap:5px;height:18px}
-  .v2-dv.o{flex-direction:row-reverse;border-right:2px solid var(--ink)} .v2-dv.s{flex-direction:row}
+  .v2-dv.l{flex-direction:row-reverse;border-right:2px solid var(--ink)} .v2-dv.r{flex-direction:row}
+  .v2-hl,.v2-hr{font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;padding:0 6px}
+  .v2-hl{text-align:right} .v2-hr{text-align:left}
   .v2-dv > span{height:14px;display:block;min-width:2px}
-  .v2-dv.o > span{background:var(--oppose);border-radius:4px 0 0 4px} .v2-dv.s > span{background:var(--support);border-radius:0 4px 4px 0}
+  .v2-dv.l > span{background:var(--support);border-radius:4px 0 0 4px} .v2-dv.r > span{background:var(--oppose);border-radius:0 4px 4px 0}
   .v2-dv em{font-style:normal;font-size:13px;font-weight:600;color:var(--ink-2)}
   .v2-share{font-size:13px;color:var(--ink-2);text-align:right}
   .v2-ul{margin:4px 0 4px 18px;font-size:14.5px}
@@ -536,7 +538,7 @@
     .v2-cols,.v2-views{grid-template-columns:1fr}
     .v2-prow{grid-template-columns:1fr 1fr 58px;row-gap:2px}
     .v2-prow .v2-plabel{grid-column:1 / -1}
-    .v2-phead{display:none}
+    .v2-phead .v2-plabel{display:none}
     .v2-claim{grid-template-columns:1fr}
     .v2-claim .v2-badge{justify-self:start}
   }
@@ -1490,8 +1492,9 @@ function testimonyItem(t, text, opts={}){
     : `<div class="t-body" style="color:var(--ink-3)">Text not yet extracted (likely a scanned PDF).${t.url?` <a href="${esc(t.url)}" target="_blank" rel="noopener">Open the official PDF →</a>`:""}</div>`;
   const toggle = `(function(btn){var a=document.getElementById('${id}'),f=document.getElementById('${id}-full');var open=btn.textContent==='Read more';if(f){a.hidden=open;f.hidden=!open;}else{a.classList.toggle('clamp',!open);}btn.textContent=open?'Show less':'Read more';btn.setAttribute('aria-label',(open?'Show less of the testimony from ':'Read more of the testimony from ')+btn.dataset.who);btn.setAttribute('aria-expanded',open);})(this)`;
   return `<article class="t-item${opts.compact?" compact":""}" id="${opts.compact?"top":"letter"}-${esc(t.id)}">
-    <div class="t-head">${stancePill(t.position, t.position_source)}<span class="who">${whoHtml}</span><span class="where">${esc(where)}</span></div>
+    <div class="t-head">${opts.syn ? v2Pill(t) : stancePill(t.position, t.position_source)}<span class="who">${whoHtml}</span><span class="where">${esc(where)}</span></div>
     ${where?`<div class="t-where-m">${esc(where)}</div>`:""}
+    ${opts.syn ? `<div class="v2-tags">${v2SrcTag(t, opts.syn.computed.letters[t.id]||{})}</div>` : ""}
     ${body}
     <div class="t-foot">
       ${opts.showBill && b ? `<a class="t-bill" href="#/bill/${b.ld}?letter=${encodeURIComponent(t.id)}" style="font-weight:400;color:var(--ink-2)">LD ${b.ld} — ${esc(b.title.length>76?b.title.slice(0,74)+"…":b.title)}</a>` : ""}
@@ -1672,6 +1675,11 @@ function v2Pill(t){
   const label = {support:"For", oppose:"Against", unclear:"Unclear", neutral:"Neither"}[t.position] || m.label;
   return `<span class="stance-pill ${t.position==="unclear"?"neutral":esc(t.position)}">${m.icon?`<span aria-hidden="true">${m.icon}</span> `:""}${esc(label)}</span>`;
 }
+function v2SrcTag(t, info){
+  return info.source==="corrected"
+    ? `<span class="v2-src corrected" title="The keyword rule labeled this letter ${esc(t.keyword_label||"")}; reading the whole letter gave the side shown">corrected (keyword rule said ${esc(({support:"for",oppose:"against"})[t.keyword_label]||t.keyword_label||"?")})</span>`
+    : `<span class="v2-src">side: ${esc(V2_SRC[info.source]||"keyword")}</span>`;
+}
 function v2LetterItem(t, text, syn, ld, title){
   const info = syn.computed.letters[t.id] || {};
   const where = [t.town, t.organization].filter(Boolean).join(" · ");
@@ -1679,9 +1687,7 @@ function v2LetterItem(t, text, syn, ld, title){
   const flag = (syn.flags||[]).find(f=>f.letter_id===t.id);
   const camp = info.campaign ? (syn.computed.campaigns||[]).find(c=>c.id===info.campaign) : null;
   const manual = (syn.campaigns_manual||[]).findIndex(m=>m.letter_ids.includes(t.id));
-  const srcTag = info.source==="corrected"
-    ? `<span class="v2-src corrected" title="The keyword rule labeled this letter ${esc(t.keyword_label||"")}; reading the whole letter gave the side shown">corrected (keyword rule said ${esc(({support:"for",oppose:"against"})[t.keyword_label]||t.keyword_label||"?")})</span>`
-    : `<span class="v2-src">side: ${esc(V2_SRC[info.source]||"keyword")}</span>`;
+  const srcTag = v2SrcTag(t, info);
   // excerpt: drop the "Name Town LD n" header, then letterhead and salutation
   let body = text;
   if(text!=null){ const m = new RegExp(`\\bL\\.?\\s*D\\.?[\\s-]*${ld}\\b`, "i").exec(text.slice(0,160)); if(m) body = text.slice(m.index + m[0].length).replace(/^[\s:.,–—-]+/, ""); }
@@ -1803,12 +1809,12 @@ function v2Sections(b, all, syn, hearingDate, ld){
   const places = `<div class="panel">
     <h2>Where letters came from</h2>
     <div class="v2-places">
-      <div class="v2-prow v2-phead" aria-hidden="true"><span></span><span style="text-align:right">Against</span><span style="text-align:left">For</span><span></span></div>
+      <div class="v2-prow v2-phead" aria-hidden="true"><span class="v2-plabel"></span><span class="v2-hl">← For</span><span class="v2-hr">Against →</span><span></span></div>
       ${groups.map(g=>{ const s = c[`${g}_support`], o = c[`${g}_oppose`];
         return `<a class="v2-prow" href="${v2Href(ld, {place:g})}" onclick="pendingScroll='v2-letters'" aria-label="${esc(v2PlaceLabel(syn, g))}: ${s} for, ${o} against. Show these letters">
           <span class="v2-plabel">${esc(v2PlaceLabel(syn, g))}</span>
-          <span class="v2-dv o"><span style="width:${o/max*100}%"></span><em>${fmtN(o)}</em></span>
-          <span class="v2-dv s"><span style="width:${s/max*100}%"></span><em>${fmtN(s)}</em></span>
+          <span class="v2-dv l"><span style="width:${s/max*100}%"></span><em>${fmtN(s)}</em></span>
+          <span class="v2-dv r"><span style="width:${o/max*100}%"></span><em>${fmtN(o)}</em></span>
           <span class="v2-share">${pctOf(s, s+o)}% for</span></a>`; }).join("")}
     </div>
     <p class="src">${[unk?`Not shown: ${fmtN(unk)} letter${unk===1?"":"s"} with no town or organization (${[c.unknown_support?`${c.unknown_support} for`:"", c.unknown_oppose?`${c.unknown_oppose} against`:""].filter(Boolean).join(", ")||"no side"})`:"", shownOther?`${fmtN(shownOther)} unclear or without readable text`:""].filter(Boolean).join("; ")}${unk||shownOther?". ":""}${v2Link(ld, {place:"unknown"}, "Letters with no location", "")}</p>
@@ -1972,7 +1978,9 @@ async function viewBill(ld, params=new URLSearchParams()){
     </div>
     ${(b.heard_with||[]).length?`<div class="src" style="margin:-10px 0 12px">Heard with ${b.heard_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}</div>`:""}
     <div class="tiles btiles">
-      ${billTile(`#${base}?tab=testimony`, fmtN(all.length), `letter${all.length===1?"":"s"}${unknown?` · ${fmtN(unknown)} no position`:""}`, miniBar)}
+      ${billTile(`#${base}?tab=testimony`, fmtN(all.length), `letter${all.length===1?"":"s"}${v2
+        ? (k=>[k.unclear?` · ${fmtN(k.unclear)} unclear`:"", k.no_text?` · ${fmtN(k.no_text)} no readable text`:"", (k.neutral||0)+(k.no_side||0)?` · ${fmtN((k.neutral||0)+(k.no_side||0))} neither or no side`:""].join(""))(syn.computed.counts)
+        : unknown?` · ${fmtN(unknown)} no position`:""}`, miniBar)}
       ${billTile(`#${base}?tab=votes`, fmtN(rolls.length), `roll-call vote${rolls.length===1?"":"s"}`)}
       ${billTile(nOrgs?`#${base}?tab=lobbying`:null, fmtN(nOrgs), `organization${nOrgs===1?"":"s"} lobbied`)}
       ${billTile(`#${base}?tab=votes`, fmtN(amendments.length), `amendment${amendments.length===1?"":"s"}`)}
@@ -2034,7 +2042,7 @@ async function viewBill(ld, params=new URLSearchParams()){
       <div class="panel"><h2>Where it stands</h2>${billStatusStrip(b, hearingDate)}
         <div class="src"><a href="#${base}?tab=votes">Full history and votes →</a></div></div>
       ${top.length?`<div class="panel"><h2>From the testimony</h2>
-        <div style="display:flex;flex-direction:column;gap:10px">${top.map(t=>testimonyItem(t, texts[t.id] ?? null, {clamp:true, compact:true})).join("")}</div>
+        <div style="display:flex;flex-direction:column;gap:10px">${top.map(t=>testimonyItem(t, texts[t.id] ?? null, {clamp:true, compact:true, syn: v2 ? syn : null})).join("")}</div>
         <div class="src" style="font-size:14px;margin-top:12px"><a href="#${base}?tab=testimony">See all ${fmtN(all.length)} letter${all.length===1?"":"s"} →</a></div></div>`:""}`;
     aside = `<aside>
         <div class="panel">
