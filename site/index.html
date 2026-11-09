@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MEPLE — The Maine Platform for Legislative Engagement</title>
+<meta name="description" content="Search the bills, votes, lobbying reports and written public testimony of the Maine Legislature. Free, nonpartisan and built in the open.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MEPLE">
+<meta property="og:title" content="MEPLE — The Maine Platform for Legislative Engagement">
+<meta property="og:description" content="Search the bills, votes, lobbying reports and written public testimony of the Maine Legislature. Free, nonpartisan and built in the open.">
+<meta property="og:url" content="https://me-ple.netlify.app/">
+<meta property="og:image" content="https://me-ple.netlify.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Ccircle cx='17' cy='17' r='16' fill='%2314503C'/%3E%3Cpath d='M17 6l1.8 4.2 4.4-1-2.4 3.8 3.7 2.4-4.3 1 .5 4.4-3.7-2.5-3.7 2.5.5-4.4-4.3-1 3.7-2.4-2.4-3.8 4.4 1L17 6z' fill='%23F3C98B'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -335,6 +345,79 @@
     .prof-head .avatar{display:none}
     .hb{grid-template-columns:minmax(90px,1fr) 1.4fr 40px}
   }
+  /* ---- UX pass 2 ---- */
+  select,input,textarea{max-width:100%}
+  .tabs{scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs.fade-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+  .tabs.fade-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px);mask-image:linear-gradient(90deg,transparent,#000 36px)}
+  .tabs.fade-l.fade-r{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent)}
+  .menu-btn{display:none;align-items:center;gap:6px;border:1px solid var(--hairline-2);background:#fff;color:var(--ink-2);border-radius:8px;padding:7px 12px;font-size:14px;font-weight:600}
+  .rib-short{display:none}
+  .filters-btn{display:none}
+  .m-date{display:none;font-size:12px;color:var(--ink-3)}
+  @media(max-width:900px){
+    .site-inner{flex-wrap:nowrap;height:56px;padding-top:0;padding-bottom:0;gap:10px}
+    nav.main{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:2px;background:var(--paper);border-bottom:1px solid var(--hairline);box-shadow:0 10px 24px rgba(20,40,30,.12);padding:8px 16px 14px;margin:0;width:auto;order:0;overflow:visible}
+    header.site.menu-open nav.main{display:flex}
+    nav.main a{padding:11px 10px;font-size:16px}
+    .menu-btn{display:inline-flex;margin-left:auto}
+  }
+  @media(max-width:600px){
+    .ribbon{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;padding:5px 12px}
+    .rib-long{display:none} .rib-short{display:inline}
+    .wrap{padding:0 16px}
+    .toolbar{gap:8px}
+    .toolbar input[type=search]{flex:1 1 100%;min-width:0}
+    .toolbar select{flex:1 1 100%;min-width:0}
+    .toolbar select.half{flex:1 1 calc(50% - 4px)}
+    .filters-btn{display:inline-flex;flex:none}
+    .toolbar:has(.filters-btn) input[type=search]{flex:1 1 0}
+    .t-filters{display:none}
+    .t-filters.open{display:block}
+    .votes-tbl th:first-child,.votes-tbl td:first-child{display:none}
+    .m-date{display:block}
+  }
+  /* bill-page pieces */
+  .lob-who{display:none;font-size:12.5px;color:var(--ink-3);margin-top:2px}
+  .lob-panel .lob-more{display:none}
+  .lob-panel.all .lob-more{display:table-row}
+  .rc-list{display:flex;flex-direction:column;gap:6px}
+  details.rc{border:1px solid var(--hairline);border-radius:8px;background:#fff}
+  details.rc > summary{cursor:pointer;list-style:none;padding:9px 12px;display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;align-items:baseline;font-size:14px}
+  details.rc > summary::-webkit-details-marker{display:none}
+  details.rc > summary::before{content:"▸";color:var(--ink-3);grid-row:1 / span 2;align-self:start}
+  details.rc[open] > summary::before{content:"▾"}
+  details.rc > summary .rc-date{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+  details.rc > summary .rc-motion{color:var(--ink);grid-column:2;grid-row:2}
+  details.rc > summary .rc-tally{grid-column:3;grid-row:1 / span 2;white-space:nowrap;color:var(--ink-2)}
+  details.rc[open]{border-color:var(--pine-mid)}
+  .rc-body{padding:4px 14px 12px 32px;font-size:13.5px;color:var(--ink-2)}
+  .rc-g h4{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin:10px 0 4px}
+  .rc-party{margin-bottom:6px;line-height:1.55}
+  .rc-party b{color:var(--ink)}
+  .hist .btn{margin-top:4px}
+  details.rc,.panel,#syn,.t-item{scroll-margin-top:76px}
+  @media(max-width:600px){
+    .lob-who{display:block}
+    .lob-who-col{display:none}
+    details.rc > summary{grid-template-columns:auto 1fr}
+    details.rc > summary .rc-tally{grid-column:2;grid-row:3}
+    .rc-body{padding-left:14px}
+    /* compact testimony cards */
+    .t-item{padding:12px 14px}
+    .t-head{flex-wrap:nowrap;gap:8px;margin-bottom:2px}
+    .t-head .who{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14.5px}
+    .t-item{display:grid;grid-template-columns:minmax(0,1fr)}
+    .t-item > *{min-width:0}
+    .t-head .where{display:none}
+    .t-item .t-where-m{display:block}
+    .t-body{font-size:14.5px;line-height:1.5}
+    .t-body.clamp{-webkit-line-clamp:2}
+    .t-foot{margin-top:6px;gap:14px}
+    .t-foot .t-bill{flex-basis:100%}
+  }
+  .t-where-m{display:none;font-size:12.5px;color:var(--ink-3);margin-bottom:6px}
   .subh{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);font-weight:600;margin:18px 0 8px}
 </style>
 </head>
@@ -363,6 +446,7 @@
       <a href="#/lobbying" data-nav="lobbying">Lobbying</a>
       <a href="#/about" data-nav="about">About</a>
     </nav>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav" onclick="toggleMenu()"><span aria-hidden="true">☰</span> Menu</button>
     <a class="hdr-cta" id="hdr-cta" href="https://legislature.maine.gov/testimony" target="_blank" rel="noopener" title="Submit testimony on the Maine Legislature's own site">Testify ↗</a>
   </div>
 </header>
@@ -450,7 +534,15 @@ async function loadOptional(path){
 }
 const money = n => n==null ? "—" : "$" + Number(n).toLocaleString(undefined,{maximumFractionDigits:0});
 async function loadTestimonyIndex(){
-  if(!D.tindex){ try { D.tindex = await getJSON("testimony/index.json"); } catch(e){ D.tindex = []; } }
+  // testimony/index.json is stored in a short form (see pipeline/districts.py); expand it to the row shape the views use.
+  if(!D.tindex){
+    const POS = {s:"support", n:"neutral", o:"oppose"};
+    try { D.tindex = (await getJSON("testimony/index.json")).map(r=>({id:r.i, name:r.n??null, organization:r.o??null, town:r.t??null,
+      position:POS[r.p]||null, position_source:r.p?"inferred":null, date:r.d??null, ld:r.l, committee_code:r.c??null,
+      url:`https://legislature.maine.gov/legis/bills/getTestimonyDoc.asp?id=${r.i}`, has_text:r.x!==0,
+      person_profile_id:r.pp??null, org_profile_id:r.op??null})); }
+    catch(e){ D.tindex = []; }
+  }
   return D.tindex;
 }
 
@@ -584,7 +676,7 @@ function billCard(b){
     <div class="ld">LD ${b.ld} · ${esc(D.meta.legislature.toUpperCase())}</div>
     <h3 class="clamp2" title="${esc(b.title)}">${esc(b.title)}</h3>
     <div class="meta">Sponsored by ${esc(legName(b.sponsor_id,false))} · ${esc(comName(b.committee_code))}</div>
-    ${b.positions&&b.testimony_count?countsBar(b.positions):""}
+    ${b.positions&&b.testimony_count?countsBar(b.positions, {total:b.testimony_count}):""}
     <div class="foot">
       ${statusChip(b)}
       <span class="tcount">${tIcon()} ${fmtN(billTestimonyCount(b))} testimonies</span>
@@ -606,6 +698,7 @@ function billRow(b){
 function countsBar(c, opts={}){
   c = {support:0, neutral:0, oppose:0, ...(c||{})};
   const tot = c.support + c.neutral + c.oppose;
+  if(opts.total!=null) opts = {...opts, unknown: Math.max(0, opts.total - tot)};   // letters without a position
   if(!tot) return `<div class="src" style="margin:4px 0 0">No positions recorded${opts.unknown?` (${fmtN(opts.unknown)} letters)`:""}</div>`;
   const pct = k => c[k] ? Math.max(2,(c[k]/tot*100)) : 0;
   return `<div class="stancebar sm" role="img" aria-label="${c.support} support, ${c.neutral} neither, ${c.oppose} oppose">
@@ -622,7 +715,7 @@ function billMini(b, extra=""){
   return `<a class="bill-mini" href="#/bill/${b.ld}">
     <span class="ld">LD ${b.ld}</span>
     <span class="t clamp2" title="${esc(b.title)}">${esc(b.title)}</span>
-    <span class="r">${statusChip(b)}<span class="tcount" title="Testimonies">${tIcon()} ${fmtN(b.testimony_count||0)}</span>${lobbyCount(b)}${extra}</span>
+    <span class="r">${statusChip(b)}<span class="tcount">${fmtN(b.testimony_count||0)} testimon${(b.testimony_count||0)===1?"y":"ies"}</span>${lobbyCount(b)}${extra}</span>
   </a>`;
 }
 function moreBtn(param, shown, total, step=25){
@@ -642,14 +735,40 @@ function hbars(rows, total){   // [[label html, n]] -> simple horizontal bars
 // Skip letterhead (addresses, phone numbers, "STATE HOUSE STATION", memo headers, salutations) and start at the first real sentence.
 const LETTERHEAD = /(\b\d{3}[-.)\s]\s?\d{3}[-.\s]\d{4}\b|@|www\.|\.(org|com|gov|net)\b|state house station|\bP\.?\s?O\.?\s+box\b|\bsuite\b|\b(ME|Maine)\s+0\d{4}\b|^\s*(to|from|re|date|subject|cc|memo(randum)?)\s*:|\btty\b|\bfax\b|\bfounded\b \d{4})/i;
 const SALUTATION = /^(senator|representative|sen\.|rep\.|dear|chair|chairs|good (morning|afternoon|evening)|honorable|members of|the honorable)\b.*[,:;]\s*$/i;
-function leadText(text){
+// Excerpts start at the first substantive sentence: no letterhead, addresses, dates, "Testimony of … in support of LD …"
+// or "LD 1822 -- Ought to Pass" headings, no salutation, and no footnote markers ("Reports1").
+const T_HEADING = /^(LDs?\b|L\.\s?D\.|before the\b|in (support|opposition)\b|neither for nor against\b|joint standing committee\b|committee on\b|re\b|subject\b|the honorable\b|hon\.)/i;
+const T_DATE_START = /^((mon|tues|wednes|thurs|fri|satur|sun)day,?\s+)?(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}/i;
+const T_SALUTE_PREFIX = /^(greetings[,.!]?\s+)?(dear\s+)?((the\s+)?honorable\s+)?(of\s+the|senators?|representatives?|sen\.|rep\.|madam(e)?\s+chair|chairs?|chairman|co-?chairs?|good (morning|afternoon|afiernoon|evening)|members|distinguished)(?![a-z])[\s\S]{0,260}?(committees?(\s+on(\s+the)?(\s+[a-z]+,?){1,6})?|judiciary|taxation|members|colleagues)(\s*[.,:;!—-]+\s*|[ \t]*\n\s*)/i;
+function leadText(text, title){
   const s = String(text||"");
   const lines = s.split(/\n+/);
+  const wkey = w => w.toLowerCase().replace(/[^a-z0-9$]/g,"");
+  const titleWords = new Set(String(title||"").split(/\s+/).map(wkey).filter(Boolean));
+  const header = l => {
+    const words = l.split(/\s+/).filter(w=>/[a-z]/i.test(w));
+    const inTitle = titleWords.size ? words.filter(w=>titleWords.has(wkey(w))).length : 0;
+    return words.length < 8
+      || (inTitle >= words.length*0.6 && !/\b(I|we|my|our|us|I'm|I am)\b/.test(l))   // the bill's title, often wrapped over lines || !/[a-z]{3}/.test(l) || LETTERHEAD.test(l) || l === l.toUpperCase() || SALUTATION.test(l)
+      || T_HEADING.test(l) || T_DATE_START.test(l)
+      || /^(testimony|written testimony|an act\b|resolve,|\d{1,2}\s)/i.test(l)
+      || (/\b(testimony|joint standing committee)\b/i.test(l) && !/\b(I|we|my|our|us|I'm|I am)\b/.test(l))
+      || words.filter(w=>/^[A-Z][A-Z.,]+$/.test(w)).length > words.length/2;   // mostly capitals: letterhead or OCR noise
+  };
   for(let i=0;i<lines.length;i++){
     const l = lines[i].trim();
-    const words = l.split(/\s+/).filter(w=>/[a-z]/i.test(w));
-    if(words.length >= 8 && /[a-z]{3}/.test(l) && !LETTERHEAD.test(l) && l !== l.toUpperCase() && !SALUTATION.test(l))
-      return lines.slice(i).join("\n");
+    if(header(l)) continue;
+    let rest = lines.slice(i).join("\n");
+    const m = rest.match(T_SALUTE_PREFIX);
+    if(m && rest.slice(m[0].length).trim().split(/\s+/).length >= 8) rest = rest.slice(m[0].length);
+    rest = rest.replace(/([A-Za-z)\]”"’])(\d{1,2})(?=[\s,.;:)]|$)/g, "$1")   // footnote markers ("Reports1", "(MCEDV)1")
+               .replace(/^[^A-Za-z"“(]+/, "")                               // stray bullets and OCR marks
+               .replace(/^(committee|members)[.,:;]\s+/i, "");              // the tail of a salutation split over lines
+    // Any other salutation: start at the writer's first words ("My name is…", "I am writing…") when they come soon after it.
+    const mi = rest.search(/\b(my name is|I am writing|I'm writing|I write|we write|we are writing|I am here|I'm here|I am testifying|thank you for)/i);
+    if(mi > 0 && mi < 320 && /\b(senators?|representatives?|sen\.|rep\.|chair\w*|members|committee|dear|good (morning|afternoon|evening)|honorable)\b/i.test(rest.slice(0, mi)))
+      rest = rest.slice(mi);
+    return rest.charAt(0).toUpperCase() + rest.slice(1);
   }
   return s;
 }
@@ -718,7 +837,7 @@ function viewHome(){
       return `<a class="bill-card" href="#/bill/${ld}">
         <div class="ld">LD ${ld} · ${fmtN(b.testimony_count||0)} testimonies</div>
         <h3 class="clamp2" title="${esc(b.title)}">${esc(b.title)}</h3>
-        ${countsBar(b.positions)}
+        ${countsBar(b.positions, {total:b.testimony_count})}
         <p style="font-size:14px;color:var(--ink-2)">${esc(firstSentence(sy.summary))}</p>
         <div class="foot">${statusChip(b)}<span class="tcount">AI-written summary →</span></div>
       </a>`; });
@@ -736,7 +855,7 @@ function viewHome(){
       <p class="lede">Read and search what Mainers have already told the Legislature: every written testimony on the public record for the ${esc(D.meta.legislature)}, bill by bill, in one place, free.</p>
       <p class="lede" style="font-size:15px;margin-top:10px">Submitting testimony through MEPLE is planned for the 133rd Legislature. Until then, <a href="${LEG_TESTIFY}" target="_blank" rel="noopener" style="color:#F3C98B;text-decoration:underline">testify on the Legislature's own site ↗</a>.</p>
       <form class="searchbar" onsubmit="event.preventDefault(); location.hash='#/bills?q='+encodeURIComponent(this.q.value)">
-        <input name="q" type="search" placeholder="Search bills — try &quot;data center&quot;, &quot;privacy&quot;, or an LD number…" aria-label="Search bills">
+        <input name="q" type="search" placeholder="${matchMedia('(max-width:600px)').matches?"Search bills or an LD number":"Search bills — try &quot;data center&quot;, &quot;privacy&quot;, or an LD number…"}" aria-label="Search bills">
         <button type="submit">Search</button>
       </form>
       <div class="hint">${top.length?`Most testimony: ${top.map(b=>`<a href="#/bill/${b.ld}">LD ${b.ld}</a>`).join(" · ")}`:""}</div>
@@ -788,6 +907,7 @@ function viewHome(){
 }
 
 function viewBills(params){
+  setTitle("Bills");
   const q = (params.get("q")||"").trim().toLowerCase();
   const com = params.get("committee")||"";
   const st = params.get("status")||"";
@@ -821,11 +941,11 @@ function viewBills(params){
         <option value="">All committees</option>
         ${D.committees.map(c=>`<option ${c.code===com?"selected":""} value="${esc(c.code)}">${esc(c.name)}</option>`).join("")}
       </select>
-      <select onchange="updateParam('status', this.value, true)" aria-label="Filter by status">
+      <select class="half" onchange="updateParam('status', this.value, true)" aria-label="Filter by status">
         <option value="">Any outcome</option>
         ${Object.entries(STATUS_LABELS).map(([k,v])=>`<option value="${k}" ${st===k?"selected":""}>${v}</option>`).join("")}
       </select>
-      <select onchange="updateParam('sort', this.value, true)" aria-label="Sort" title="${esc(LOBBY_NOTE)}">
+      <select class="half" onchange="updateParam('sort', this.value, true)" aria-label="Sort" title="${esc(LOBBY_NOTE)}">
         <option value="newest" ${sort==="newest"?"selected":""}>Newest</option>
         <option value="testimony" ${sort==="testimony"?"selected":""}>Most testimony</option>
         <option value="lobbied" ${sort==="lobbied"?"selected":""}>Most lobbied</option>
@@ -842,6 +962,7 @@ function viewBills(params){
 }
 
 const STANCE_HEAD = {support:"Arguments for the bill", oppose:"Arguments against the bill", amend:"Changes requested", neutral:"Other points raised"};
+let tfOpen = false;   // testimony archive filter panel (mobile), kept open across re-renders while filtering
 let pendingScroll = null, pendingLetter = null, pageTitle = null;
 const DEFAULT_TITLE = document.title;
 function copyLetterLink(btn, ld, id){
@@ -874,27 +995,61 @@ function clearTestimonyFilters(){
   const p = new URLSearchParams(qs||""); ["tpos","tq","tn","theme","letter"].forEach(k=>p.delete(k));
   const s = p.toString(); history.replaceState(null,"","#"+path+(s?"?"+s:"")); render(false);
 }
-function lobbyingPanel(lob){
+// Lobbying on one bill: one row per client, months shown as a count and range (every month in the tooltip),
+// sorted by months reported. 15 rows, then "Show all". Self-contained, so the bill page can place it in any tab.
+function lobbyingPanel(lob, opts={}){
   if(!lob || !(lob.reports||[]).length) return "";
-  // Group monthly reports by client so a reader sees who hired lobbying on this bill, then the months and lobbyists.
   const byClient = {};
   for(const r of lob.reports){ (byClient[r.client||"—"] ||= []).push(r); }
-  const clients = Object.entries(byClient).sort((a,b)=>b[1].length-a[1].length);
-  return `<div class="panel">
-    <h2>Lobbying on this bill · ${clients.length} client${clients.length===1?"":"s"}, ${lob.reports.length} monthly report${lob.reports.length===1?"":"s"}</h2>
-    <table class="plain"><tr><th>Client</th><th>Lobbyist / firm</th><th>Months reported</th></tr>
-    ${clients.map(([c, rs])=>{
-      const who = [...new Set(rs.map(r=>[r.lobbyist, r.firm].filter(Boolean).join(", ")))].join("; ");
-      // r.period is the calendar month ("2025-12"); r.year is the Ethics Commission's lobbying year (December-November)
-      const months = [...new Set([...rs].sort((x,y)=>(x.period||"").localeCompare(y.period||"")).map(r=>r.period
-        ? new Date(r.period+"-15T12:00:00").toLocaleDateString("en-US",{month:"short",year:"numeric"})
-        : `${r.month||""} ${r.year||""}`.trim()))].join(", ");
-      return `<tr><td style="white-space:normal"><b>${esc(c)}</b></td><td>${esc(who)}</td><td>${esc(months)}</td></tr>`;
-    }).join("")}
+  const rows = Object.entries(byClient).map(([c, rs])=>{
+    const months = [...new Set(rs.map(r=>r.period).filter(Boolean))].sort();
+    const who = [...new Set(rs.map(r=>[r.lobbyist, r.firm].filter(Boolean).join(", ")).filter(Boolean))].join("; ");
+    return {c, who, months, n: rs.length};
+  }).sort((a,b)=>b.months.length-a.months.length || b.n-a.n || a.c.localeCompare(b.c));
+  const SHOW = 15;
+  const row = (x, i) => `<tr class="${i>=SHOW?"lob-more":""}"><td style="white-space:normal"><b>${esc(x.c)}</b><div class="lob-who">${esc(x.who)}</div></td><td class="lob-who-col">${esc(x.who)}</td><td title="${esc(x.months.map(fmtMonth).join(", "))}" style="white-space:nowrap">${esc(monthsLabel(x.months))}</td></tr>`;
+  return `<div class="panel lob-panel" id="lobbying">
+    <h2>Lobbying on this bill · ${fmtN(rows.length)} organization${rows.length===1?"":"s"}</h2>
+    <table class="plain lob-tbl"><tr><th>Client</th><th class="lob-who-col">Lobbyist</th><th>Months reported</th></tr>
+    ${rows.map(row).join("")}
     </table>
-    <div class="src">${esc(lob.note||"")} <a href="${esc(lob.source||"#")}" target="_blank" rel="noopener">Source: Maine Ethics Commission lobbyist disclosures ↗</a></div>
+    ${rows.length>SHOW?`<div style="margin-top:10px"><button class="btn ghost sm" onclick="this.closest('.lob-panel').classList.add('all');this.remove()">Show all ${fmtN(rows.length)}</button></div>`:""}
+    <div class="src">${esc(LOBBY_NOTE)} Hover a month range for the months. ${esc(lob.note||"")} <a href="${esc(lob.source||"#")}" target="_blank" rel="noopener">Source: Maine Ethics Commission lobbyist disclosures ↗</a></div>
   </div>`;
 }
+// Roll calls, each expandable to Yea / Nay / Absent grouped by party, every name linked. ?rc=<id> opens one.
+function openRollCall(id){ updateParam("rc", String(id)); }
+function rollCallList(b, openId){
+  const rolls = b.roll_calls||[];
+  if(!rolls.length) return "";
+  const PARTY = {D:"Democrats", R:"Republicans", I:"Independents", U:"Unenrolled", G:"Green", L:"Libertarian"};
+  const group = votes => {
+    const by = {};
+    for(const v of votes){ const l = D.legById[v.id]; (by[l?l.party||"?":"?"] ||= []).push(v.id); }
+    return Object.entries(by).sort((a,b)=>b[1].length-a[1].length).map(([p, ids])=>`<div class="rc-party"><b>${esc(PARTY[p]||"Party not listed")} (${ids.length})</b> ${ids.map(id=>D.legById[id]?`<a href="#/legislator/${esc(id)}">${esc(D.legById[id].name)}</a>`:esc(id||"Unknown member")).join(", ")}</div>`).join("");
+  };
+  const kind = v => /^(yea|yes|aye)/i.test(v||"") ? "yea" : /^(nay|no)$/i.test(v||"") ? "nay" : "absent";
+  return `<h3 class="subh">Roll-call votes · ${fmtN(rolls.length)}</h3>
+    <div class="rc-list">${rolls.map(r=>{
+      const vs = r.votes||[];
+      const g = {yea:vs.filter(v=>kind(v.vote)==="yea"), nay:vs.filter(v=>kind(v.vote)==="nay"), absent:vs.filter(v=>kind(v.vote)==="absent")};
+      return `<details class="rc" id="rc-${esc(r.id)}"${String(r.id)===String(openId)?" open":""}>
+        <summary><span class="rc-date">${esc(r.date?fmtDate(r.date):"")} · ${esc({H:"House",S:"Senate"}[r.chamber]||r.chamber||"")}</span>
+          <span class="rc-motion" title="${esc(r.motion||"")}">${esc(plainMotion(r.motion))}</span>
+          <span class="rc-tally"><b>${esc(r.yea)}–${esc(r.nay)}</b>${r.result?` · ${esc(r.result)}`:""}</span></summary>
+        <div class="rc-body">
+          ${vs.length?`<div class="rc-g"><h4>Yea (${g.yea.length})</h4>${group(g.yea)}</div><div class="rc-g"><h4>Nay (${g.nay.length})</h4>${group(g.nay)}</div>${g.absent.length?`<div class="rc-g"><h4>Absent, excused or not voting (${g.absent.length})</h4>${group(g.absent)}</div>`:""}`
+            :`<p class="src">Individual votes aren't recorded for this roll call.</p>`}
+          <div class="src"><a href="#/bill/${b.ld}?rc=${encodeURIComponent(r.id)}" onclick="event.preventDefault();copyText(this, location.href.split('#')[0]+this.getAttribute('href'))">Copy link to this vote</a>${r.url?` · <a href="${esc(r.url)}" target="_blank" rel="noopener">Official record ↗</a>`:""}</div>
+        </div>
+      </details>`; }).join("")}</div>`;
+}
+function copyText(el, url){
+  const done = () => { const o = el.textContent; el.textContent = "Copied"; setTimeout(()=>{ el.textContent = o; }, 2000); };
+  if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(done, ()=>prompt("Link:", url));
+  else prompt("Link:", url);
+}
+
 function mediaPanel(b){
   const l = b.links||{};
   const items = [];
@@ -942,15 +1097,57 @@ function noTestimonySentence(hearingDate){
     ? `A public hearing was held on ${fmtDate(hearingDate)}. No written testimony is on the Legislature's record for it.`
     : "No public hearing was held, so there is no written testimony.";
 }
-function historyList(b){
-  // Merge committee actions and chamber actions into one dated list; fall back to the hand-written timeline.
+const fmtShort = (iso, withYear) => { const d = new Date(iso+"T12:00:00"); return isNaN(d) ? String(iso||"") : d.toLocaleDateString("en-US", withYear ? {month:"short", day:"numeric", year:"numeric"} : {month:"short", day:"numeric"}); };
+function committeeResultPlain(r){
+  r = String(r||"").trim();
+  if(/divided/i.test(r)) return "divided report";
+  return r.split("/").map(x=> /^ontp$/i.test(x) ? "Ought Not to Pass" : /^otp-?am$/i.test(x) ? "Ought to Pass as Amended" : /^otp$/i.test(x) ? "Ought to Pass" : /^ltw$/i.test(x) ? "Leave to Withdraw" : x).join(" / ");
+}
+// Every recorded action, oldest first, with runs of the same action in the same place collapsed
+// ("Unfinished Business ×6, Jun 16, 2025–Feb 3, 2026").
+function billActions(b){
   const ev = [];
-  for(const a of (b.committee_actions||[])) ev.push({date:a.date, label:`${a.action}${a.result?` — ${a.result}`:""}`, where:b.committee_name||comName(b.committee_code)});
+  const cname = b.committee_name||comName(b.committee_code);
+  for(const a of (b.committee_actions||[])) ev.push({date:a.date, label:`${a.action}${a.result?`: ${committeeResultPlain(a.result)}`:""}`, where:`${cname} Committee`});
   for(const a of (b.chamber_actions||[])) ev.push({date:a.date, label:a.action, where:a.chamber});
-  if(!ev.length && b.timeline) return b.timeline.map(e=>`<li class="${e.final?"final":""}"><b>${esc(e.label)}</b>${esc(e.date||"")}</li>`).join("");
   ev.sort((x,y)=>String(x.date).localeCompare(String(y.date)));
-  const fd = b.final_disposition && b.final_disposition.label ? `<li class="final"><b title="${esc(b.final_disposition.label)}">${esc(plainStatus(b.final_disposition.label))}</b>${esc(b.final_disposition.date||"")}</li>` : "";
-  return ev.map(e=>`<li><b>${esc(e.label)}</b>${esc(e.date||"")}${e.where?` · ${esc(e.where)}`:""}</li>`).join("") + fd;
+  const runs = [];
+  for(const e of ev){
+    const last = runs[runs.length-1];
+    if(last && last.label===e.label && last.where===e.where){ last.n++; last.to = e.date; }
+    else runs.push({...e, n:1, from:e.date, to:e.date});
+  }
+  return {total: ev.length, runs};
+}
+// Milestones: referral, public hearing, committee votes and reports, every roll call, final disposition.
+function billMilestones(b, hearingDate){
+  const ms = [];
+  const cname = b.committee_name||comName(b.committee_code);
+  const ref = (b.chamber_actions||[]).find(a=>/referred to the committee|reference to the committee/i.test(a.action||""));
+  if(ref) ms.push({date:ref.date, label:`Referred to the ${cname} Committee`, where:ref.chamber});
+  if(hearingDate) ms.push({date:hearingDate, label:"Public hearing", where:`${cname} Committee`});
+  for(const a of (b.committee_actions||[])){
+    if(/^voted$/i.test(a.action||"")) ms.push({date:a.date, label:`Committee vote: ${committeeResultPlain(a.result)}`, where:`${cname} Committee`});
+    else if(/^reported out$/i.test(a.action||"")) ms.push({date:a.date, label:`Committee report: ${committeeResultPlain(a.result)}`, where:`${cname} Committee`});
+  }
+  for(const r of (b.roll_calls||[])) ms.push({date:r.date, label:`Roll call: ${plainMotion(r.motion)} — ${r.yea}–${r.nay}${r.result?`, ${r.result.toLowerCase()}`:""}`, where:{H:"House",S:"Senate"}[r.chamber]||r.chamber, rc:r.id});
+  const fd = b.final_disposition;
+  ms.sort((x,y)=>String(x.date).localeCompare(String(y.date)));
+  if(fd && fd.label) ms.push({date:fd.date, label:plainStatus(fd.label), raw:fd.label, final:true});
+  return ms;
+}
+function historyList(b, hearingDate){
+  const ms = billMilestones(b, hearingDate);
+  const {total, runs} = billActions(b);
+  const li = e => `<li class="${e.final?"final":""}"><b${e.raw?` title="${esc(e.raw)}"`:""}>${e.rc?`<a href="#" onclick="event.preventDefault();openRollCall('${esc(e.rc)}')">${esc(e.label)}</a>`:esc(e.label)}</b>${esc(e.date?fmtDate(e.date):"")}${e.where?` · ${esc(e.where)}`:""}</li>`;
+  const runLi = r => `<li><b>${esc(r.label)}${r.n>1?` ×${r.n}`:""}</b>${r.n>1&&r.from!==r.to?`${esc(fmtShort(r.from, r.from.slice(0,4)!==r.to.slice(0,4)))}–${esc(fmtShort(r.to, true))}`:esc(r.date?fmtDate(r.date):"")}${r.where?` · ${esc(r.where)}`:""}</li>`;
+  const fd = b.final_disposition && b.final_disposition.label ? li({date:b.final_disposition.date, label:plainStatus(b.final_disposition.label), raw:b.final_disposition.label, final:true}) : "";
+  if(!ms.length && !runs.length && b.timeline) return `<ul class="timeline">${b.timeline.map(e=>`<li class="${e.final?"final":""}"><b>${esc(e.label)}</b>${esc(e.date||"")}</li>`).join("")}</ul>`;
+  return `<div class="hist">
+    <ul class="timeline hist-ms">${ms.map(li).join("")}</ul>
+    <ul class="timeline hist-all" hidden>${runs.map(runLi).join("")}${fd}</ul>
+    ${total?`<button class="btn ghost sm" onclick="var h=this.closest('.hist'),all=h.querySelector('.hist-all'),o=all.hidden;all.hidden=!o;h.querySelector('.hist-ms').hidden=o;this.textContent=o?'Show milestones only':'Show all ${fmtN(total)} actions'">Show all ${fmtN(total)} actions</button>`:""}
+  </div>`;
 }
 
 
@@ -960,23 +1157,24 @@ function testimonyItem(t, text, opts={}){
   const nameHtml = t.person_profile_id ? `<a href="#/profile/${esc(t.person_profile_id)}">${esc(t.name)}</a>` : esc(t.name);
   const orgHtml = t.organization ? (t.org_profile_id ? `<a href="#/profile/${esc(t.org_profile_id)}">${esc(t.organization)}</a>` : esc(t.organization)) : "";
   const whoHtml = [t.name?nameHtml:"", orgHtml].filter(Boolean).join(", ");
+  const whoText = t.name || t.organization || "this writer";
   const where = [t.town, t.date].filter(Boolean).join(" · ");
   const id = `t-${esc(t.id)}`;
   // Clamped cards start at the first real sentence (no letterhead); "Read more" shows the whole letter as extracted.
-  const lead = text!=null && opts.clamp ? leadText(text) : text;
+  const lead = text!=null && opts.clamp ? leadText(text, b && b.title) : text;
   const body = text!=null
     ? `<div class="t-body ${opts.clamp?"clamp":""}" id="${id}">${esc(lead)}</div>${opts.clamp&&lead!==text?`<div class="t-body" id="${id}-full" hidden>${esc(text)}</div>`:""}`
     : `<div class="t-body" style="color:var(--ink-3)">Text not yet extracted (likely a scanned PDF).${t.url?` <a href="${esc(t.url)}" target="_blank" rel="noopener">Open the official PDF →</a>`:""}</div>`;
-  const toggle = `(function(btn){var a=document.getElementById('${id}'),f=document.getElementById('${id}-full');var open=btn.textContent==='Read more';if(f){a.hidden=open;f.hidden=!open;}else{a.classList.toggle('clamp',!open);}btn.textContent=open?'Show less':'Read more';})(this)`;
+  const toggle = `(function(btn){var a=document.getElementById('${id}'),f=document.getElementById('${id}-full');var open=btn.textContent==='Read more';if(f){a.hidden=open;f.hidden=!open;}else{a.classList.toggle('clamp',!open);}btn.textContent=open?'Show less':'Read more';btn.setAttribute('aria-label',(open?'Show less of the testimony from ':'Read more of the testimony from ')+btn.dataset.who);btn.setAttribute('aria-expanded',open);})(this)`;
   return `<article class="t-item" id="letter-${esc(t.id)}">
     <div class="t-head">${stancePill(t.position, t.position_source)}<span class="who">${whoHtml}</span><span class="where">${esc(where)}</span></div>
+    ${where?`<div class="t-where-m">${esc(where)}</div>`:""}
     ${body}
     <div class="t-foot">
-      ${opts.showBill && b ? `<a href="#/bill/${b.ld}?letter=${encodeURIComponent(t.id)}" style="font-weight:400;color:var(--ink-2)">LD ${b.ld} — ${esc(b.title.length>76?b.title.slice(0,74)+"…":b.title)}</a>` : ""}
-      ${text!=null && opts.clamp && text.length>320 ? `<button onclick="${toggle}">Read more</button>` : ""}
+      ${opts.showBill && b ? `<a class="t-bill" href="#/bill/${b.ld}?letter=${encodeURIComponent(t.id)}" style="font-weight:400;color:var(--ink-2)">LD ${b.ld} — ${esc(b.title.length>76?b.title.slice(0,74)+"…":b.title)}</a>` : ""}
+      ${text!=null && opts.clamp && text.length>200 ? `<button type="button" data-who="${esc(whoText)}" aria-label="Read more of the testimony from ${esc(whoText)}" aria-expanded="false" onclick="${toggle}">Read more</button>` : ""}
       ${!t.mine && t.ld ? `<button type="button" onclick="copyLetterLink(this, ${Number(t.ld)}, '${esc(String(t.id))}')">Copy link</button>` : ""}
-      ${t.url ? `<a href="${esc(t.url)}" target="_blank" rel="noopener">Official PDF ↗</a>` : ""}
-      ${t.position_source==="inferred" ? `<span>* position inferred from the text</span>` : ""}
+      ${t.url ? `<a href="${esc(t.url)}" target="_blank" rel="noopener">PDF ↗</a>` : ""}
       ${(t.shared_with||[]).length && !opts.showBill ? `<span>Also filed under ${t.shared_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}</span>` : ""}
     </div>
   </article>`;
@@ -1055,8 +1253,9 @@ function testimonyList(all, texts, params, syn){
       </select>
     </div>
     ${cleared?`<div class="src" style="margin:0 0 6px;color:var(--ink)">Filters were cleared to show the linked letter.</div>`:""}
+    ${all.some(t=>t.position_source==="inferred")?`<div class="src" style="margin:0 0 6px">* position inferred from the text of the letter.</div>`:""}
     ${th?`<div class="src" style="margin:0 0 6px;color:var(--ink)"><b>Letters making this point:</b> ${esc(th.label)}</div>`:""}
-    <div class="result-note" style="margin-bottom:10px"><span>Showing ${fmtN(visible.length)} of ${fmtN(list.length)}${list.length!==all.length?` matching (${fmtN(all.length)} total)`:""}${tsort==="rel"?" · letters with a position on this bill first":""}</span>${tpos||tq||th?`<a href="#" onclick="event.preventDefault();clearTestimonyFilters()">Clear filters</a>`:""}</div>` : `<div style="height:14px"></div>`;
+    <div class="result-note" style="margin-bottom:10px"><span>Showing ${fmtN(visible.length)} of ${fmtN(list.length)}${list.length!==all.length?` matching (${fmtN(all.length)} total)`:""}${tsort==="rel"?" · letters with a position on this bill first":""}</span>${tpos||tq||th?`<a href="#" onclick="event.preventDefault();clearTestimonyFilters()">Clear filters</a>`:""}</div>` : `<div style="height:14px"></div>${all.some(t=>t.position_source==="inferred")?`<div class="src" style="margin:-6px 0 8px">* position inferred from the text of the letter.</div>`:""}`;
   return `${controls}
     <div style="display:flex;flex-direction:column;gap:12px">
       ${visible.length ? visible.map(t=>testimonyItem(t, t.mine ? t.text : (texts[t.id] ?? null), {clamp:true})).join("") : `<div class="empty">No testimony matches those filters.</div>`}
@@ -1085,6 +1284,8 @@ async function viewBill(ld, params=new URLSearchParams()){
   const sp = D.legById[b.sponsor_id];
   const hearingDate = (b.hearing&&b.hearing.date) || row.hearing_date;
   const linked = params.get("letter") ? all.find(t=>String(t.id)===params.get("letter")) : null;
+  if(params.get("rc") && rolls.some(r=>String(r.id)===params.get("rc"))) pendingScroll = "rc-" + params.get("rc");
+  setTitle(`LD ${b.ld} · ${clampTitle(b.title, 80 - `LD ${b.ld} · `.length - " — MEPLE".length)}`);
   if(linked) pageTitle = `Testimony of ${linked.name||linked.organization||"a member of the public"} on LD ${b.ld} — MEPLE`;
   return `
   <div class="wrap">
@@ -1118,12 +1319,10 @@ async function viewBill(ld, params=new URLSearchParams()){
         </div>
         <div class="panel">
           <h2>History and votes</h2>
-          <ul class="timeline">${historyList(b)}</ul>
+          ${historyList(b, hearingDate)}
           ${reports.length?`<h3 class="subh">Committee report${reports.length>1?"s":""}</h3>
             ${reports.map(r=>`<div style="font-size:14px;margin-bottom:10px"><b>${esc(r.label||"Report")}${r.recommendation?` — ${esc(r.recommendation)}`:""}</b>${r.signer_ids&&r.signer_ids.length?`<div style="color:var(--ink-2);margin-top:3px">${r.signer_ids.map(legLink).join(", ")}</div>`:(r.signers&&r.signers.length?`<div style="color:var(--ink-2);margin-top:3px">${r.signers.map(esc).join(", ")}</div>`:"")}</div>`).join("")}`:""}
-          ${rolls.length?`<h3 class="subh">Roll-call votes</h3><table class="plain"><tr><th>Date</th><th>Vote</th></tr>
-            ${rolls.map(r=>`<tr><td>${esc(r.date||"")}</td><td style="white-space:normal">${esc({H:"House",S:"Senate"}[r.chamber]||r.chamber||"")}: <span title="${esc(r.motion||"")}">${esc(plainMotion(r.motion))}</span><br><b>${esc(r.yea)}–${esc(r.nay)}</b>${r.result?` · ${esc(r.result)}`:""}${r.url?` · <a href="${esc(r.url)}" target="_blank" rel="noopener">record</a>`:""}</td></tr>`).join("")}
-          </table>`:`<h3 class="subh">Votes</h3><p style="font-size:14.5px;margin:0">${esc(noVotesSentence(b))}</p>`}
+          ${rolls.length?rollCallList(b, params.get("rc")):`<h3 class="subh">Votes</h3><p style="font-size:14.5px;margin:0">${esc(noVotesSentence(b))}</p>`}
           ${amendments.length?`<h3 class="subh">Amendments</h3><table class="plain"><tr><th>Amendment</th><th>Status</th></tr>
             ${amendments.map(a=>`<tr><td>${a.url?`<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.id)}</a>`:esc(a.id)}</td><td style="white-space:normal">${esc(a.status||"")}${a.sponsor?` · ${esc(a.sponsor)}`:""}${a.fiscal_note_url?` · <a href="${esc(a.fiscal_note_url)}" target="_blank" rel="noopener">fiscal note</a>`:""}</td></tr>`).join("")}
           </table>`:""}
@@ -1153,6 +1352,7 @@ async function viewBill(ld, params=new URLSearchParams()){
 }
 
 async function viewTestimony(params){
+  setTitle("Testimony archive");
   const rows = await loadTestimonyIndex();
   const towns = await loadTowns();
   const st = params.get("position")||"";
@@ -1175,6 +1375,7 @@ async function viewTestimony(params){
   const lds = [...new Set(slice.map(t=>t.ld))];
   await Promise.all(lds.map(loadTexts));
   const removeTown = t => townList.filter(x=>x!==t).join(",");
+  const nActive = (com?1:0) + (st?1:0) + (dk?1:0) + townList.length;
   return `
   <div class="page-head"><div class="wrap">
     <h1>Testimony archive</h1>
@@ -1183,16 +1384,21 @@ async function viewTestimony(params){
   <div class="wrap">
     <div class="toolbar">
       <input type="search" placeholder="Search by name, organization, town, or LD number…" value="${esc(params.get("q")||"")}" oninput="updateParam('q', this.value, true)" aria-label="Search testimony">
+      <button type="button" class="btn ghost sm filters-btn" aria-expanded="${tfOpen?"true":"false"}" aria-controls="t-filters" onclick="tfOpen=document.getElementById('t-filters').classList.toggle('open');this.setAttribute('aria-expanded',tfOpen)">Filters${nActive?` (${nActive})`:""}</button>
+    </div>
+    <div class="t-filters${tfOpen?" open":""}" id="t-filters">
+    <div class="toolbar" style="margin-top:0">
       <select onchange="updateParam('committee', this.value, true)" aria-label="Filter by committee">
         <option value="">All committees</option>
         ${D.committees.map(c=>`<option ${c.code===com?"selected":""} value="${esc(c.code)}">${esc(c.name)}</option>`).join("")}
       </select>
-      <select onchange="updateParam('position', this.value, true)" aria-label="Filter by position">
+      <select class="half" onchange="updateParam('position', this.value, true)" aria-label="Filter by position">
         <option value="">All positions</option>
         <option value="support" ${st==="support"?"selected":""}>✓ Support</option>
         <option value="neutral" ${st==="neutral"?"selected":""}>– Neither for nor against</option>
         <option value="oppose" ${st==="oppose"?"selected":""}>✗ Oppose</option>
       </select>
+      <select class="half" onchange="updateParam('district', this.value, true)" aria-label="Filter by legislative district">${districtOptions(dk?dk.key:"")}</select>
     </div>
     <div class="filters">
       <form onsubmit="event.preventDefault();var v=this.town.value.trim();if(v){updateParam('towns', ${esc(JSON.stringify(townList))}.concat([v]).join(','), true);}" style="display:flex;gap:6px">
@@ -1200,8 +1406,8 @@ async function viewTestimony(params){
         <button class="btn ghost sm" type="submit">Add</button>
       </form>
       ${townDatalist(towns)}
-      <select onchange="updateParam('district', this.value, true)" aria-label="Filter by legislative district">${districtOptions(dk?dk.key:"")}</select>
       ${townList.map(t=>`<span class="tchip">${esc(t)}<a href="#" aria-label="Remove ${esc(t)}" onclick="event.preventDefault();updateParam('towns', ${esc(JSON.stringify(removeTown(t)))}, true)">×</a></span>`).join("")}
+    </div>
     </div>
     ${townSet?`<div class="src" style="margin:-4px 0 12px;color:var(--ink-2)">Filtered by the town people wrote on their testimony. Districts that split a town include the whole town.${dk?` ${esc(districtLabel(dk))}: ${dTowns.map(esc).join(", ")} · <a href="#/district/${dk.key}">District page →</a>`:""}</div>`:""}
     <div class="result-note"><span>${fmtN(all.length)} testimonies${all.some(t=>t.position_source==="inferred")?" · positions marked * are inferred from the text of the testimony":""}</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
@@ -1237,6 +1443,7 @@ function legCard(l){
 
 
 function viewCommittees(){
+  setTitle("Committees");
   return `
   <div class="page-head"><div class="wrap">
     <h1>Joint standing committees</h1>
@@ -1258,6 +1465,7 @@ function viewCommittees(){
 
 
 async function viewLegislators(params){
+  setTitle("Legislators");
   const q = (params.get("q")||"").trim().toLowerCase();
   const ch = params.get("chamber")||"";
   const pt = params.get("party")||"";
@@ -1287,8 +1495,8 @@ async function viewLegislators(params){
     ${town?townLegislators(town, towns):""}
     <div class="toolbar">
       <input type="search" placeholder="Search by name, town, or district…" value="${esc(params.get("q")||"")}" oninput="updateParam('q', this.value, true)" aria-label="Search legislators">
-      <select onchange="updateParam('chamber', this.value, true)" aria-label="Chamber"><option value="">Both chambers</option><option value="House" ${ch==="House"?"selected":""}>House</option><option value="Senate" ${ch==="Senate"?"selected":""}>Senate</option></select>
-      <select onchange="updateParam('party', this.value, true)" aria-label="Party"><option value="">All parties</option><option value="D" ${pt==="D"?"selected":""}>Democrat</option><option value="R" ${pt==="R"?"selected":""}>Republican</option><option value="I" ${pt==="I"?"selected":""}>Independent</option><option value="U" ${pt==="U"?"selected":""}>Unenrolled</option></select>
+      <select class="half" onchange="updateParam('chamber', this.value, true)" aria-label="Chamber"><option value="">Both chambers</option><option value="House" ${ch==="House"?"selected":""}>House</option><option value="Senate" ${ch==="Senate"?"selected":""}>Senate</option></select>
+      <select class="half" onchange="updateParam('party', this.value, true)" aria-label="Party"><option value="">All parties</option><option value="D" ${pt==="D"?"selected":""}>Democrat</option><option value="R" ${pt==="R"?"selected":""}>Republican</option><option value="I" ${pt==="I"?"selected":""}>Independent</option><option value="U" ${pt==="U"?"selected":""}>Unenrolled</option></select>
       ${anyFormer?`<select onchange="updateParam('members', this.value, true)" aria-label="Current or former members"><option value="current" ${ms==="current"?"selected":""}>Current members</option><option value="former" ${ms==="former"?"selected":""}>Former members this session</option><option value="all" ${ms==="all"?"selected":""}>All who served</option></select>`:""}
     </div>
     <div class="result-note"><span>${ms==="former"?`${fmtN(nFormer)} former member${nFormer===1?"":"s"} who left during the session`:`${fmtN(list.length-nFormer)} current legislators${nFormer?` · ${fmtN(nFormer)} former (listed last)`:""}`}</span></div>
@@ -1306,6 +1514,7 @@ function comBadges(coms){
 async function viewLegislator(id, params=new URLSearchParams()){
   const l = D.legById[id];
   if(!l) return `<div class="wrap"><div class="empty">Not found. <a href="#/legislators">Back to legislators</a></div></div>`;
+  setTitle(`${l.chamber==="Senate"?"Sen.":"Rep."} ${l.name}`);
   const tab = params.get("tab")||"overview";
   const sponsored = D.index.filter(b=>b.sponsor_id===id);
   const cosponsored = D.index.filter(b=>(b.cosponsor_ids||[]).includes(id));
@@ -1351,8 +1560,8 @@ async function viewLegislator(id, params=new URLSearchParams()){
         <select onchange="updateParam('vc', this.value, true)" aria-label="Filter by committee"><option value="">All committees</option>${vcoms.map(c=>`<option value="${esc(c)}" ${vc===c?"selected":""}>${esc(comName(c))}</option>`).join("")}</select>
         <span class="src" style="margin:0">${fmtN(list.length)} roll-call vote${list.length===1?"":"s"}</span>
       </div>
-      ${explain?`<p style="font-size:14.5px;margin:12px 0 4px">${explain}</p>`:!list.length?`<p style="font-size:14.5px;color:var(--ink-2)">No votes match.</p>`:`<table class="plain"><tr><th>Date</th><th>Bill and motion</th><th>Vote</th></tr>
-      ${list.slice(0,nv).map(v=>`<tr><td>${esc(v.date||"")}</td><td style="white-space:normal"><a href="#/bill/${v.ld}">LD ${v.ld}</a> <span class="clamp2" style="font-size:12.5px;color:var(--ink-2)" title="${esc(v.title||"")}">${esc(v.title||"")}</span><div style="font-size:12.5px;color:var(--ink-3)" title="${esc(v.motion||"")}">${esc(plainMotion(v.motion))}${v.yea!=null?` · ${v.yea}–${v.nay}`:""}${v.result?` · ${esc(v.result)}`:""}</div></td><td><span class="stance-pill ${voteCls(v.vote)}">${esc(v.vote||"—")}</span></td></tr>`).join("")}
+      ${explain?`<p style="font-size:14.5px;margin:12px 0 4px">${explain}</p>`:!list.length?`<p style="font-size:14.5px;color:var(--ink-2)">No votes match.</p>`:`<table class="plain votes-tbl"><tr><th>Date</th><th>Bill and motion</th><th>Vote</th></tr>
+      ${list.slice(0,nv).map(v=>`<tr><td>${esc(v.date||"")}</td><td style="white-space:normal"><div class="m-date">${esc(v.date?fmtDate(v.date):"")}</div><a href="#/bill/${v.ld}">LD ${v.ld}</a> <span class="clamp2" style="font-size:12.5px;color:var(--ink-2)" title="${esc(v.title||"")}">${esc(v.title||"")}</span><div style="font-size:12.5px;color:var(--ink-3)" title="${esc(v.motion||"")}">${esc(plainMotion(v.motion))}${v.yea!=null?` · ${v.yea}–${v.nay}`:""}${v.result?` · ${esc(v.result)}`:""}</div></td><td><span class="stance-pill ${voteCls(v.vote)}">${esc(v.vote||"—")}</span></td></tr>`).join("")}
       </table>`}${moreBtn("n", Math.min(nv, list.length), list.length, 50)}</div>`;
   }
   else if(tab==="committee"){
@@ -1366,7 +1575,7 @@ async function viewLegislator(id, params=new URLSearchParams()){
     const withT = sortBills(sponsored.filter(b=>b.testimony_count), "");
     body = `<div class="panel"><h2>Testimony on bills they sponsored · ${fmtN(tTotal)} letters on ${fmtN(withT.length)} bills</h2>
       ${countsBar(pos, {unknown: tTotal-pos.support-pos.neutral-pos.oppose})}
-      <div style="margin-top:12px">${withT.slice(0,n).map(b=>billMini(b, `<span style="min-width:150px">${countsBar(b.positions)}</span>`)).join("")}</div>
+      <div style="margin-top:12px">${withT.slice(0,n).map(b=>billMini(b, `<span style="min-width:150px">${countsBar(b.positions, {total:b.testimony_count})}</span>`)).join("")}</div>
       ${moreBtn("n", Math.min(n, withT.length), withT.length)}
       <div class="src">Positions are inferred from the text of each letter.</div></div>`;
   }
@@ -1461,6 +1670,7 @@ const OUTCOMES = [["enacted","Enacted"],["died","Died"],["vetoed","Vetoed"],["wi
 async function viewCommittee(code, params=new URLSearchParams()){
   const c = D.comByCode[code];
   if(!c) return `<div class="wrap"><div class="empty">Committee not found. <a href="#/committees">Back to committees</a></div></div>`;
+  setTitle(`${c.name} Committee`);
   const tab = params.get("tab")||"overview";
   const lobIdx = await loadOptional("lobbying/index.json");
   const bills = D.index.filter(b=>b.committee_code===code);
@@ -1491,20 +1701,20 @@ async function viewCommittee(code, params=new URLSearchParams()){
     body = `<div class="panel"><h2>${fmtN(tTotal)} testimonies on ${fmtN(withT.length)} bills</h2>
       ${countsBar(pos, {unknown: tTotal-pos.support-pos.neutral-pos.oppose})}
       <div class="src"><a href="#/testimony?committee=${esc(code)}">Read all testimony to this committee in the archive →</a> · Positions inferred from the letters.</div>
-      <div style="margin-top:12px">${withT.slice(0,n).map(b=>billMini(b, `<span style="min-width:150px">${countsBar(b.positions)}</span>`)).join("")}</div>
+      <div style="margin-top:12px">${withT.slice(0,n).map(b=>billMini(b, `<span style="min-width:150px">${countsBar(b.positions, {total:b.testimony_count})}</span>`)).join("")}</div>
       ${moreBtn("n", Math.min(n, withT.length), withT.length)}</div>`;
   }
   else if(tab==="members"){
     body = `<div class="grid-2">${members.map(m=>D.legById[m.id]?legCard({...D.legById[m.id], role: m.role&&m.role!=="Member"?m.role:D.legById[m.id].role}):"").join("")}</div>`;
   }
   else {
-    const lobbied = lobIdx ? (lobIdx.most_lobbied||[]).filter(x=>(D.idxByLd[x.ld]||{}).committee_code===code).slice(0,5) : [];
+    const lobbied = bills.filter(b=>b.lobbying_clients).sort(byLobbied).slice(0,5);
     const chairs = members.filter(m=>/chair/i.test(m.role||""));
     body = `<div class="ov-grid">
       <div>
         <div class="panel"><h2>Most-testified bills</h2>${byT.slice(0,5).map(b=>billMini(b)).join("")}
           <div class="src"><a href="#${base}?tab=bills">All ${fmtN(bills.length)} bills →</a></div></div>
-        ${lobbied.length?`<div class="panel"><h2>Most lobbied bills here</h2>${lobbied.map(x=>`<div style="font-size:14px;margin-bottom:6px"><a href="#/bill/${x.ld}">LD ${x.ld}</a> <span style="color:var(--ink-3)">· ${fmtN(x.reports)} monthly reports, ${fmtN(x.clients)} clients</span></div>`).join("")}<div class="src">From monthly lobbyist reports filed with the Maine Ethics Commission.</div></div>`:""}
+        ${lobbied.length?`<div class="panel"><h2>Most lobbied bills here</h2>${lobbied.map(x=>`<div style="font-size:14px;margin-bottom:8px"><a href="#/bill/${x.ld}">LD ${x.ld}</a> <span style="color:var(--ink-3)">· ${fmtN(x.lobbying_clients)} organizations, ${fmtN(x.lobbying_reports)} monthly reports</span><div class="clamp2" style="font-size:13px;color:var(--ink-2)">${esc(x.title)}</div></div>`).join("")}<div class="src">From monthly lobbyist reports filed with the Maine Ethics Commission.</div></div>`:""}
       </div>
       <div>
         <div class="panel"><h2>Outcomes</h2>${hbars(byOutcome.map(([k,l,cnt])=>[`<a href="#${base}?tab=bills&o=${k}">${esc(l)}</a>`, cnt]))}</div>
@@ -1532,19 +1742,18 @@ async function viewCommittee(code, params=new URLSearchParams()){
 async function viewDistrict(key){
   const dk = districtKey(key);
   if(!dk) return `<div class="wrap"><div class="empty">District not found. Use #/district/sd-34 or #/district/hd-135.</div></div>`;
-  const [towns, rows] = await Promise.all([districtTowns(dk), loadTestimonyIndex()]);
+  // Precomputed by pipeline/districts.py, so this page never loads the 45,000-row archive index.
+  const dd = await loadOptional(`districts/${dk.key}.json`);
+  if(!dd) return `<div class="wrap"><div class="empty">No data for ${esc(districtLabel(dk))}. <a href="#/legislators">Back to legislators</a></div></div>`;
+  const towns = dd.towns||[];
+  setTitle(districtLabel(dk));
   const members = currentMembers(dk.chamber, dk.n);
   const former = D.legislators.filter(l=>l.chamber===dk.chamber && String(l.district)===dk.n && l.current===false);
-  const set = new Set(towns.map(t=>t.toLowerCase()));
-  const tt = rows.filter(t=>set.has((t.town||"").toLowerCase()));
-  const names = new Set(tt.map(t=>t.name)).size;
-  const comCount = {}; const bill = {};
-  for(const t of tt){
-    comCount[t.committee_code] = (comCount[t.committee_code]||0)+1;
-    const e = bill[t.ld] ||= {ld:t.ld, n:0, c:{support:0,neutral:0,oppose:0}};
-    e.n++; if(e.c[t.position]!==undefined) e.c[t.position]++;
-  }
-  const topBills = Object.values(bill).sort((a,b)=>b.n-a.n || a.ld-b.ld).slice(0,10);
+  const tt = {length: dd.testimonies};
+  const names = dd.names;
+  const comCount = Object.fromEntries(dd.committees||[]);
+  const bill = {length: dd.bills};
+  const topBills = dd.top_bills||[];
   const sponsored = members.flatMap(m=>D.index.filter(b=>b.sponsor_id===m.id)).sort((a,b)=>(b.testimony_count||0)-(a.testimony_count||0)).slice(0,10);
   const archive = `#/testimony?district=${dk.key}`;
   return `
@@ -1557,12 +1766,12 @@ async function viewDistrict(key){
       <div class="src" style="margin-top:6px">${dk.chamber==="Senate"?"Towns from the current senator's district profile on legislature.maine.gov.":"Towns from the House district-towns list; a town split between districts appears in each."}</div>
     </div>
     <div class="grid-2" style="margin:16px 0">${members.map(legCard).join("") || `<div class="leg-card" style="cursor:default"><div><div class="role">Vacant</div><h3>No current member</h3></div></div>`}${former.map(legCard).join("")}</div>
-    ${tiles([[fmtN(tt.length),"Testimonies from these towns"],[fmtN(names),"Different names"],[fmtN(Object.keys(bill).length),"Bills"],
+    ${tiles([[fmtN(tt.length),"Testimonies from these towns"],[fmtN(names),"Different names"],[fmtN(dd.bills),"Bills"],
              [fmtN(Object.keys(comCount).length),"Committees"],[fmtN(sponsored.length?members.reduce((s,m)=>s+D.index.filter(b=>b.sponsor_id===m.id).length,0):0),"Bills sponsored by the member"],[fmtN(towns.length),"Towns"]])}
     <div class="ov-grid" style="margin-top:12px">
       <div>
         <div class="panel"><h2>Most-testified bills from these towns</h2>
-          ${topBills.length?topBills.map(x=>{ const b = D.idxByLd[x.ld]||{ld:x.ld,title:"",testimony_count:0}; return billMini({...b, testimony_count:x.n}, `<span style="min-width:150px">${countsBar(x.c)}</span>`); }).join(""):`<p style="font-size:14px;color:var(--ink-2)">No testimony from these towns.</p>`}
+          ${topBills.length?topBills.map(x=>{ const b = D.idxByLd[x.ld]||{ld:x.ld,title:"",testimony_count:0}; return billMini({...b, testimony_count:x.n}, `<span style="min-width:150px">${countsBar(x.c, {total:x.n})}</span>`); }).join(""):`<p style="font-size:14px;color:var(--ink-2)">No testimony from these towns.</p>`}
           <div class="src"><a href="${archive}">Read all ${fmtN(tt.length)} in the archive →</a> · Counts on each row are letters from these towns.</div></div>
         ${sponsored.length?`<div class="panel"><h2>Bills the member sponsored</h2>${sponsored.map(b=>billMini(b)).join("")}
           ${members[0]?`<div class="src"><a href="#/legislator/${esc(members[0].id)}?tab=sponsored">All sponsored bills →</a></div>`:""}</div>`:""}
@@ -1585,6 +1794,7 @@ function officialRole(p, link=true){
   return `${esc(p.title)}, ${ag(p.agency_name||"")}`;
 }
 async function viewProfiles(params){
+  setTitle("Who testified");
   const idx = await loadOptional("profiles/index.json");
   if(!idx) return `<div class="page-head"><div class="wrap"><h1>Who testified</h1></div></div><div class="wrap"><div class="empty">Organization and official profiles haven't been built yet.</div></div>`;
   const q = (params.get("q")||"").trim().toLowerCase();
@@ -1623,6 +1833,7 @@ async function viewProfiles(params){
 
 async function viewProfile(id, params){
   const p = await loadOptional(`profiles/${encodeURIComponent(id)}.json`);
+  if(p) setTitle(p.name);
   if(!p) return `<div class="wrap"><div class="empty">Profile not found. <a href="#/profiles">Back to who testified</a></div></div>`;
   const idx = await loadOptional("profiles/index.json") || [];
   const byId = Object.fromEntries(idx.map(x=>[x.id,x]));
@@ -1678,6 +1889,7 @@ function monthsLabel(ms){
 }
 const LOBBY_TOP_BILLS = 25, LOBBY_TOP = 50;
 async function viewLobbying(params){
+  setTitle("Lobbying");
   const idx = await loadOptional("lobbying/index.json");
   if(!idx) return `<div class="page-head"><div class="wrap"><h1>Lobbying</h1></div></div><div class="wrap"><div class="empty">Lobbying data hasn't been built yet.</div></div>`;
   const bsort = params.get("bsort")==="reports" ? "reports" : "clients";
@@ -1730,6 +1942,7 @@ async function viewLobbyClient(slug, params){
   const c = await loadOptional(`lobbying/clients/${encodeURIComponent(slug)}.json`);
   if(!c) return `<div class="wrap"><div class="empty">Lobbying client not found. <a href="#/lobbying">Back to lobbying</a></div></div>`;
   const prof = c.profile_id ? {id:c.profile_id} : null;
+  setTitle(c.client);
   const n = Math.max(50, Number(params.get("n"))||50);
   const rows = c.bills.map(x=>({...x, b:D.idxByLd[x.ld]}));
   return `
@@ -1756,6 +1969,7 @@ function lobbyBillsTable(c, all){
 }
 
 function viewAbout(){
+  setTitle("About");
   const m = D.meta;
   return `
   <div class="page-head"><div class="wrap">
@@ -1787,8 +2001,49 @@ function updateParam(k,v,resetPage){
   if(resetPage){ p.delete("page"); p.delete("tn"); }
   if(k!=="letter") p.delete("letter");   // a linked letter stays pinned only until the reader changes the list
   const s = p.toString();
-  history.replaceState(null,"","#"+path+(s?"?"+s:""));
+  history.replaceState(history.state,"","#"+path+(s?"?"+s:""));   // keep the entry's id so its scroll position stays with it
   render(false);
+}
+
+/* Scroll: a new page starts at the top; Back/Forward return to where the reader was; query-only changes on the same page
+   (filters, tabs, "Show more") keep the position. Each history entry gets an id; positions are saved per id. */
+if("scrollRestoration" in history) history.scrollRestoration = "manual";
+let navSeq = Date.now(), scrollPos = {};
+try { scrollPos = JSON.parse(sessionStorage.getItem("meple-scroll")||"{}"); } catch(e){}
+let saveTimer = null;
+window.addEventListener("scroll", ()=>{
+  const id = history.state && history.state.mepleId; if(!id) return;
+  scrollPos[id] = window.scrollY;
+  clearTimeout(saveTimer); saveTimer = setTimeout(()=>{ try { sessionStorage.setItem("meple-scroll", JSON.stringify(scrollPos)); } catch(e){} }, 200);
+}, {passive:true});
+function toggleMenu(open){
+  const h = document.querySelector("header.site"), b = document.getElementById("menu-btn");
+  if(!h || !b) return;
+  const on = open==null ? !h.classList.contains("menu-open") : open;
+  h.classList.toggle("menu-open", on); b.setAttribute("aria-expanded", on ? "true" : "false");
+}
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") toggleMenu(false); });
+// Tab strips: the active tab is scrolled into view, and a fade marks whichever edge has more tabs hidden.
+function initTabStrips(){
+  document.querySelectorAll(".tabs").forEach(t=>{
+    const on = t.querySelector("a.on");
+    if(on && t.scrollWidth > t.clientWidth) t.scrollLeft = on.offsetLeft - (t.clientWidth - on.offsetWidth)/2;
+    const fade = () => {
+      t.classList.toggle("fade-r", t.scrollLeft + t.clientWidth < t.scrollWidth - 2);
+      t.classList.toggle("fade-l", t.scrollLeft > 2);
+    };
+    fade(); t.addEventListener("scroll", fade, {passive:true});
+  });
+}
+function setTitle(t){ pageTitle = t ? `${t} — MEPLE` : null; }
+function clampTitle(s, n){ s = String(s||""); return s.length>n ? s.slice(0, n-1).replace(/\s+\S*$/,"")+"…" : s; }
+function viewNotFound(){
+  setTitle("Page not found");
+  return `<div class="wrap"><div class="empty" style="padding:64px 16px">
+    <h1 style="font-family:var(--serif);font-size:26px;color:var(--ink);margin-bottom:10px">No page at this address</h1>
+    <p style="margin-bottom:16px">The link may be mistyped or out of date.</p>
+    <p><a href="#/bills">Bills</a> · <a href="#/legislators">Legislators</a> · <a href="#/">Home page</a></p>
+  </div></div>`;
 }
 
 let renderSeq = 0, lastPath = null;
@@ -1802,7 +2057,7 @@ async function render(scroll=true){
   pendingLetter = null; pageTitle = null;
   try{
     if(seg.length===0){ html = viewHome(); }
-    else if(seg[0]==="bills"){ html = viewBills(params); nav="bills"; }
+    else if(seg[0]==="bills" && seg.length===1){ html = viewBills(params); nav="bills"; }
     else if(seg[0]==="bill"){ html = await viewBill(seg[1], params); nav="bills"; }
     else if(seg[0]==="testimony"){ html = await viewTestimony(params); nav="testimony"; }
     else if(seg[0]==="legislators"){ html = await viewLegislators(params); nav="legislators"; }
@@ -1815,10 +2070,14 @@ async function render(scroll=true){
     else if(seg[0]==="lobbying" && seg[1]==="client"){ html = await viewLobbyClient(decodeURIComponent(seg[2]||""), params); nav="lobbying"; }
     else if(seg[0]==="lobbying"){ html = await viewLobbying(params); nav="lobbying"; }
     else if(seg[0]==="about"){ html = viewAbout(); nav="about"; }
-    else { html = viewHome(); }
+    else { html = viewNotFound(); }
   }catch(e){ console.error(e); html = `<div class="wrap"><div class="empty">Something went wrong loading this page.</div></div>`; }
   if(seq!==renderSeq) return; // a newer render superseded this one
   const samePath = path===lastPath; lastPath = path;   // tabs, filters and "show more" keep the scroll position
+  // A history entry we've seen before (Back/Forward) has an id with a saved position; a new entry gets an id now.
+  const st = history.state || {};
+  const restoreY = st.mepleId && scrollPos[st.mepleId]!=null ? scrollPos[st.mepleId] : null;
+  if(!st.mepleId) history.replaceState({...st, mepleId: String(++navSeq)}, "");
   const app = $("#app");
   const active = document.activeElement;
   const keepFocus = active && (active.tagName==="INPUT"||active.tagName==="SELECT") && app.contains(active);
@@ -1829,10 +2088,13 @@ async function render(scroll=true){
     if(el){ el.focus(); if(el.setSelectionRange && focusId.pos!=null){ try{el.setSelectionRange(focusId.pos,focusId.pos);}catch(e){} } }
   }
   document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("active", a.dataset.nav===nav));
+  toggleMenu(false);
+  initTabStrips();
   document.title = pageTitle || DEFAULT_TITLE;
   if(pendingLetter){ const id = pendingLetter; pendingLetter = null; pendingScroll = null; revealLetter(id); }
   else if(pendingScroll){ const el = document.getElementById(pendingScroll); pendingScroll = null; if(el) el.scrollIntoView({behavior:"smooth", block:"start"}); }
-  else if(scroll && !samePath) window.scrollTo(0,0);
+  else if(restoreY!=null && scroll) window.scrollTo({top: restoreY, behavior: "instant"});
+  else if(scroll && !samePath) window.scrollTo({top: 0, behavior: "instant"});
 }
 
 function setChrome(){
@@ -1841,7 +2103,7 @@ function setChrome(){
   if(m.sample){
     rib.innerHTML = `<strong>Demonstration prototype.</strong> ${esc(m.notice||"Bills shown are real measures; testimony and counts are illustrative sample content.")}`;
   } else {
-    rib.innerHTML = `<strong>Public record.</strong> Bills, votes and written testimony from the Maine Legislature's website, ${esc(m.legislature)} · data updated ${esc(m.generated_at)}`;
+    rib.innerHTML = `<span class="rib-long"><strong>Public record.</strong> Bills, votes and written testimony from the Maine Legislature's website, ${esc(m.legislature)} · data updated ${esc(m.generated_at)}</span><span class="rib-short"><strong>Public record</strong> · ${esc(m.legislature)} · updated ${esc(m.generated_at)}</span>`;
   }
   const ff = $("#footfine");
   ff.innerHTML += m.sample
