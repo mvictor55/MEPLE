@@ -21,9 +21,10 @@ STEPS = [
     ("profiles",   [sys.executable, "-m", "pipeline.profiles"]),          # organizations, agencies, public officials
     ("lobbying",   [sys.executable, "-m", "pipeline.lobbying", "build"]), # needs raw/lobbying/reports.json (pipeline.lobbying index)
     ("finance",    [sys.executable, "-m", "pipeline.finance", "2024"]),   # needs raw/finance/*.csv
+    ("districts",  [sys.executable, "-m", "pipeline.districts"]),         # district pages + slim testimony/index.json
     ("synthesis",  [sys.executable, "-m", "pipeline.synthesis", "build"]),# rebuilds from saved results; new runs: pipeline.synthesis plan / run --yes
 ]
-DEFAULT_STEPS = ["legiscan", "crawl", "billtext", "rosters", "tindex", "textract", "build", "pages", "profiles", "lobbying", "finance", "synthesis"]
+DEFAULT_STEPS = ["legiscan", "crawl", "billtext", "rosters", "tindex", "textract", "build", "pages", "profiles", "lobbying", "finance", "districts", "synthesis"]
 
 def main():
     only = sys.argv[1:] or DEFAULT_STEPS

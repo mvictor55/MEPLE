@@ -152,7 +152,7 @@ def run(sample_notice: str | None = None):
     if config.OUT.exists():
         shutil.rmtree(config.OUT, onexc=_force_remove)
     (out_bills).mkdir(parents=True); (config.OUT / "testimony").mkdir()
-    t_index, t_total = [], 0
+    t_index, t_total, dup_actions = [], 0, 0
     for ld in lds:
         lg = lg_bills.get(str(ld), {}); sp = status_pages.get(ld, {})
         if sp.get("missing") and not lg:
@@ -202,6 +202,17 @@ def run(sample_notice: str | None = None):
         # (checked on LD 595, 609, 302, 705, 1880), so they are not used.
         t_dates = sorted({t["hearing_date"] for t in trows if t.get("hearing_date")})
         hearing = sp.get("hearing") or ({"date": t_dates[0], "committee_code": code} if t_dates else None) or (None if sp.get("hearings") is not None else next(({"date": c["date"], "time": c.get("time"), "location": c.get("location")} for c in lg.get("calendar", []) if "hearing" in (c.get("type") or c.get("description") or "").lower()), None))
+        # LegiScan's history repeats the committee docket as committee rows (chamber "J"/"JOINT": "Work Session Held: TABLED").
+        # Drop those that match a docket entry by date and text; keep any others, labeled with the full committee name.
+        def _norm_act(s): return re.sub(r"[^a-z0-9]+", " ", str(s or "").lower()).strip()
+        docket = {(a.get("date"), _norm_act(f"{a.get('action')} {a.get('result') or ''}")) for a in sp.get("committee_actions", [])}
+        chamber_actions = []
+        for a in lg.get("chamber_actions", []):
+            ch = {"H": "House", "S": "Senate"}.get(a.get("chamber"), a.get("chamber"))
+            if ch not in ("House", "Senate"):
+                if (a.get("date"), _norm_act(a.get("action"))) in docket: dup_actions += 1; continue
+                ch = config.COMMITTEES.get(code) or ch
+            chamber_actions.append({**a, "chamber": ch})
         full = {
             "ld": ld, "paper": sp.get("paper"), "session": config.SESSION, "title": title,
             "sponsor_id": sponsor_id, "cosponsor_ids": cos_ids,
@@ -213,7 +224,7 @@ def run(sample_notice: str | None = None):
             "amendments": sp.get("amendments", []),
             "committee_actions": sp.get("committee_actions", []),
             "committee_reports": _link_signers(sp.get("committee_reports", []), by_key, by_full, com_members.get(code)),
-            "chamber_actions": [{**a, "chamber": {"H": "House", "S": "Senate"}.get(a.get("chamber"), a.get("chamber"))} for a in lg.get("chamber_actions", [])],
+            "chamber_actions": chamber_actions,
             "roll_calls": rolls, "hearing": hearing,
             # other bills whose testimony includes the same documents at the same hearing
             # (one letter filed under several bills); see testimony.positions()
@@ -238,7 +249,10 @@ def run(sample_notice: str | None = None):
         c["bill_count"] = sum(1 for b in index if b["committee_code"] == c["code"])
 
     (out_bills / "index.json").write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
-    (config.OUT / "testimony" / "index.json").write_text(json.dumps(t_index, ensure_ascii=False), encoding="utf-8")
+    # The full archive index stays in pipeline/raw (pipeline.profiles adds profile ids to it); pipeline.districts
+    # writes the slim site/data/testimony/index.json and the per-district files from it.
+    (config.RAW / "testimony_index_full.json").write_text(json.dumps(t_index, ensure_ascii=False), encoding="utf-8")
+    print(f"build: removed {dup_actions} chamber-history rows that repeated a committee docket entry")
     (config.OUT / "legislators.json").write_text(json.dumps(sorted(legislators.values(), key=lambda l: (l["chamber"], last_name(l["name"]))), ensure_ascii=False, indent=0), encoding="utf-8")
     (config.OUT / "committees.json").write_text(json.dumps(committees, ensure_ascii=False, indent=0), encoding="utf-8")
     # Municipalities with their House and Senate districts (House district-towns list), for the town picker and district pages

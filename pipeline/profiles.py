@@ -239,7 +239,7 @@ def official_from_text(text: str | None) -> tuple[str | None, str | None]:
 
 def run():
     out = config.OUT / "profiles"; out.mkdir(parents=True, exist_ok=True)
-    rows = json.loads((config.OUT / "testimony" / "index.json").read_text(encoding="utf-8"))
+    rows = json.loads((config.RAW / "testimony_index_full.json").read_text(encoding="utf-8"))
     bills = {b["ld"]: b for b in json.loads((config.OUT / "bills" / "index.json").read_text(encoding="utf-8"))}
     legislator_keys = {person_key(l["name"]) for l in json.loads((config.OUT / "legislators.json").read_text(encoding="utf-8"))}
 
@@ -366,7 +366,7 @@ def run():
     # tag testimony rows (idempotent)
     for r in rows:
         r["person_profile_id"] = tag_person.get(r["id"]); r["org_profile_id"] = tag_org.get(r["id"])
-    (config.OUT / "testimony" / "index.json").write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
+    (config.RAW / "testimony_index_full.json").write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
     for p in (config.OUT / "bills").glob("LD*.json"):
         b = json.loads(p.read_text(encoding="utf-8"))
         for t in b.get("testimony", []):
