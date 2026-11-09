@@ -1,16 +1,34 @@
 {
  "ld": 676,
+ "version": 2,
  "model": "Claude Opus 5.5",
- "generated_at": "2026-11-07",
- "method": "Written by Claude Opus 5.5 in a Claude Code session after reading every letter with text; not produced by the batch pipeline.",
- "summary": "Testimony on LD 676 divided over whether to fund replacing unused Mountain Division track between Standish and Fryeburg with a paved trail. Supporters described recreation, health and economic benefits, the advisory council's recommendation and the bill's role in accepting outside funds; opponents argued for keeping the track for future rail service, cited a railroad's interest and the State Railroad Preservation Act, and proposed building the trail beside the rails.",
- "letters_considered": 143,
- "themes": [
+ "generated_at": "2026-11-08",
+ "method": "Every letter read in full by Claude Opus 5.5 (chat session, Nov 8, 2026), building on the earlier Claude Code synthesis of this bill. Arguments carried over from that synthesis; common ground, cruxes and claims added. Claims checked only against the official sources linked. Not produced by the batch pipeline.",
+ "signed_off": null,
+ "summary": "Testimony on LD 676 split almost evenly over whether to fund replacing the unused Mountain Division track between Standish and Fryeburg with a paved trail. Supporters, concentrated in the towns along the line, described recreation, safety and economic benefits and the advisory council's recommendation; opponents, mostly from elsewhere in Maine and out of state, argued for keeping the track for future rail service, cited a railroad's interest and the State Railroad Preservation Act, and proposed building the trail beside the rails.",
+ "overview_lines": [
+  "{letters} letters from about {people} people, evenly split: {support} for the trail, {oppose} against.",
+  "Towns along the line were for it {affected_support}–{affected_oppose}; out-of-state writers were against it {out_oppose}–{out_support}.",
+  "The open question: whether a trail is truly “interim” if a railroad wants the line."
+ ],
+ "affected_places": {
+  "label": "Towns along the line",
+  "towns": [
+   "Standish",
+   "Baldwin",
+   "Hiram",
+   "Brownfield",
+   "Fryeburg"
+  ],
+  "note": "The towns the 31-mile Standish–Fryeburg section runs through. Steep Falls is a village of Standish."
+ },
+ "arguments": [
   {
-   "stance": "support",
+   "id": "a1",
+   "side": "support",
    "label": "A safe place to walk, bike and get outdoors",
    "detail": "Writers who use the existing trail sections describe a flat, paved path away from road traffic that serves children, older residents, people with limited mobility and families, and say a longer trail would support health and year-round recreation.",
-   "testimony_ids": [
+   "letter_ids": [
     "10041183",
     "10041361",
     "10041409",
@@ -69,13 +87,14 @@
     "188254",
     "188255"
    ],
-   "count": 57
+   "quotes": []
   },
   {
-   "stance": "support",
+   "id": "a2",
+   "side": "support",
    "label": "Trail would bring visitors and business to rural towns",
    "detail": "Supporters say trail users spend money on food, lodging, rentals and shuttles, citing other rail trails they have ridden, and that the trail would bring economic development to the small towns between Standish and Fryeburg.",
-   "testimony_ids": [
+   "letter_ids": [
     "10041183",
     "10041215",
     "10041361",
@@ -125,13 +144,14 @@
     "188255",
     "188256"
    ],
-   "count": 48
+   "quotes": []
   },
   {
-   "stance": "support",
+   "id": "a3",
+   "side": "support",
    "label": "Lets MaineDOT accept and spend federal or outside funds",
    "detail": "Supporters describe the bill's small allocation as a placeholder that lets MaineDOT receive and spend federal grants or other outside money on building the trail, at little cost to the state.",
-   "testimony_ids": [
+   "letter_ids": [
     "10041155",
     "10041183",
     "10041215",
@@ -164,13 +184,14 @@
     "188254",
     "188256"
    ],
-   "count": 31
+   "quotes": []
   },
   {
-   "stance": "support",
+   "id": "a4",
+   "side": "support",
    "label": "Carries out the advisory council's recommendation and LD 404",
    "detail": "These letters point to the Rail Use Advisory Council's vote for an interim \"trail-until-rail\", the law enacted as LD 404 directing MaineDOT to implement it, and support from towns along the corridor, and describe this bill as the next step.",
-   "testimony_ids": [
+   "letter_ids": [
     "10041155",
     "10041183",
     "10041215",
@@ -201,13 +222,14 @@
     "188254",
     "188256"
    ],
-   "count": 29
+   "quotes": []
   },
   {
-   "stance": "support",
+   "id": "a5",
+   "side": "support",
    "label": "Links existing sections into a Portland-to-New Hampshire route",
    "detail": "Writers say the bill would close the gap between the trail sections in Gorham/Windham and Fryeburg, creating a continuous route from Portland toward New Hampshire that could also serve car-free commuting and a wider trail network.",
-   "testimony_ids": [
+   "letter_ids": [
     "10041215",
     "10041361",
     "10041409",
@@ -229,13 +251,14 @@
     "188253",
     "188255"
    ],
-   "count": 20
+   "quotes": []
   },
   {
-   "stance": "support",
+   "id": "a6",
+   "side": "support",
    "label": "Restoring rail service on this line is not practical",
    "detail": "Supporters say the ties and rails are deteriorated and would need full replacement, that trains have not run on the line for decades, and that no workable plan for rail service exists; one adds that freight traffic would not suit quiet rural towns.",
-   "testimony_ids": [
+   "letter_ids": [
     "10041215",
     "10041491",
     "10041757",
@@ -247,13 +270,14 @@
     "10042051",
     "188254"
    ],
-   "count": 10
+   "quotes": []
   },
   {
-   "stance": "oppose",
+   "id": "a7",
+   "side": "oppose",
    "label": "Removing the track ends future freight and passenger rail",
    "detail": "Opponents say the line could again carry freight, tourist or commuter trains linking Portland with New Hampshire and Vermont, taking trucks off roads and cutting emissions, and that once the track is removed rail service is unlikely ever to return.",
-   "testimony_ids": [
+   "letter_ids": [
     "10039939",
     "10039948",
     "10039949",
@@ -319,13 +343,14 @@
     "188252",
     "188257"
    ],
-   "count": 64
+   "quotes": []
   },
   {
-   "stance": "oppose",
+   "id": "a8",
+   "side": "oppose",
    "label": "A railroad wants to run the line; state law favors rail",
    "detail": "These letters say the Conway Scenic Railroad and others have expressed interest in operating the line, and that under the State Railroad Preservation Act a trail is interim and the corridor must be kept for rail, so a railroad should be heard before track is removed.",
-   "testimony_ids": [
+   "letter_ids": [
     "10039939",
     "10039949",
     "10040020",
@@ -371,13 +396,14 @@
     "188251",
     "188252"
    ],
-   "count": 44
+   "quotes": []
   },
   {
-   "stance": "oppose",
+   "id": "a9",
+   "side": "oppose",
    "label": "Trail costs outweigh its benefits",
    "detail": "Opponents question spending public money to remove track and build and maintain a trail, saying rail trails bring little revenue or use, Maine already has other rail trails, and the bill's placeholder figure understates removal costs estimated in the millions.",
-   "testimony_ids": [
+   "letter_ids": [
     "10040020",
     "10040866",
     "10040878",
@@ -394,13 +420,14 @@
     "188250",
     "188252"
    ],
-   "count": 15
+   "quotes": []
   },
   {
-   "stance": "oppose",
+   "id": "a10",
+   "side": "oppose",
    "label": "The rail line is history worth preserving",
    "detail": "Writers describe the Mountain Division as part of Maine's railroad heritage, built and run for generations, and ask that the tracks be kept for that reason.",
-   "testimony_ids": [
+   "letter_ids": [
     "10039939",
     "10040850",
     "10040879",
@@ -415,13 +442,14 @@
     "10042071",
     "10043300"
    ],
-   "count": 13
+   "quotes": []
   },
   {
-   "stance": "amend",
+   "id": "a11",
+   "side": "amend",
    "label": "Keep the rails and build the trail beside them",
    "detail": "Writers ask for \"rail with trail\": keep the track in place and build the path alongside it, as already done in Fryeburg and Windham, so the corridor can serve both uses.",
-   "testimony_ids": [
+   "letter_ids": [
     "10039948",
     "10039949",
     "10039987",
@@ -453,13 +481,14 @@
     "188252",
     "188257"
    ],
-   "count": 30
+   "quotes": []
   },
   {
-   "stance": "amend",
+   "id": "a12",
+   "side": "amend",
    "label": "Pause track removal until rail proposals are evaluated",
    "detail": "These letters ask the committee to table the bill, issue requests for proposals, or study passenger rail before any track is removed, so that offers to use the line can be considered.",
-   "testimony_ids": [
+   "letter_ids": [
     "10040886",
     "10041362",
     "10041798",
@@ -467,7 +496,454 @@
     "188247",
     "188248"
    ],
-   "count": 6
+   "quotes": []
   }
- ]
+ ],
+ "also_raised": [
+  {
+   "label": "Wheelchair, stroller and other accessible use of a paved trail",
+   "letter_ids": [
+    "10042031",
+    "10042052",
+    "10041450",
+    "10041820",
+    "10041915",
+    "10042046",
+    "10041563",
+    "10041815",
+    "10041754",
+    "10041361",
+    "10041757",
+    "188255",
+    "10041931",
+    "10041455",
+    "10040910"
+   ]
+  },
+  {
+   "label": "Snowmobiling on the corridor",
+   "letter_ids": [
+    "10041450",
+    "10041512",
+    "10041757",
+    "188254",
+    "10039948",
+    "10040020"
+   ]
+  },
+  {
+   "label": "Climate and emissions",
+   "letter_ids": [
+    "188253",
+    "10039948",
+    "10040909",
+    "10042071",
+    "10040897",
+    "10041671"
+   ]
+  }
+ ],
+ "common_ground": [
+  {
+   "title": "The existing trail sections work",
+   "text": "Supporters want to link the paved sections that already exist. Opponents point to the same sections in Fryeburg, Windham and Standish as proof that a trail can run beside the rails.",
+   "support_ids": [
+    "10041183",
+    "10041424",
+    "10041820",
+    "10041155",
+    "10041449",
+    "10041531",
+    "188253",
+    "10041815",
+    "10041512",
+    "10041361",
+    "10041757",
+    "10042051",
+    "10042077"
+   ],
+   "oppose_ids": [
+    "188251",
+    "10041010",
+    "10042071",
+    "188252",
+    "10040998",
+    "10039987"
+   ]
+  },
+  {
+   "title": "The corridor should bring visitors and money to western Maine",
+   "text": "Both sides argue from tourism and the local economy. They disagree only on whether a trail or an excursion railroad would do it better.",
+   "support_ids": [
+    "10041183",
+    "10041913",
+    "10041424",
+    "10042031",
+    "10041851",
+    "10042052",
+    "10042001",
+    "10041450",
+    "10041215",
+    "10041820",
+    "10041560",
+    "10041915",
+    "10042046",
+    "10041715",
+    "10041477",
+    "10041504",
+    "10041628",
+    "10041880",
+    "10041531",
+    "10041685",
+    "10041664",
+    "188256",
+    "10041696",
+    "10041417",
+    "10041805",
+    "188253",
+    "10041815",
+    "10041776",
+    "10041512",
+    "10041932",
+    "10041361",
+    "10042051",
+    "10041491",
+    "10042080",
+    "10041967",
+    "10042111",
+    "10041907",
+    "10041781",
+    "188254",
+    "10042045",
+    "188255",
+    "10041412",
+    "10041931",
+    "10041398",
+    "10041978",
+    "10042077"
+   ],
+   "oppose_ids": [
+    "10039939",
+    "10041448",
+    "10040654",
+    "10039948",
+    "10040866",
+    "188248",
+    "10042087",
+    "10040850",
+    "10041748",
+    "188250",
+    "188251",
+    "188246",
+    "188243",
+    "10041093",
+    "10041997",
+    "10040020",
+    "10041437",
+    "10040977",
+    "10041455",
+    "10040878",
+    "10040909",
+    "10040794",
+    "10040888",
+    "10043300",
+    "10041461",
+    "10042071",
+    "188252",
+    "10040897",
+    "188249",
+    "188244",
+    "10040998",
+    "10041240",
+    "10041671",
+    "10040910",
+    "10040886",
+    "10040504",
+    "10041798",
+    "188247"
+   ]
+  }
+ ],
+ "cruxes": [
+  {
+   "question": "Is a trail really “interim”?",
+   "support_view": "The campaign letters describe an “interim trail-until-rail”: the corridor stays in state hands and rail could return.",
+   "oppose_view": "Under the State Railroad Preservation Act, they argue, a trail must give way once a railroad shows interest, and Conway Scenic has.",
+   "record": "The law requires track-removal legislation to call removal “interim in nature” and says the corridor will be preserved for future rail use. The sections reviewed (23 M.R.S. §§ 75, 7105, 7107) do not say a railroad’s interest ends a trail use. No letter estimates what restoring track after trail use would cost.",
+   "would_settle": "MaineDOT’s estimate of the cost to restore track after trail use.",
+   "support_ids": [
+    "10041183",
+    "10041424",
+    "10042031",
+    "10041851",
+    "10042052",
+    "10041215",
+    "10041915",
+    "10041155",
+    "10041449",
+    "10041477",
+    "10041504",
+    "10041880",
+    "10041531",
+    "10041685",
+    "188256",
+    "10041417",
+    "10041805",
+    "10041934",
+    "10041776",
+    "10041512",
+    "10041932",
+    "10042111",
+    "10041907",
+    "10041781",
+    "188254",
+    "10041931",
+    "10041398",
+    "10041620"
+   ],
+   "oppose_ids": [
+    "10039939",
+    "10041448",
+    "188248",
+    "10040799",
+    "10040850",
+    "10041748",
+    "188250",
+    "188251",
+    "188243",
+    "10040939",
+    "10040794",
+    "10040888",
+    "188252",
+    "10041240",
+    "10040910",
+    "10040886",
+    "10040504"
+   ]
+  },
+  {
+   "question": "Would a railroad actually run the line?",
+   "support_view": "Restoring rail service on this line is not practical; the market would have used it if it were.",
+   "oppose_view": "Conway Scenic Railroad wants to run excursion trains; TrainRiders Northeast describes a plan to lease the line from the state once it is improved.",
+   "record": "45 opposing letters name Conway Scenic Railroad, including two from its staff. The letters do not include a written proposal or its terms.",
+   "would_settle": "Whether a written proposal has been filed with MaineDOT, and who would pay to rehabilitate the track.",
+   "support_ids": [
+    "10041215",
+    "10041491",
+    "10041757",
+    "10041805",
+    "10041806",
+    "10041880",
+    "10042045",
+    "10042046",
+    "10042051",
+    "188254"
+   ],
+   "oppose_ids": [
+    "10040923",
+    "10039939",
+    "10041448",
+    "10040654",
+    "10040866",
+    "188248",
+    "10042087",
+    "10040861",
+    "10042106",
+    "10040799",
+    "10040850",
+    "10041748",
+    "10042049",
+    "188250",
+    "188251",
+    "10041870",
+    "10041989",
+    "188246",
+    "10040879",
+    "188243",
+    "10041093",
+    "10041997",
+    "10040020",
+    "10041010",
+    "10041437",
+    "10041455",
+    "10041812",
+    "10040939",
+    "10040909",
+    "10040794",
+    "10040888",
+    "10039949",
+    "10041461",
+    "10042071",
+    "188252",
+    "10040897",
+    "188249",
+    "10041209",
+    "10040998",
+    "10041240",
+    "10041671",
+    "10040910",
+    "10040886",
+    "10040504",
+    "188247"
+   ]
+  },
+  {
+   "question": "What would rail-with-trail cost?",
+   "support_view": "A council participant writes that trail-only was the cheapest option, about one-seventh the cost of rail-with-trail.",
+   "oppose_view": "Keep the rails and build the trail beside them, as in the sections that already exist.",
+   "record": "30 opposing letters propose rail-with-trail. One opposing letter cites a feasibility-study estimate of $1.8–2.1 million just to remove the track.",
+   "would_settle": "The conceptual cost table (Table 1-1) in the advisory council’s May 2022 report.",
+   "support_ids": [
+    "10042052",
+    "10041215",
+    "10041477",
+    "10041805",
+    "10042045",
+    "10042077"
+   ],
+   "oppose_ids": [
+    "10039948",
+    "10039949",
+    "10039987",
+    "10040654",
+    "10040866",
+    "10040909",
+    "10040923",
+    "10040977",
+    "10040998",
+    "10041199",
+    "10041209",
+    "10041437",
+    "10041448",
+    "10041455",
+    "10041671",
+    "10041746",
+    "10041747",
+    "10041792",
+    "10041847",
+    "10041870",
+    "10041872",
+    "10042049",
+    "10042071",
+    "10042134",
+    "188243",
+    "188244",
+    "188246",
+    "188250",
+    "188252",
+    "188257"
+   ]
+  }
+ ],
+ "claims": [
+  {
+   "claim": "The advisory council voted 11–1 for an interim trail",
+   "made_by": "18 campaign letters and the sponsor",
+   "status": "accurate",
+   "note": "The council’s May 2022 report records an 11–1 vote of its 12 members. The campaign letter dates the vote to 2021; it came in 2022.",
+   "source_url": "https://www1.maine.gov/mdot/ofps/docs/mdrcc/Mountain%20Rail%20Use%20Advisory%20Council%20Summary%20and%20Recommendations%205.26.22.pdf",
+   "source_label": "Council report, May 2022"
+  },
+  {
+   "claim": "LD 404 put the council’s recommendations into law in 2023",
+   "made_by": "Campaign letters",
+   "status": "accurate",
+   "note": "LD 404 became Resolve 2023, chapter 89. It directs MaineDOT to carry out the recommendation, subject to available funding.",
+   "source_url": "https://lldc.mainelegislature.org/Open/Laws/2023/2023_RES_c089.pdf",
+   "source_label": "Resolve 2023, c. 89"
+  },
+  {
+   "claim": "State law treats any trail as interim until a railroad shows interest",
+   "made_by": "Many opposing letters",
+   "status": "partly",
+   "note": "The law calls removal interim and preserves the corridor for future rail. The sections reviewed do not say a railroad’s interest ends a trail use.",
+   "source_url": "https://legislature.maine.gov/statutes/23/title23sec7107.html",
+   "source_label": "23 M.R.S. § 7107"
+  },
+  {
+   "claim": "The bill’s appropriation is a $500 placeholder",
+   "made_by": "Opposing letters",
+   "status": "accurate",
+   "note": "The bill text lists $500 in the Federal Expenditures Fund.",
+   "source_url": "https://legislature.maine.gov/legis/bills/getPDF.asp?paper=SP0289&item=1&snum=132",
+   "source_label": "LD 676 bill text"
+  },
+  {
+   "claim": "Removing the track would cost $1.8–2.1 million",
+   "made_by": "One opposing letter",
+   "status": "not_checked",
+   "note": "Attributed to the feasibility study; not yet checked against it.",
+   "source_url": null,
+   "source_label": null
+  },
+  {
+   "claim": "The Mountain Division never made a profit",
+   "made_by": "Disputed within the letters",
+   "status": "disputed",
+   "note": "Asserted and disputed by writers; no public source MEPLE uses can settle it.",
+   "source_url": null,
+   "source_label": null
+  }
+ ],
+ "campaigns_manual": [
+  {
+   "label": "Reuse the advisory council's talking points in their own words",
+   "kind": "talking_points",
+   "letter_ids": [
+    "10041155",
+    "10041934",
+    "10041620"
+   ]
+  }
+ ],
+ "flags": [
+  {
+   "letter_id": "10042164",
+   "note": "Describes a different bill (Down East Sunrise Trail to Calais); may be misfiled"
+  },
+  {
+   "letter_id": "10040799",
+   "note": "Two letters signed Donald Martin, from different towns"
+  },
+  {
+   "letter_id": "10040850",
+   "note": "Two letters signed Donald Martin, from different towns"
+  }
+ ],
+ "test_fixtures": {
+  "campaign_18": [
+   "10041183",
+   "10041424",
+   "10042031",
+   "10041915",
+   "10041477",
+   "10041504",
+   "10041531",
+   "188256",
+   "10041417",
+   "10041805",
+   "10041776",
+   "10041512",
+   "10041932",
+   "10042111",
+   "10041907",
+   "10041781",
+   "10041931",
+   "10041398"
+  ],
+  "expected_counts": {
+   "letters": 145,
+   "support": 70,
+   "oppose": 71,
+   "unclear": 1,
+   "no_text": 3,
+   "affected_support": 39,
+   "affected_oppose": 8,
+   "out_support": 3,
+   "out_oppose": 25,
+   "maine_support": 28,
+   "maine_oppose": 36,
+   "unknown_oppose": 2
+  }
+ }
 }

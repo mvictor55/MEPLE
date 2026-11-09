@@ -372,7 +372,7 @@ def run():
 
     def counts(rs):
         c = Counter((r.get("position") or "unknown") for r in rs)
-        return {k: c.get(k, 0) for k in ("support", "neutral", "oppose", "unknown")}
+        return {k: c.get(k, 0) for k in ("support", "neutral", "oppose", "unknown")} | ({"unclear": c["unclear"]} if c.get("unclear") else {})
 
     # person profiles only for senior roles (see _SENIOR); everyone else stays on the agency profile only
     staff_titles = Counter()

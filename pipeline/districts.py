@@ -5,10 +5,11 @@ Inputs:  pipeline/raw/testimony_index_full.json (written by pipeline.build, prof
          site/data/legislators.json, site/data/towns.json
 Outputs: site/data/districts/{hd-N|sd-N}.json   one per district, so a district page never loads the archive index
          site/data/testimony/index.json           the archive index in a short form the site expands on load:
-           i id · n name · o organization · t town · p position (s/n/o) · d date · l LD · c committee
+           i id · n name · o organization · t town · p position (s/n/o/u, u = unclear) · d date · l LD · c committee
            pp person profile id · op organization profile id · x 0 when the letter has no extracted text
-           Omitted keys are null. Every position in the index is inferred from the text, so there is no
-           position_source key; the official PDF URL is derived from the id.
+           ps label source when it isn't the keyword rule (model / person / none) · kl the keyword label an override replaced
+           Omitted keys are null. A position without ps was set by the keyword rule ("inferred");
+           the official PDF URL is derived from the id.
 
     python -m pipeline.districts
 """
@@ -18,16 +19,18 @@ from . import config
 
 FULL = config.RAW / "testimony_index_full.json"
 URL = "https://legislature.maine.gov/legis/bills/getTestimonyDoc.asp?id="
-POS = {"support": "s", "neutral": "n", "oppose": "o"}
+POS = {"support": "s", "neutral": "n", "oppose": "o", "unclear": "u"}
 
 def slim(rows):
     out = []
     for r in rows:
         assert r.get("url") in (None, URL + str(r["id"])), r.get("url")
-        assert r.get("position_source") in (None, "inferred"), r.get("position_source")
+        assert r.get("position_source") in (None, "inferred", "keyword", "model", "person", "none"), r.get("position_source")
         s = {"i": r["id"], "n": r.get("name"), "o": r.get("organization"), "t": r.get("town"),
              "p": POS.get(r.get("position")), "d": r.get("date"), "l": r["ld"], "c": r.get("committee_code"),
-             "pp": r.get("person_profile_id"), "op": r.get("org_profile_id"), "x": 0 if not r.get("has_text") else None}
+             "pp": r.get("person_profile_id"), "op": r.get("org_profile_id"), "x": 0 if not r.get("has_text") else None,
+             "ps": r.get("position_source") if r.get("position_source") in ("model", "person", "none") else None,
+             "kl": POS.get(r.get("keyword_label"))}
         out.append({k: v for k, v in s.items() if v is not None})
     return out
 

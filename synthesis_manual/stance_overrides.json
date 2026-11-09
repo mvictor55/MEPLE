@@ -1,0 +1,465 @@
+{
+ "_about": "Stance labels set outside the keyword pipeline. Each entry overrides pipeline/raw/testimony/index.json for that letter id. source: model = assigned by a model reading the letter; person = set by a person. The other 80 LD 676 letters keep their keyword labels, which were read and agreed with on 2026-11-08.",
+ "labels": {
+  "10040923": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041789": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041792": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041935": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10040654": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08",
+   "note": "Keyword label was support; the letter asks the committee to keep the track"
+  },
+  "10042001": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041450": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10039948": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10040866": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041223": {
+   "ld": 676,
+   "position": null,
+   "source": "none",
+   "by": "Claude Opus 5.5",
+   "date": "2026-11-08",
+   "note": "No readable text (blank or unreadable scan)"
+  },
+  "10041215": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041560": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041465": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10040861": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10042106": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041362": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041155": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10042046": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041409": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "188250": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041746": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041747": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041749": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041870": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08",
+   "note": "Keyword label was support; the letter asks the committee to keep the track"
+  },
+  "10041989": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "188246": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041625": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041628": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041563": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041093": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041997": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10040020": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041828": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041567": {
+   "ld": 676,
+   "position": null,
+   "source": "none",
+   "by": "Claude Opus 5.5",
+   "date": "2026-11-08",
+   "note": "No readable text (blank or unreadable scan)"
+  },
+  "188257": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041847": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10042072": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041010": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041696": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041437": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041914": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041934": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10040977": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041955": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10042043": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10042055": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10042134": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041757": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10040878": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10040909": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041199": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10043300": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10039949": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "188245": {
+   "ld": 676,
+   "position": null,
+   "source": "none",
+   "by": "Claude Opus 5.5",
+   "date": "2026-11-08",
+   "note": "No readable text (blank or unreadable scan)"
+  },
+  "10040962": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041806": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "188244": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041412": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041451": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041872": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041798": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10042042": {
+   "ld": 676,
+   "position": "unclear",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "188247": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10039987": {
+   "ld": 676,
+   "position": "oppose",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  },
+  "10041620": {
+   "ld": 676,
+   "position": "support",
+   "source": "model",
+   "by": "Claude Opus 5.5, read in full in a chat session",
+   "date": "2026-11-08"
+  }
+ }
+}

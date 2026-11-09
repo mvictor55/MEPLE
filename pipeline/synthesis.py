@@ -15,6 +15,12 @@ Hand-written syntheses in synthesis_manual/LD{ld}.json (tracked in git) are
 validated and copied into site/data/synthesis/ by `build`, so a rebuild keeps
 them. A manual file wins over a batch result for the same bill.
 
+Version 2 (a manual file with "version": 2; LD 676 so far) adds arguments with sides, common ground,
+cruxes, checked claims and flags. `build` validates it, then computes from the bill's letters (no API):
+coverage by side and label source, distinct people, place groups, campaigns (copied text), repeat writers
+and per-argument shares, fills the {placeholders} in overview_lines, and checks test_fixtures if present.
+A fixture mismatch stops the build.
+
 How it works
   Pass 1  Each bill's letters are split into parts of about 100k tokens. For each
           part the model lists the distinct arguments made about THIS bill and the
@@ -270,12 +276,222 @@ def run(top_n=TOP_N, min_t=MIN_TESTIMONIES, yes=False):
     st["generated_at"] = date.today().isoformat(); _save_state(st)
     build()
 
+# ---------------------------------------------------------------- version 2 (hand-written, computed counts)
+V2_SIDES = ("support", "oppose", "amend", "neutral")
+V2_CLAIM_STATUS = ("accurate", "partly", "inaccurate", "not_checked", "disputed")
+V2_PLACEHOLDERS = {"letters", "people", "support", "oppose", "unclear", "no_text", "neutral",
+                   "affected_support", "affected_oppose", "maine_support", "maine_oppose", "out_support", "out_oppose",
+                   "unknown_support", "unknown_oppose", "campaign_letters", "campaigns", "repeat_writers"}
+US_STATES = {"alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR", "california": "CA", "colorado": "CO",
+    "connecticut": "CT", "delaware": "DE", "florida": "FL", "georgia": "GA", "hawaii": "HI", "idaho": "ID", "illinois": "IL",
+    "indiana": "IN", "iowa": "IA", "kansas": "KS", "kentucky": "KY", "louisiana": "LA", "maryland": "MD", "massachusetts": "MA",
+    "michigan": "MI", "minnesota": "MN", "mississippi": "MS", "missouri": "MO", "montana": "MT", "nebraska": "NE", "nevada": "NV",
+    "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY", "north carolina": "NC", "north dakota": "ND",
+    "ohio": "OH", "oklahoma": "OK", "oregon": "OR", "pennsylvania": "PA", "rhode island": "RI", "south carolina": "SC",
+    "south dakota": "SD", "tennessee": "TN", "texas": "TX", "utah": "UT", "vermont": "VT", "virginia": "VA", "washington": "WA",
+    "west virginia": "WV", "wisconsin": "WI", "wyoming": "WY"}
+STATE_ABBR = set(US_STATES.values()) | {"DC"}
+# Out-of-state places and organizations seen in LD 676 testimony that name no state. An unlisted out-of-state
+# organization or place is counted as Maine.
+OUT_PLACES = ("north conway", "derry", "greenland", "staten island", "north hero", "new london")
+OUT_ORGS = ("conway scenic railroad", "mount washington valley trails association")
+PLACE_ALIASES = {"steep falls": "standish"}   # villages counted as their town
+
+def _out_of_state(s: str) -> bool:
+    if not s: return False
+    low = s.lower()
+    if any(re.search(r"\b" + re.escape(n) + r"\b", low) for n in US_STATES): return True      # "New Hampshire"
+    if re.search(r"\bmass\b", low): return True                                                 # "Mass"
+    toks = re.findall(r"[A-Za-z]+", s)
+    if any(t in STATE_ABBR for t in toks): return True                                           # "NH", "RI", "Keene, NH"
+    if toks and len(toks[-1]) == 2 and toks[-1].upper() in STATE_ABBR: return True               # "Littleton Ma"
+    m = re.search(r",\s*([A-Za-z]{2})\b", s)                                                     # "City, St"
+    if m and m.group(1).upper() in STATE_ABBR: return True
+    if any(re.search(r"\b" + re.escape(x) + r"\b", low) for x in OUT_PLACES): return True
+    return any(o in low for o in OUT_ORGS)
+
+def place_group(t: dict, affected: list[str]) -> str:
+    """affected / out / maine / unknown, from the town and organization written on the letter."""
+    town, org = (t.get("town") or "").strip(), (t.get("organization") or "").strip()
+    def norm_place(x):
+        x = x.lower()
+        for a, b in PLACE_ALIASES.items(): x = re.sub(r"\b" + a + r"\b", b, x)
+        return x
+    aff = [a.lower() for a in affected]
+    if town and norm_place(town) in aff: return "affected"
+    if org and any(re.search(r"\b" + re.escape(a) + r"\b", norm_place(org)) for a in aff): return "affected"   # "resident of Baldwin, Maine"
+    if _out_of_state(town) or _out_of_state(org): return "out"
+    return "maine" if (town or org) else "unknown"
+
+def person_key(name) -> str | None:
+    w = re.sub(r"[^a-z ]", "", re.sub(r"\(.*?\)", "", (name or "").lower())).split()
+    return " ".join(w) or None
+
+# Campaigns: copied text, found with 8-word shingles. Each letter's "Name Town LD n" header is cut by matching the LD
+# reference in its first 160 characters (PDF extraction often collapses a letter onto one line, so counting lines fails).
+# Two letters match when half the shorter letter's shingles appear in the other; letters under 20 words are left out.
+# A campaign is 3+ letters from 3+ names, joined by union-find.
+SHINGLE, MATCH, MIN_WORDS = 8, 0.5, 20
+def campaign_words(text: str, ld: int) -> list[str]:
+    m = re.search(r"\bL\.?\s*D\.?[\s-]*" + str(ld) + r"\b", text[:160], re.I)
+    if m: text = text[m.end():]
+    return re.findall(r"[a-z0-9']+", text.lower())
+
+def find_campaigns(letters: list[dict], texts: dict, ld: int) -> list[list[str]]:
+    words = {t["id"]: campaign_words(texts[t["id"]], ld) for t in letters if texts.get(t["id"])}
+    sh = {i: {tuple(w[k:k + SHINGLE]) for k in range(len(w) - SHINGLE + 1)} for i, w in words.items() if len(w) >= MIN_WORDS}
+    ids = sorted(sh); par = {i: i for i in ids}
+    def root(x):
+        while par[x] != x: par[x] = par[par[x]]; x = par[x]
+        return x
+    for a in range(len(ids)):
+        for b in range(a + 1, len(ids)):
+            x, y = sh[ids[a]], sh[ids[b]]
+            small, big = (x, y) if len(x) <= len(y) else (y, x)
+            if small and len(small & big) / len(small) >= MATCH: par[root(ids[a])] = root(ids[b])
+    groups = {}
+    for i in ids: groups.setdefault(root(i), []).append(i)
+    name = {t["id"]: person_key(t.get("name")) for t in letters}
+    return sorted((sorted(g) for g in groups.values() if len(g) >= 3 and len({name[i] for i in g}) >= 3), key=lambda g: (-len(g), g))
+
+def _v2_ids(rec: dict) -> list[tuple[str, list]]:
+    out = [(f"argument {a.get('id')}", a.get("letter_ids", [])) for a in rec.get("arguments", [])]
+    out += [(f"also_raised {i}", x.get("letter_ids", [])) for i, x in enumerate(rec.get("also_raised", []))]
+    out += [(f"campaigns_manual {i}", x.get("letter_ids", [])) for i, x in enumerate(rec.get("campaigns_manual", []))]
+    for key in ("common_ground", "cruxes"):
+        for i, x in enumerate(rec.get(key, [])):
+            out += [(f"{key} {i} support", x.get("support_ids", [])), (f"{key} {i} oppose", x.get("oppose_ids", []))]
+    out.append(("flags", [f.get("letter_id") for f in rec.get("flags", [])]))
+    out.append(("test_fixtures.campaign_18", (rec.get("test_fixtures") or {}).get("campaign_18", [])))
+    return out
+
+def _check_v2(rec: dict, ld: int, ids: set) -> list[str]:
+    errs = []
+    if rec.get("ld") != ld: errs.append(f"ld field is {rec.get('ld')}")
+    if not rec.get("model"): errs.append("no model")
+    if not rec.get("summary"): errs.append("no summary")
+    seen = set()
+    for a in rec.get("arguments", []):
+        if not a.get("id") or a["id"] in seen: errs.append(f"argument id {a.get('id')!r} missing or repeated")
+        seen.add(a.get("id"))
+        if a.get("side") not in V2_SIDES: errs.append(f"argument {a.get('id')}: side {a.get('side')}")
+        if not a.get("label"): errs.append(f"argument {a.get('id')}: no label")
+    for where, lst in _v2_ids(rec):
+        if len(set(lst)) != len(lst): errs.append(f"{where}: duplicate ids")
+        bad = [x for x in lst if x not in ids]
+        if bad: errs.append(f"{where}: ids not on LD {ld}: {bad[:5]}")
+    for i, line in enumerate(rec.get("overview_lines", [])):
+        unknown = set(re.findall(r"\{(\w+)\}", line)) - V2_PLACEHOLDERS
+        if unknown: errs.append(f"overview_lines {i}: unknown placeholders {sorted(unknown)}")
+    for i, c in enumerate(rec.get("claims", [])):
+        if c.get("status") not in V2_CLAIM_STATUS: errs.append(f"claim {i}: status {c.get('status')}")
+        if not c.get("claim"): errs.append(f"claim {i}: no text")
+    for i, c in enumerate(rec.get("cruxes", [])):
+        for k in ("question", "support_view", "oppose_view"):
+            if not c.get(k): errs.append(f"crux {i}: no {k}")
+    ap = rec.get("affected_places") or {}
+    if not ap.get("label") or not ap.get("towns"): errs.append("affected_places needs a label and towns")
+    return errs
+
+def build_v2(rec: dict, ld: int) -> dict:
+    """Computed counts for a version-2 synthesis. Raises SystemExit on a test_fixtures mismatch."""
+    bill = json.loads((config.OUT / "bills" / f"LD{ld}.json").read_text(encoding="utf-8"))
+    tp = config.OUT / "testimony" / f"LD{ld}.json"
+    texts = json.loads(tp.read_text(encoding="utf-8")) if tp.exists() else {}
+    letters = bill.get("testimony", [])
+    affected = rec["affected_places"]["towns"]
+    place = {t["id"]: place_group(t, affected) for t in letters}
+    pos = {t["id"]: t.get("position") for t in letters}
+    def src(t):
+        s = t.get("position_source")
+        if s == "none" or (not t.get("position") and not t.get("has_text")): return "none"
+        if s in ("model", "person") and t.get("keyword_label") and t["keyword_label"] != t.get("position"): return "corrected"
+        return {"inferred": "keyword", "keyword": "keyword", "model": "model", "person": "person"}.get(s, "keyword" if t.get("position") else "unlabeled")
+    source = {t["id"]: src(t) for t in letters}
+    c = {"letters": len(letters), "people": len({person_key(t.get("name")) for t in letters if person_key(t.get("name"))})}
+    for k in ("support", "oppose", "neutral", "unclear"): c[k] = sum(1 for t in letters if t.get("position") == k)
+    c["no_text"] = sum(1 for t in letters if source[t["id"]] == "none")
+    c["no_side"] = sum(1 for t in letters if not t.get("position") and source[t["id"]] != "none")   # readable, no side
+    for g in ("affected", "maine", "out", "unknown"):
+        for k in ("support", "oppose", "neutral", "unclear"):
+            c[f"{g}_{k}"] = sum(1 for t in letters if place[t["id"]] == g and t.get("position") == k)
+        c[f"{g}_none"] = sum(1 for t in letters if place[t["id"]] == g and not t.get("position"))
+    by_source = {k: sum(1 for v in source.values() if v == k) for k in ("keyword", "model", "corrected", "person", "none", "unlabeled")}
+    # affected towns, each with its letters by side
+    towns = []
+    for town in affected:
+        ids_t = [t["id"] for t in letters if place[t["id"]] == "affected" and town.lower() in
+                 re.sub(r"\bsteep falls\b", "standish", f"{t.get('town') or ''} {t.get('organization') or ''}".lower())]
+        towns.append({"town": town, "support": sum(pos[i] == "support" for i in ids_t), "oppose": sum(pos[i] == "oppose" for i in ids_t), "letters": len(ids_t)})
+    camps = find_campaigns(letters, texts, ld)
+    manual_sets = [set(m["letter_ids"]) for m in rec.get("campaigns_manual", [])]
+    campaigns = []
+    for n, g in enumerate(camps, 1):
+        shortest = min(g, key=lambda i: len(texts[i]))
+        body = texts[shortest]
+        m = re.search(r"I support LD\s*" + str(ld) + r" because", body, re.I)
+        campaigns.append({"id": f"c{n}", "letter_ids": g, "names": len({person_key(next(t for t in letters if t["id"] == i).get("name")) for i in g}),
+                          "sides": {k: sum(pos[i] == k for i in g) for k in ("support", "oppose", "unclear")},
+                          "text_from": shortest, "text": (body[m.start():] if m else body).strip(),
+                          "same_as_manual": next((j for j, ms in enumerate(manual_sets) if ms == set(g)), None)})
+    in_campaign = {i: cp["id"] for cp in campaigns if cp["same_as_manual"] is None for i in cp["letter_ids"]}
+    c["campaigns"] = sum(1 for cp in campaigns if cp["same_as_manual"] is None)
+    c["campaign_letters"] = len(in_campaign)
+    # repeat writers: the same normalized name on 2+ letters
+    by_name = {}
+    for t in letters:
+        k = person_key(t.get("name"))
+        if k: by_name.setdefault(k, []).append(t)
+    repeat = []
+    for k, ts in by_name.items():
+        if len(ts) < 2: continue
+        places = {(t.get("town") or t.get("organization") or "").strip().lower() for t in ts}
+        repeat.append({"name": ts[0]["name"], "letter_ids": [t["id"] for t in ts], "places": sorted({(t.get("town") or t.get("organization") or "") for t in ts}),
+                       "sides": [t.get("position") for t in ts], "note": "may be different people" if len(places) > 1 else None})
+    c["repeat_writers"] = len(repeat)
+    side_total = {"support": c["support"], "oppose": c["oppose"], "amend": c["oppose"], "neutral": c["neutral"] + c["unclear"]}
+    arguments = []
+    for a in rec.get("arguments", []):
+        ids_a = a["letter_ids"]
+        arguments.append({"id": a["id"], "letters": len(ids_a),
+                          "share": round(len(ids_a) / side_total[a["side"]], 4) if side_total[a["side"]] else 0,
+                          "campaign_copies": sum(1 for i in ids_a if i in in_campaign),
+                          "places": {g: sum(1 for i in ids_a if place[i] == g) for g in ("affected", "maine", "out", "unknown")}})
+    computed = {"counts": c, "by_source": by_source, "towns": towns, "campaigns": campaigns, "repeat_writers": repeat,
+                "arguments": arguments, "letters": {t["id"]: {"place": place[t["id"]], "source": source[t["id"]],
+                                                              **({"campaign": in_campaign[t["id"]]} if t["id"] in in_campaign else {})} for t in letters},
+                "method": {"places": "Place groups use the town and organization written on each letter. Towns listed as along the line (Steep Falls counts as Standish) are "
+                                     f"“{rec['affected_places']['label']}”; a state name or abbreviation, a “City, ST” address, or a known out-of-state place or organization "
+                                     "counts as out of state; any other town or organization counts as Maine. An unlisted out-of-state organization would be counted as Maine.",
+                           "campaigns": f"Copied text is found by comparing {SHINGLE}-word sequences after each letter's “Name Town LD {ld}” header. Two letters match when "
+                                        f"{int(MATCH*100)}% of the shorter letter's sequences appear in the other; letters under {MIN_WORDS} words are left out. A campaign is 3 or more letters from 3 or more names."}}
+    out = {k: v for k, v in rec.items() if k != "test_fixtures"} | {"computed": computed}
+    out["overview"] = [re.sub(r"\{(\w+)\}", lambda m: f"{c[m.group(1)]:,}" if isinstance(c.get(m.group(1)), int) else m.group(0), line) for line in rec.get("overview_lines", [])]
+    fx = rec.get("test_fixtures")
+    if fx:
+        bad = [f"{k}: expected {v}, computed {c.get(k)}" for k, v in (fx.get("expected_counts") or {}).items() if c.get(k) != v]
+        if "campaign_18" in fx:
+            want = set(fx["campaign_18"])
+            found = next((set(cp["letter_ids"]) for cp in campaigns if set(cp["letter_ids"]) & want), set())
+            if found != want:
+                bad.append(f"campaign_18: missing {sorted(want - found)}, extra {sorted(found - want)}")
+        if bad:
+            raise SystemExit(f"synthesis LD{ld}.json: TEST FIXTURE MISMATCH, build stopped:\n  " + "\n  ".join(bad))
+        print(f"  LD {ld}: test fixtures pass ({len(fx.get('expected_counts') or {})} counts, campaign of {len(fx.get('campaign_18', []))})")
+    others = [cp for cp in campaigns if not (fx and set(cp["letter_ids"]) == set(fx.get("campaign_18", [])))]
+    for cp in others:
+        print(f"  LD {ld}: also found a {len(cp['letter_ids'])}-letter copied-text group {cp['letter_ids']}"
+              + (f" (same letters as campaigns_manual {cp['same_as_manual']})" if cp["same_as_manual"] is not None else ""))
+    return out
+
 def _check_manual(rec: dict, ld: int) -> list[str]:
     """Problems with a hand-written synthesis: ids must belong to the bill and have text, counts must match."""
     errs = []
     bp = config.OUT / "bills" / f"LD{ld}.json"
     if not bp.exists():
         return [f"no built bill file for LD {ld}"]
+    if rec.get("version") == 2:
+        return _check_v2(rec, ld, {t["id"] for t in json.loads(bp.read_text(encoding="utf-8")).get("testimony", [])})
     ids = {t["id"] for t in json.loads(bp.read_text(encoding="utf-8")).get("testimony", [])}
     tp = config.OUT / "testimony" / f"LD{ld}.json"
     with_text = set(json.loads(tp.read_text(encoding="utf-8"))) if tp.exists() else set()
@@ -326,12 +542,16 @@ def build():
         (OUT_S / f"LD{ld}.json").write_text(json.dumps(rec, ensure_ascii=False), encoding="utf-8"); done.append(int(ld)); models[str(ld)] = MODEL_LABEL
     # hand-written syntheses (tracked in synthesis_manual/) are copied in after validation
     manual = []
-    for p in sorted(MANUAL_S.glob("LD*.json")) if MANUAL_S.exists() else []:
+    for p in sorted(MANUAL_S.glob("LD[0-9]*.json")) if MANUAL_S.exists() else []:
         ld = int(p.stem[2:])
         rec = json.loads(p.read_text(encoding="utf-8"))
         errs = _check_manual(rec, ld)
         if errs:
+            if rec.get("version") == 2:   # a v2 file carries test fixtures; a broken one stops the build instead of quietly disappearing
+                raise SystemExit(f"synthesis {p.name}: version 2 file failed validation:\n  " + "\n  ".join(errs))
             print(f"  {p.name}: not published: {'; '.join(errs)}"); continue
+        if rec.get("version") == 2:
+            rec = build_v2(rec, ld)
         (OUT_S / f"LD{ld}.json").write_text(json.dumps(rec, ensure_ascii=False), encoding="utf-8")
         if ld not in done: done.append(ld)
         models[str(ld)] = rec["model"]; manual.append(ld)

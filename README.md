@@ -125,6 +125,16 @@ build` validates them (every cited id is a letter on that bill with text, every
 count equals the ids cited) and copies them into `site/data/synthesis/`, so
 rebuilding keeps them.
 
+LD 676 uses version 2 (`"version": 2`): arguments with sides, common ground,
+cruxes, checked claims and flags, written by hand. `build` checks it, then
+computes from the letters, with no API: sides by label source, distinct people,
+place groups, copied-text campaigns, repeat writers and argument shares. It
+fills the `{placeholders}` in `overview_lines` and stops the build if
+`test_fixtures` don't match. `synthesis_manual/stance_overrides.json` holds
+sides set by reading a letter. `pipeline.build` applies it, recording
+`position_source` as `model`, `person` or `none`, and keeping a replaced keyword
+label in `keyword_label`; keyword labels stay `inferred`.
+
 ## Running the pipeline
 
 Needs Python 3.11+, `pip install -r requirements.txt`, `playwright install chromium`,

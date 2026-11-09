@@ -38,6 +38,30 @@ def last_name(name: str) -> str:
 LEGISCAN_STATUS = {1: ("pending", "Introduced"), 2: ("pending", "Engrossed"), 3: ("pending", "Enrolled"),
                    4: ("enacted", "Passed"), 5: ("vetoed", "Vetoed"), 6: ("died", "Failed")}
 
+# Side labels set by reading the letter, which replace the keyword labels for those letters (synthesis_manual/stance_overrides.json).
+# position_source: "inferred" = keyword rule (the site also accepts "keyword"), "model" = a model read the letter,
+# "person" = set by a person, "none" = no readable text. Where an override replaces a keyword label, the old label is kept
+# in keyword_label. Letters without an override are written exactly as before.
+POSITIONS = ("support", "neutral", "oppose", "unclear")
+def load_overrides() -> dict:
+    p = config.ROOT / "synthesis_manual" / "stance_overrides.json"
+    if not p.exists(): return {}
+    labels = json.loads(p.read_text(encoding="utf-8")).get("labels", {})
+    for tid, o in labels.items():
+        assert o.get("source") in ("model", "person", "none"), f"stance_overrides {tid}: source {o.get('source')}"
+        assert o.get("position") in POSITIONS + (None,), f"stance_overrides {tid}: position {o.get('position')}"
+        assert (o.get("position") is None) == (o.get("source") == "none"), f"stance_overrides {tid}: position and source disagree"
+    return labels
+
+def apply_override(t: dict, ld: int, overrides: dict) -> bool:
+    o = overrides.get(str(t["id"]))
+    if not o: return False
+    assert int(o.get("ld", ld)) == ld, f"stance_overrides {t['id']}: ld {o.get('ld')} but the letter is on LD {ld}"
+    if t.get("position") and t.get("position_source") in ("inferred", "keyword"):
+        t["keyword_label"] = t["position"]
+    t["position"], t["position_source"] = o.get("position"), o["source"]
+    return True
+
 def run(sample_notice: str | None = None):
     R = config.RAW
     lg_bills = _load(R / "legiscan" / "bills.json", {})
@@ -153,6 +177,7 @@ def run(sample_notice: str | None = None):
         shutil.rmtree(config.OUT, onexc=_force_remove)
     (out_bills).mkdir(parents=True); (config.OUT / "testimony").mkdir()
     t_index, t_total, dup_actions = [], 0, 0
+    overrides, n_override = load_overrides(), 0
     for ld in lds:
         lg = lg_bills.get(str(ld), {}); sp = status_pages.get(ld, {})
         if sp.get("missing") and not lg:
@@ -195,6 +220,7 @@ def run(sample_notice: str | None = None):
                 txt = tp.read_text(encoding="utf-8")
                 if txt.strip(): texts[t["id"]] = txt
             t["has_text"] = t["id"] in texts
+            n_override += apply_override(t, ld, overrides)
         t_total += len(trows)
         # Public hearing: status page (getPHWS) first; else the date the testimony was filed for; else LegiScan's calendar,
         # but only when the status page's hearing list couldn't be fetched. When the Legislature lists the bill's hearings
@@ -231,7 +257,8 @@ def run(sample_notice: str | None = None):
             # (one letter filed under several bills); see testimony.positions()
             "heard_with": sorted({x for t in trows for x in (t.get("shared_with") or [])}),
             "tags": lg.get("subjects", []), "affected_statutes": sp.get("affected_statutes", []),
-            "testimony": [{k: t.get(k) for k in ("id", "name", "organization", "town", "position", "position_source", "date", "hearing_date", "url", "has_text", "shared_with")} for t in trows],
+            "testimony": [{k: t.get(k) for k in ("id", "name", "organization", "town", "position", "position_source", "date", "hearing_date", "url", "has_text", "shared_with")}
+                          | ({"keyword_label": t["keyword_label"]} if t.get("keyword_label") else {}) for t in trows],
             "sources": list(dict.fromkeys((sp.get("sources") or []) + ([f"https://legiscan.com/ME/bill/LD{ld}/2025"] if lg else []))),
             "sample": False,
         }
@@ -243,9 +270,11 @@ def run(sample_notice: str | None = None):
                       "final_date": full["final_disposition"].get("date"), "hearing_date": (hearing or {}).get("date"),
                       "testimony_count": len(trows), "tags": full["tags"][:6],
                       # position counts for stance bars on cards and overviews (inferred positions, see testimony.positions)
-                      "positions": {k: sum(1 for t in trows if t.get("position") == k) for k in ("support", "neutral", "oppose")}})
+                      "positions": {k: sum(1 for t in trows if t.get("position") == k) for k in ("support", "neutral", "oppose")}
+                                   | ({"unclear": n_un} if (n_un := sum(1 for t in trows if t.get("position") == "unclear")) else {})})
         for t in trows:
-            t_index.append({k: t.get(k) for k in ("id", "name", "organization", "town", "position", "position_source", "date", "url", "has_text")} | {"ld": ld, "committee_code": code})
+            t_index.append({k: t.get(k) for k in ("id", "name", "organization", "town", "position", "position_source", "date", "url", "has_text")} | {"ld": ld, "committee_code": code}
+                           | ({"keyword_label": t["keyword_label"]} if t.get("keyword_label") else {}))
     for c in committees:
         c["bill_count"] = sum(1 for b in index if b["committee_code"] == c["code"])
 
@@ -254,6 +283,8 @@ def run(sample_notice: str | None = None):
     # writes the slim site/data/testimony/index.json and the per-district files from it.
     (config.RAW / "testimony_index_full.json").write_text(json.dumps(t_index, ensure_ascii=False), encoding="utf-8")
     print(f"build: removed {dup_actions} chamber-history rows that repeated a committee docket entry")
+    print(f"build: {n_override} letter positions set from synthesis_manual/stance_overrides.json ({len(overrides)} entries)")
+    assert n_override == len(overrides), "stance_overrides.json names letters that are not in the testimony index"
     (config.OUT / "legislators.json").write_text(json.dumps(sorted(legislators.values(), key=lambda l: (l["chamber"], last_name(l["name"]))), ensure_ascii=False, indent=0), encoding="utf-8")
     (config.OUT / "committees.json").write_text(json.dumps(committees, ensure_ascii=False, indent=0), encoding="utf-8")
     # Municipalities with their House and Senate districts (House district-towns list), for the town picker and district pages
