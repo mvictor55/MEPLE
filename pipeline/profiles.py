@@ -237,9 +237,76 @@ def official_from_text(text: str | None) -> tuple[str | None, str | None]:
                 return re.sub(r"\s+", " ", m.group("title")).strip(), aid
     return None, None
 
+# "Testified on its behalf": one entry per person. Name variants of one person on the same profile are merged
+# (case, nicknames, middle names and initials, credentials, notes such as "(corrected)", repeated words, a one-letter
+# first-name typo). Jr. and Sr. stay separate people; a name without a suffix joins a suffixed one only when the
+# profile has just one suffix for that name. Every merge is logged to raw/people_merges.json for review.
+NICKNAMES = {"josh": "joshua", "jeff": "jeffrey", "phil": "philip", "dan": "daniel", "danny": "daniel", "dave": "david",
+    "mike": "michael", "bob": "robert", "rob": "robert", "bill": "william", "will": "william", "jim": "james", "jimmy": "james",
+    "tom": "thomas", "tim": "timothy", "andy": "andrew", "drew": "andrew", "chris": "christopher", "kate": "katherine",
+    "katie": "katherine", "kathy": "katherine", "liz": "elizabeth", "beth": "elizabeth", "betsy": "elizabeth", "sam": "samuel",
+    "matt": "matthew", "nick": "nicholas", "steve": "stephen", "steven": "stephen", "pete": "peter", "greg": "gregory",
+    "jen": "jennifer", "jenn": "jennifer", "jenny": "jennifer", "becky": "rebecca", "becca": "rebecca", "ben": "benjamin",
+    "ed": "edward", "ted": "edward", "joe": "joseph", "tony": "anthony", "rick": "richard", "rich": "richard", "ron": "ronald",
+    "don": "donald", "pat": "patrick", "sue": "susan", "meg": "margaret", "peggy": "margaret", "alex": "alexander",
+    "zach": "zachary", "zack": "zachary", "nate": "nathan", "jon": "jonathan", "ken": "kenneth", "charlie": "charles",
+    "deb": "debra", "kim": "kimberly", "jess": "jessica", "brad": "bradley", "max": "maxwell", "cat": "catherine", "norm": "norman"}
+_CRED = r"(md|m d|do|d o|esq|phd|ph d|rn|dds|dmd|lcsw|mph|jd|np|pa c|cna|lpn|msw)"
+
+def _person_parts(name: str):
+    s = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode()
+    s = re.sub(r"\(.*?\)|\"[^\"]*\"", " ", s)                      # "(corrected)", "(Maine Treasurer)", "Coralie \"Cokie\" Giles"
+    s = re.sub(r"^\s*(dr|mr|mrs|ms|rev|hon)\.?\s+", "", s, flags=re.I)
+    w = re.sub(r"[^a-z ]+", " ", s.lower()).split()
+    while w and re.fullmatch(_CRED, w[-1]): w.pop()                  # credentials after the name
+    if len(w) >= 2 and " ".join(w[-2:]) in ("m d", "d o", "ph d"): w = w[:-2]
+    suffix = w.pop() if w and w[-1] in ("jr", "sr", "ii", "iii", "iv") else ""
+    w = [x for i, x in enumerate(w) if i == 0 or x != w[i - 1]]      # "Ann Ann R. Robinson", "John Simoneau John Simoneau"
+    if len(w) >= 4 and w[: len(w) // 2] == w[len(w) // 2:]: w = w[: len(w) // 2]
+    if len(w) < 2: return None
+    return NICKNAMES.get(w[0], w[0]), w[-1], suffix
+
+def _close(a: str, b: str) -> bool:
+    """Same first name: a prefix of 2+ letters (Kim / Kimberly), or one letter apart when 4+ long (Phillip / Philip)."""
+    if a == b: return True
+    if min(len(a), len(b)) >= 2 and (a.startswith(b) or b.startswith(a)): return True
+    if min(len(a), len(b)) < 4: return False
+    if len(a) == len(b): return sum(x != y for x, y in zip(a, b)) == 1
+    lo, hi = sorted((a, b), key=len)
+    return len(hi) - len(lo) == 1 and any(hi[:i] + hi[i + 1:] == lo for i in range(len(hi)))
+
+FIRST_NAMES: Counter = Counter()   # first words of every name on every letter, set in run()
+
+def merge_people(names: Counter, log: list, pid: str):
+    groups = []                                                       # [first, last, suffix, Counter]
+    for n, c in sorted(names.items(), key=lambda x: -x[1]):
+        k = _person_parts(n)
+        g = None
+        if k:
+            for x in groups:
+                if x[1] == k[1] and x[2] == k[2] and _close(x[0], k[0]): g = x; break
+        if g: g[3][n] += c
+        else: groups.append([*(k or (n, n, "")), Counter({n: c})])
+    # a plain name joins the one suffixed form of the same name (Robert Fisk -> Robert Fisk, Jr.), never when Jr. and Sr. both appear
+    for g in [x for x in groups if not x[2]]:
+        suf = [x for x in groups if x[2] and x[1] == g[1] and _close(x[0], g[0])]
+        if len({x[2] for x in suf}) == 1 and len(suf) == 1:
+            suf[0][3].update(g[3]); groups.remove(g)
+    out = []
+    for g in groups:
+        forms = g[3]
+        good = [f for f in forms if f != f.lower() and f != f.upper() and "(" not in f]
+        # most-used form; on a tie, the one whose first name is more common across all letters (Justin over Juatin)
+        show = max(good or list(forms), key=lambda f: (forms[f], FIRST_NAMES[(f.split() or [""])[0].lower()], len(f)))
+        if not good: show = " ".join(w[:1].upper() + w[1:].lower() for w in show.split())   # only ever filed in one case
+        if len(forms) > 1: log.append({"profile": pid, "shown_as": show, "merged": dict(forms)})
+        out.append((show, sum(forms.values())))
+    return [n for n, _ in sorted(out, key=lambda x: -x[1])]
+
 def run():
     out = config.OUT / "profiles"; out.mkdir(parents=True, exist_ok=True)
     rows = json.loads((config.RAW / "testimony_index_full.json").read_text(encoding="utf-8"))
+    FIRST_NAMES.update((r.get("name") or "").split()[0].lower() for r in rows if (r.get("name") or "").split())
     bills = {b["ld"]: b for b in json.loads((config.OUT / "bills" / "index.json").read_text(encoding="utf-8"))}
     legislator_keys = {person_key(l["name"]) for l in json.loads((config.OUT / "legislators.json").read_text(encoding="utf-8"))}
 
@@ -339,7 +406,7 @@ def run():
         profiles.append(prof)
         for r in rs: tag_person[r["id"]] = pid
 
-    review = []
+    review, people_log = [], []
     for n_org, rs in org_rows.items():
         if len(rs) < MIN_ORG_TESTIMONIES:
             continue
@@ -347,7 +414,7 @@ def run():
         forms = org_forms[n_org]
         prof = {"id": pid, "type": "organization", "name": forms.most_common(1)[0][0], "aliases": [f for f, _ in forms.most_common()][1:6],
                 "testimony_count": len(rs), "bill_count": len({r["ld"] for r in rs}), "positions": counts(rs),
-                "people": [n for n, _ in Counter(r.get("name") for r in rs if r.get("name")).most_common(12)],
+                "people": merge_people(Counter(r.get("name") for r in rs if r.get("name")), people_log, pid)[:12],
                 "testimony": testimony_list(rs, True)}
         profiles.append(prof)
         for r in rs: tag_org[r["id"]] = pid
@@ -361,6 +428,8 @@ def run():
                  key=lambda p: -p["testimony_count"])
     (out / "index.json").write_text(json.dumps(idx, ensure_ascii=False), encoding="utf-8")
     config.RAW.mkdir(parents=True, exist_ok=True)
+    (config.RAW / "people_merges.json").write_text(json.dumps(people_log, indent=1, ensure_ascii=False), encoding="utf-8")
+    print(f"profiles: {len(people_log)} people on organization profiles merged from name variants (raw/people_merges.json)")
     (config.RAW / "profiles_review.json").write_text(json.dumps(sorted(review, key=lambda x: -sum(x["forms"].values())), indent=1, ensure_ascii=False), encoding="utf-8")
 
     # tag testimony rows (idempotent)

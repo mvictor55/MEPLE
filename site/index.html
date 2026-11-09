@@ -616,6 +616,7 @@ let submitState = null;
 const $ = sel => document.querySelector(sel);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmtN = n => Number(n||0).toLocaleString();
+const pl = (n, one, many=one+"s") => `${fmtN(n)} ${Number(n)===1?one:many}`;   // "1 testimony", "2 testimonies"
 const legName = (id, short=true) => {
   const l = D.legById[id]; if(!l) return "—";
   const pre = l.chamber==="Senate" ? "Sen." : "Rep.";
@@ -862,7 +863,7 @@ function billCard(b){
     ${b.positions&&b.testimony_count?countsBar(b.positions, {total:b.testimony_count}):""}
     <div class="foot">
       ${statusChip(b)}
-      <span class="tcount">${tIcon()} ${fmtN(billTestimonyCount(b))} testimonies</span>
+      <span class="tcount">${tIcon()} ${pl(billTestimonyCount(b), "testimony", "testimonies")}</span>
     </div>
   </a>`;
 }
@@ -873,7 +874,7 @@ function billRow(b){
       <h3 class="clamp2" title="${esc(b.title)}">${esc(b.title)}</h3>
       <div class="meta">${esc(legName(b.sponsor_id,false))} · ${esc(comName(b.committee_code))}${b.hearing_date?` · Hearing ${esc(b.hearing_date)}`:""}</div>
     </div>
-    <div class="right">${statusChip(b)}<span class="tcount">${tIcon()} ${fmtN(billTestimonyCount(b))} testimonies</span>${lobbyCount(b)}</div>
+    <div class="right">${statusChip(b)}<span class="tcount">${tIcon()} ${pl(billTestimonyCount(b), "testimony", "testimonies")}</span>${lobbyCount(b)}</div>
   </a>`;
 }
 
@@ -882,7 +883,7 @@ function countsBar(c, opts={}){
   c = {support:0, neutral:0, oppose:0, ...(c||{})};
   const tot = c.support + c.neutral + c.oppose;
   if(opts.total!=null) opts = {...opts, unknown: Math.max(0, opts.total - tot)};   // letters without a position
-  if(!tot) return `<div class="src" style="margin:4px 0 0">No positions recorded${opts.unknown?` (${fmtN(opts.unknown)} letters)`:""}</div>`;
+  if(!tot) return `<div class="src" style="margin:4px 0 0">No positions recorded${opts.unknown?` (${pl(opts.unknown, "letter")})`:""}</div>`;
   const pct = k => c[k] ? Math.max(2,(c[k]/tot*100)) : 0;
   return `<div class="stancebar sm" role="img" aria-label="${c.support} support, ${c.neutral} neither, ${c.oppose} oppose">
       ${[["support","var(--support)"],["neutral","var(--neutral)"],["oppose","var(--oppose)"]].filter(([k])=>c[k]).map(([k,col])=>`<span style="width:${pct(k)}%;background:${col}"></span>`).join(`<span class="gap"></span>`)}</div>
@@ -1018,7 +1019,7 @@ function viewHome(){
     const syns = await Promise.all(lds.map(ld=>loadOptional(`synthesis/LD${ld}.json`)));
     const cards = lds.map((ld,i)=>{ const b = D.idxByLd[ld], sy = syns[i]||{};
       return `<a class="bill-card" href="#/bill/${ld}">
-        <div class="ld">LD ${ld} · ${fmtN(b.testimony_count||0)} testimonies</div>
+        <div class="ld">LD ${ld} · ${pl(b.testimony_count||0, "testimony", "testimonies")}</div>
         <h3 class="clamp2" title="${esc(b.title)}">${esc(b.title)}</h3>
         ${countsBar(b.positions, {total:b.testimony_count})}
         <p style="font-size:14px;color:var(--ink-2)">${esc(firstSentence(sy.summary))}</p>
@@ -1385,7 +1386,7 @@ function historyList(b, hearingDate){
   return `<div class="hist">
     <ul class="timeline hist-ms">${ms.map(li).join("")}</ul>
     <ul class="timeline hist-all" hidden>${runs.map(runLi).join("")}${fd}</ul>
-    ${total?`<button class="btn ghost sm" onclick="var h=this.closest('.hist'),all=h.querySelector('.hist-all'),o=all.hidden;all.hidden=!o;h.querySelector('.hist-ms').hidden=o;this.textContent=o?'Show milestones only':'Show all ${fmtN(total)} actions'">Show all ${fmtN(total)} actions</button>`:""}
+    ${total?`<button class="btn ghost sm" onclick="var h=this.closest('.hist'),all=h.querySelector('.hist-all'),o=all.hidden;all.hidden=!o;h.querySelector('.hist-ms').hidden=o;this.textContent=o?'Show milestones only':'Show all ${pl(total, "action")}'">Show all ${pl(total, "action")}</button>`:""}
   </div>`;
 }
 
@@ -1426,7 +1427,7 @@ function synthesisPanel(syn, params){
   return `<div class="panel syn" id="syn" style="border-color:#D8E5DE">
     <h2>What the testimony says</h2>
     ${syn.summary?`<p class="summary syn-sum" style="margin-bottom:8px">${esc(syn.summary)}</p><button class="syn-more" onclick="this.previousElementSibling.classList.add('full');this.remove()">Read the whole summary</button>`:""}
-    <button class="btn ghost sm syn-points" onclick="document.getElementById('syn').classList.add('themes-open');this.remove()">Show the ${fmtN(syn.themes.length)} points made</button>
+    <button class="btn ghost sm syn-points" onclick="document.getElementById('syn').classList.add('themes-open');this.remove()">Show the ${pl(syn.themes.length, "point")} made</button>
     <div class="theme-groups">
     <button class="btn ghost sm" onclick="var p=document.getElementById('syn');p.classList.toggle('open');this.textContent=p.classList.contains('open')?'Hide explanations':'Show explanations'">Show explanations</button>
     ${groups.map(([k,ts])=>`<div style="margin-top:12px">
@@ -1615,7 +1616,7 @@ async function viewBill(ld, params=new URLSearchParams()){
     body = `<div class="panel" id="testimony">
       <h2>Public testimony · ${fmtN(all.length)} on record</h2>
       ${all.length?`<div class="src" style="margin:0 0 6px"><span class="record-tag">Legislature's record</span> Written testimony filed with the ${esc(cname)} Committee${hearingDate?` for the ${esc(fmtDate(hearingDate))} public hearing`:""}.</div>`:""}
-      ${(b.heard_with||[]).length?`<div class="src" style="margin-bottom:6px">Heard with ${b.heard_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}: ${fmtN(all.filter(t=>(t.shared_with||[]).length).length)} of these documents were also filed under those bills. Positions marked * are inferred for LD ${b.ld} only, and left blank when a document states no position on this bill.</div>`:""}
+      ${(b.heard_with||[]).length?`<div class="src" style="margin-bottom:6px">Heard with ${b.heard_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}: ${(n=>`${fmtN(n)} of these documents ${n===1?"was":"were"} also filed under ${b.heard_with.length===1?"that bill":"those bills"}`)(all.filter(t=>(t.shared_with||[]).length).length)}. Positions marked * are inferred for LD ${b.ld} only, and left blank when a document states no position on this bill.</div>`:""}
       ${all.length?testimonyList(all, texts, params, syn):`<p style="font-size:14.5px;color:var(--ink-2)">${esc(noTestimonySentence(hearingDate))}</p>`}
     </div>`;
   }
@@ -1669,7 +1670,7 @@ async function viewBill(ld, params=new URLSearchParams()){
           <div class="side-note">The Legislature's online form sends written testimony to the ${esc(cname)} Committee. Submitting through MEPLE is planned for the 133rd Legislature.</div>
         </div>
         ${mediaPanel(b)}
-        ${docs.length?`<div class="panel"><h2>Documents</h2>${docs.map((d,i)=>`<div class="${i?"doc-more":""}" style="font-size:14px;margin-bottom:6px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.label)} ↗</a></div>`).join("")}${docs.length>1?`<div class="doc-all" style="font-size:14px"><a href="#${base}?tab=text">All ${fmtN(docs.length)} documents →</a></div>`:""}</div>`:""}
+        ${docs.length?`<div class="panel"><h2>Documents</h2>${docs.map((d,i)=>`<div class="${i?"doc-more":""}" style="font-size:14px;margin-bottom:6px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.label)} ↗</a></div>`).join("")}${docs.length>1?`<div class="doc-all" style="font-size:14px"><a href="#${base}?tab=text">All ${pl(docs.length, "document")} →</a></div>`:""}</div>`:""}
         ${(b.tags||[]).length?`<div class="panel"><h2>Topics</h2><div style="display:flex;gap:8px;flex-wrap:wrap">
           ${b.tags.map(t=>`<a class="chip died" href="#/bills?q=${encodeURIComponent(t)}">${esc(t)}</a>`).join("")}</div></div>`:""}
       </aside>`;
@@ -1749,7 +1750,7 @@ async function viewTestimony(params){
     </div>
     </div>
     ${townSet?`<div class="src" style="margin:-4px 0 12px;color:var(--ink-2)">Filtered by the town people wrote on their testimony. Districts that split a town include the whole town.${dk?` ${esc(districtLabel(dk))}: ${dTowns.map(esc).join(", ")} · <a href="#/district/${dk.key}">District page →</a>`:""}</div>`:""}
-    <div class="result-note"><span>${fmtN(all.length)} testimonies${all.some(t=>t.position_source==="inferred")?" · positions marked * are inferred from the text of the testimony":""}</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
+    <div class="result-note"><span>${pl(all.length, "testimony", "testimonies")}${all.some(t=>t.position_source==="inferred")?" · positions marked * are inferred from the text of the testimony":""}</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
     <div class="csv-row">${csv}${all.length>CAP?`<span class="src" style="margin:0">The download is capped at ${fmtN(CAP)} rows, in the order shown. Narrow the filters to get the rest.</span>`:""}</div>
     <div class="list">
       ${slice.length ? slice.map(t=>testimonyItem(t, (D.texts[t.ld]||{})[t.id] ?? null, {showBill:true, clamp:true})).join("") : `<div class="empty">No testimony matches those filters.</div>`}
@@ -1796,7 +1797,7 @@ function viewCommittees(){
         const t = D.index.filter(b=>b.committee_code===c.code).reduce((s,b)=>s+(b.testimony_count||0),0);
         return `<a class="com-card" href="#/committee/${esc(c.code)}">
           <h3>${esc(c.name)}</h3>
-          <div class="meta">${fmtN(n)} bill${n===1?"":"s"}${t?` · ${fmtN(t)} testimonies`:""}${(c.members||[]).length?` · ${c.members.length} members`:""}</div>
+          <div class="meta">${fmtN(n)} bill${n===1?"":"s"}${t?` · ${pl(t, "testimony", "testimonies")}`:""}${(c.members||[]).length?` · ${c.members.length} members`:""}</div>
         </a>`;
       }).join("")}
     </div>
@@ -1852,6 +1853,25 @@ function comBadges(coms){
   }).join("");
 }
 
+// Contributor names filed in all capitals or all lowercase, shown in title case ("MAINE EDUCATION ASSOCIATION PAC" ->
+// "Maine Education Association PAC"); the filed spelling stays in the tooltip. Mixed-case names are left as filed.
+const NAME_ACRONYMS = new Set(["PAC","LLC","LLP","LP","PC","PLLC","INC","USA","US","AFL-CIO","IBEW","MSEA","PASER","SEIU","UFCW","IAFF","CMP","NRA","ABC","MIA","AARP","MD","DO","CPA","II","III","IV","DBA","PA","NE","ME","MMA","MEA","MHA","AFSCME","IUOE","UAW","CWA","BIW","PFF"]);
+const NAME_SMALL = new Set(["of","and","the","for","in","at","on","to","a","an","by","de","la"]);
+function tidyName(raw){
+  const s = String(raw||"");
+  if(!/[a-z]/i.test(s) || (s!==s.toUpperCase() && s!==s.toLowerCase())) return s;
+  const cap = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  return s.split(/(\s+)/).map((w, i) => {
+    if(/^\s+$/.test(w)) return w;
+    const bare = w.toUpperCase().replace(/[.,]+$/,"");
+    if(NAME_ACRONYMS.has(bare) || (/^[A-Z]{2,4}$/i.test(bare) && !/[AEIOUY]/i.test(bare))) return w.toUpperCase().replace(/^INC/,"Inc");
+    if(i>0 && NAME_SMALL.has(w.toLowerCase())) return w.toLowerCase();
+    return w.split("-").map(part => part.split("'").map((x, j) => {
+      const c = cap(x);
+      return /^Mc[a-z]/.test(c) ? "Mc" + c.charAt(2).toUpperCase() + c.slice(3) : c;
+    }).join("'")).join("-");
+  }).join("");
+}
 async function viewLegislator(id, params=new URLSearchParams()){
   const l = D.legById[id];
   if(!l) return `<div class="wrap"><div class="empty">Not found. <a href="#/legislators">Back to legislators</a></div></div>`;
@@ -1905,7 +1925,7 @@ async function viewLegislator(id, params=new URLSearchParams()){
         ${list.length?csvButton("leg-votes", ()=>({name:[id, "votes", vf, vc, vq?"search-"+vq:""], rows:list, cols:[
           ["legislator", ()=>legName(id)], ["date", v=>v.date], ["chamber", v=>({H:"House",S:"Senate"})[v.chamber]||v.chamber], ["ld", v=>v.ld], ["bill_title", v=>v.title],
           ["motion", v=>plainMotion(v.motion)], ["motion_as_recorded", v=>v.motion], ["vote", v=>v.vote], ["yea", v=>v.yea], ["nay", v=>v.nay], ["result", v=>v.result],
-          ["meple_url", v=>`${SITE_URL}#/bill/${v.ld}?tab=votes`], ["roll_call_url", v=>v.url], ["bill_status_url", v=>billStatusUrl(v.ld)]]})):""}
+          ["meple_url", v=>`${SITE_URL}#/bill/${v.ld}?tab=votes`], ["bill_status_url", v=>billStatusUrl(v.ld)]]})):""}
       </div>
       ${comLine?`<p class="com-line" style="font-size:14.5px;margin:12px 0 4px"><b>Committee:</b> ${comLine}</p>`:""}
       ${explain?`<p style="font-size:14.5px;margin:12px 0 4px">${explain}</p>`:!list.length?`<p style="font-size:14.5px;color:var(--ink-2)">No votes match.</p>`:`<table class="plain votes-tbl"><tr><th>Date</th><th>Bill and motion</th><th>Vote</th></tr>
@@ -1922,7 +1942,7 @@ async function viewLegislator(id, params=new URLSearchParams()){
   }
   else if(tab==="testimony"){
     const withT = sortBills(sponsored.filter(b=>b.testimony_count), "");
-    body = `<div class="panel"><h2>Testimony on bills they sponsored · ${fmtN(tTotal)} letters on ${fmtN(withT.length)} bills</h2>
+    body = `<div class="panel"><h2>Testimony on bills they sponsored · ${pl(tTotal, "letter")} on ${pl(withT.length, "bill")}</h2>
       ${countsBar(pos, {unknown: tTotal-pos.support-pos.neutral-pos.oppose})}
       <div style="margin-top:12px">${withT.slice(0,n).map(b=>billMini(b, `<span style="min-width:150px">${countsBar(b.positions, {total:b.testimony_count})}</span>`)).join("")}</div>
       ${moreBtn("n", Math.min(n, withT.length), withT.length)}
@@ -1943,7 +1963,7 @@ async function viewLegislator(id, params=new URLSearchParams()){
              <div class="src" style="margin-top:4px">${src.map(x=>`${esc(x.source)}: ${money(x.amount)} (${tot?Math.round(x.amount/tot*100):0}%)`).join(" · ")}</div>`:""}
            ${(fin.top_contributors||[]).length?`<h3 class="subh">Top contributors by total</h3>
              <table class="plain"><tr><th>Contributor</th><th>Type</th><th style="text-align:right">Total</th></tr>
-             ${fin.top_contributors.map(t=>`<tr><td style="white-space:normal">${esc(t.name)}</td><td>${esc(t.type)}</td><td style="text-align:right">${money(t.amount)}${t.count>1?` <span style="color:var(--ink-3)">(${t.count})</span>`:""}</td></tr>`).join("")}
+             ${fin.top_contributors.map(t=>`<tr><td style="white-space:normal"${tidyName(t.name)!==t.name?` title="As filed: ${esc(t.name)}"`:""}>${esc(tidyName(t.name))}</td><td>${esc(t.type)}</td><td style="text-align:right">${money(t.amount)}${t.count>1?` <span style="color:var(--ink-3)">(${t.count})</span>`:""}</td></tr>`).join("")}
              </table>`:""}`}
       ${fin.also?`<p style="margin-top:12px;font-size:14px"><a href="${esc(fin.also.url)}" target="_blank" rel="noopener">${esc(fin.also.text)} ↗</a></p>`:""}
       <div class="src">${esc(fin.note||"")} <a href="${esc(fin.source_url||fin.source||"#")}" target="_blank" rel="noopener">Candidate page on mainecampaignfinancedisclosure.com ↗</a></div></div>`;
@@ -2062,7 +2082,7 @@ async function viewCommittee(code, params=new URLSearchParams()){
   }
   else if(tab==="testimony"){
     const withT = byT.filter(b=>b.testimony_count);
-    body = `<div class="panel"><h2>${fmtN(tTotal)} testimonies on ${fmtN(withT.length)} bills</h2>
+    body = `<div class="panel"><h2>${pl(tTotal, "testimony", "testimonies")} on ${pl(withT.length, "bill")}</h2>
       ${countsBar(pos, {unknown: tTotal-pos.support-pos.neutral-pos.oppose})}
       <div class="src"><a href="#/testimony?committee=${esc(code)}">Read all testimony to this committee in the archive →</a> · Positions inferred from the letters.</div>
       <div style="margin-top:12px">${withT.slice(0,n).map(b=>billMini(b, `<span style="min-width:150px">${countsBar(b.positions, {total:b.testimony_count})}</span>`)).join("")}</div>
@@ -2077,8 +2097,8 @@ async function viewCommittee(code, params=new URLSearchParams()){
     body = `<div class="ov-grid">
       <div>
         <div class="panel"><h2>Most-testified bills</h2>${byT.slice(0,5).map(b=>billMini(b)).join("")}
-          <div class="src"><a href="#${base}?tab=bills">All ${fmtN(bills.length)} bills →</a></div></div>
-        ${lobbied.length?`<div class="panel"><h2>Most lobbied bills here</h2>${lobbied.map(x=>`<div style="font-size:14px;margin-bottom:8px"><a href="#/bill/${x.ld}">LD ${x.ld}</a> <span style="color:var(--ink-3)">· ${fmtN(x.lobbying_clients)} organizations, ${fmtN(x.lobbying_reports)} monthly reports</span><div class="clamp2" style="font-size:13px;color:var(--ink-2)">${esc(x.title)}</div></div>`).join("")}<div class="src">From monthly lobbyist reports filed with the Maine Ethics Commission.</div></div>`:""}
+          <div class="src"><a href="#${base}?tab=bills">All ${pl(bills.length, "bill")} →</a></div></div>
+        ${lobbied.length?`<div class="panel"><h2>Most lobbied bills here</h2>${lobbied.map(x=>`<div style="font-size:14px;margin-bottom:8px"><a href="#/bill/${x.ld}">LD ${x.ld}</a> <span style="color:var(--ink-3)">· ${pl(x.lobbying_clients, "organization")}, ${pl(x.lobbying_reports, "monthly report")}</span><div class="clamp2" style="font-size:13px;color:var(--ink-2)">${esc(x.title)}</div></div>`).join("")}<div class="src">From monthly lobbyist reports filed with the Maine Ethics Commission.</div></div>`:""}
       </div>
       <div>
         <div class="panel"><h2>Outcomes</h2>${hbars(byOutcome.map(([k,l,cnt])=>[`<a href="#${base}?tab=bills&o=${k}">${esc(l)}</a>`, cnt]))}</div>
@@ -2184,7 +2204,7 @@ async function viewProfiles(params){
       </select>
     </div>
     ${filterBanner([({organization:"Organizations", agency:"State agencies and public bodies", official:"Public officials"})[ty]||"", quoted((params.get("q")||"").trim())], list.length, ["type","q"], "profiles")}
-    <div class="result-note"><span>${fmtN(list.length)} profiles · ordered by number of testimonies</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
+    <div class="result-note"><span>${pl(list.length, "profile")} · ordered by number of testimonies</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
     <div class="grid-2" style="padding-bottom:24px">
       ${slice.map(p=>`<a class="com-card" href="#/profile/${esc(p.id)}">
         <div class="role" style="font-size:12px;font-weight:600;color:var(--maple-ink);text-transform:uppercase;letter-spacing:.04em">${esc(PROFILE_TYPES[p.type]||p.type)}</div>
@@ -2235,7 +2255,7 @@ async function viewProfile(id, params){
       <aside>
         ${officials.length?`<div class="panel"><h2>Officials who testified</h2>${officials.map(o=>`<div style="font-size:14px;margin-bottom:6px"><a href="#/profile/${esc(o.id)}">${esc(o.name)}</a>${o.title?` <span style="color:var(--ink-3)">· ${esc(o.title)}</span>`:""}</div>`).join("")}</div>`:""}
         ${(p.people||[]).length?`<div class="panel"><h2>Testified on its behalf</h2><div style="font-size:14px;color:var(--ink-2)">${p.people.map(esc).join(", ")}</div></div>`:""}
-        ${lobby?`<div class="panel"><h2>Lobbying</h2><p style="font-size:14px;color:var(--ink-2);margin:0">Also a registered lobbying client: ${fmtN(lobby.reports)} monthly reports on ${fmtN(lobby.bills)} bills.</p>
+        ${lobby?`<div class="panel"><h2>Lobbying</h2><p style="font-size:14px;color:var(--ink-2);margin:0">Also a registered lobbying client: ${pl(lobby.reports, "monthly report")} on ${pl(lobby.bills, "bill")}.</p>
           ${lobbyC?`${lobbyBillsTable(lobbyC, lbAll)}${lobbyC.bills.length>10?`<div style="margin-top:8px"><button class="btn ghost sm" onclick="updateParam('lb', '${lbAll?"":"all"}')">${lbAll?"Show fewer":`Show all ${fmtN(lobbyC.bills.length)}`}</button></div>`:""}`:""}
           <div class="src">${lobby.slug?`<a href="#/lobbying/client/${esc(lobby.slug)}">Lobbying client page →</a> · `:""}From the Maine Ethics Commission's lobbyist disclosures. Matched by name.</div></div>`:""}
         ${(p.aliases||[]).length&&p.type==="organization"?`<div class="panel"><h2>Also written as</h2><div style="font-size:13.5px;color:var(--ink-2)">${p.aliases.map(esc).join("; ")}</div></div>`:""}
