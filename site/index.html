@@ -461,6 +461,8 @@
     .t-foot .t-bill{flex-basis:100%}
   }
   .t-where-m{display:none;font-size:12.5px;color:var(--ink-3);margin-bottom:6px}
+  .csv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}
+  .csv-btn{font-size:13px;padding:5px 10px}
   .gl{color:inherit;text-decoration:underline dotted var(--ink-3);text-underline-offset:3px}
   .gl:hover{color:var(--pine-mid)}
   .g-entry{padding:14px 0;border-bottom:1px solid var(--hairline);scroll-margin-top:76px}
@@ -676,6 +678,49 @@ function plainMotion(m){
           .replace(/\bCommittee of conference\b/,"committee of conference").replace(/\b(refer|bill) to Committee\b/,"$1 to committee")
           .replace(/\bCommittee Amendment ([A-C]) ([SH]-\d+)\b/,"Committee Amendment $1 ($2)");
 }
+/* ---------- CSV export ----------
+   Built in the browser from data the page already loaded. UTF-8 with a byte-order mark so Excel reads accents correctly.
+   Inferred positions go in their own position_inferred column, never in a column that could read as a recorded position. */
+const CSV = {};
+const SITE_URL = "https://me-ple.netlify.app/";
+const billStatusUrl = ld => `https://legislature.maine.gov/legis/bills/display_ps.asp?LD=${ld}&snum=${(D.meta&&D.meta.session)||132}`;
+const fileSlug = s => String(s||"").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40);
+const posCols = [["position_stated", t=>t.position && t.position_source!=="inferred" ? t.position : ""],
+                 ["position_inferred", t=>t.position && t.position_source==="inferred" ? t.position : ""]];
+function csvButton(key, gen, label="Download CSV"){
+  CSV[key] = gen;
+  return `<button type="button" class="btn ghost sm csv-btn" onclick="downloadCSV('${key}')"><span aria-hidden="true">⤓</span> ${esc(label)}</button>`;
+}
+function csvCell(v){
+  if(v==null) return "";
+  let s = String(v);
+  if(/^[=+@\t\r]/.test(s)) s = "'" + s;   // keep spreadsheets from reading a cell as a formula
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+}
+function downloadCSV(key){
+  const g = CSV[key] && CSV[key](); if(!g) return;
+  const parts = ["meple", ...g.name.map(fileSlug).filter(Boolean), new Date().toLocaleDateString("en-CA")];
+  const lines = [g.cols.map(c=>csvCell(c[0])).join(","), ...g.rows.map(r=>g.cols.map(c=>csvCell(c[1](r))).join(","))];
+  const blob = new Blob(["﻿" + lines.join("\r\n") + "\r\n"], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = parts.join("_") + ".csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+const billCols = [
+  ["ld", b=>b.ld], ["paper", b=>b.paper], ["title", b=>b.title], ["sponsor", b=>D.legById[b.sponsor_id]?legName(b.sponsor_id,false):""], ["committee", b=>comName(b.committee_code)],
+  ["status", b=>plainStatus(b.status_label||STATUS_LABELS[b.status]||b.status)], ["status_as_recorded", b=>b.status_label], ["final_date", b=>b.final_date], ["hearing_date", b=>b.hearing_date],
+  ["testimony_letters", b=>b.testimony_count||0], ["support_inferred", b=>(b.positions||{}).support||0], ["neither_inferred", b=>(b.positions||{}).neutral||0], ["oppose_inferred", b=>(b.positions||{}).oppose||0],
+  ["lobbying_clients", b=>b.lobbying_clients||0], ["lobbying_monthly_reports", b=>b.lobbying_reports||0],
+  ["meple_url", b=>`${SITE_URL}#/bill/${b.ld}`], ["bill_status_url", b=>billStatusUrl(b.ld)],
+];
+const letterCols = [
+  ["testimony_id", t=>t.id], ["ld", t=>t.ld], ["bill_title", t=>(D.idxByLd[t.ld]||{}).title||""],
+  ["name", t=>t.name], ["organization", t=>t.organization], ["town", t=>t.town], ["date", t=>t.date],
+  ...posCols,
+  ["meple_url", t=>`${SITE_URL}#/bill/${t.ld}?letter=${encodeURIComponent(t.id)}`], ["testimony_pdf_url", t=>t.url], ["bill_status_url", t=>billStatusUrl(t.ld)],
+];
+
 /* ---------- glossary ----------
    Every definition is based on the Legislature's own published glossary, the Joint Rules of the 132nd Legislature,
    the Legislature's digest and staff guidance, or the Maine statutes as published by the Legislature. */
@@ -1160,6 +1205,12 @@ function lobbyingPanel(lob, opts={}){
   };
   const row = (x, i) => `<tr class="${i>=SHOW?"lob-more":""}"><td style="white-space:normal"><b>${esc(x.c)}</b><div class="lob-who">${esc(x.who)}<br>${esc(monthsLabel(x.months))}</div></td><td class="lob-who-col">${esc(x.who)}</td><td class="lob-who-col" title="${esc(x.months.map(fmtMonth).join(", "))}" style="white-space:nowrap">${esc(monthsLabel(x.months))}</td><td style="white-space:normal">${posCell(x)}</td></tr>`;
   const sortLink = (k, label) => k===sortBy ? `<b>${label}</b>` : `<a href="#" onclick="event.preventDefault();updateParam('lsort','${k==="months"?"":k}')">${label}</a>`;
+  if(opts.csv) opts = {...opts, csv: csvButton("bill-lobbying", ()=>({name:[`LD${ld}`, "lobbying"], rows, cols:[
+    ["ld", ()=>ld], ["client", x=>x.c], ["lobbyists", x=>x.who], ["months_reported", x=>x.months.length], ["first_month", x=>x.months[0]], ["last_month", x=>x.months[x.months.length-1]],
+    ["months", x=>x.months.join(" ")], ["monthly_reports", x=>x.n], ["testimony_letters", x=>x.t.letters.length],
+    ["position_inferred", x=>x.t.letters.length && x.t.label!=="Letter, no position" ? x.t.label.toLowerCase() : ""],
+    ["testimony_ids", x=>x.t.letters.map(l=>l.id).join(" ")], ["testimony_pdf_urls", x=>x.t.letters.map(l=>`https://legislature.maine.gov/legis/bills/getTestimonyDoc.asp?id=${l.id}`).join(" ")],
+    ["meple_url", ()=>`${SITE_URL}#/bill/${ld}?tab=lobbying`], ["bill_status_url", ()=>billStatusUrl(ld)], ["source", ()=>lob.source]]}))};
   return `<div class="panel lob-panel" id="lobbying">
     <h2>Lobbying on this bill · ${fmtN(rows.length)} organization${rows.length===1?"":"s"}</h2>
     <p style="font-size:14.5px;margin:0 0 8px"><b>${fmtN(nT)} of ${fmtN(rows.length)}</b> organizations also filed written testimony on this bill. Maine's lobbying reports don't record a position; positions here come from their testimony and are inferred from its text.</p>
@@ -1402,6 +1453,9 @@ function testimonyList(all, texts, params, syn){
   if(focus) pendingLetter = String(focus.id);
   const left = list.length - visible.length;
   const c = positionCounts(all);
+  const ldNum = all[0] && all[0].ld;
+  const csv = csvButton("bill-testimony", ()=>({name:[`LD${ldNum}`, "testimony", tpos, tq?"search-"+tq:"", th?"theme-"+params.get("theme"):""], cols:letterCols, rows:list}),
+    list.length!==all.length ? `Download CSV (${fmtN(list.length)})` : "Download CSV");
   const controls = all.length > 10 ? `
     <div class="toolbar" style="margin:14px 0 6px">
       <input type="search" placeholder="Search by name, organization, or town…" value="${esc(tqRaw)}" oninput="updateParam('tq', this.value, true)" aria-label="Search testimony on this bill">
@@ -1419,7 +1473,7 @@ function testimonyList(all, texts, params, syn){
     ${cleared?`<div class="src" style="margin:0 0 6px;color:var(--ink)">Filters were cleared to show the linked letter.</div>`:""}
     ${all.some(t=>t.position_source==="inferred")?`<div class="src" style="margin:0 0 6px">* position inferred from the text of the letter.</div>`:""}
     ${th?`<div class="src" style="margin:0 0 6px;color:var(--ink)"><b>Letters making this point:</b> ${esc(th.label)}</div>`:""}
-    <div class="result-note" style="margin-bottom:10px"><span>Showing ${fmtN(visible.length)} of ${fmtN(list.length)}${list.length!==all.length?` matching (${fmtN(all.length)} total)`:""}${tsort==="rel"?" · letters with a position on this bill first":""}</span>${tpos||tq||th?`<a href="#" onclick="event.preventDefault();clearTestimonyFilters()">Clear filters</a>`:""}</div>` : `<div style="height:14px"></div>${all.some(t=>t.position_source==="inferred")?`<div class="src" style="margin:-6px 0 8px">* position inferred from the text of the letter.</div>`:""}`;
+    <div class="result-note" style="margin-bottom:10px"><span>Showing ${fmtN(visible.length)} of ${fmtN(list.length)}${list.length!==all.length?` matching (${fmtN(all.length)} total)`:""}${tsort==="rel"?" · letters with a position on this bill first":""}</span><span class="csv-row" style="margin:0">${tpos||tq||th?`<a href="#" onclick="event.preventDefault();clearTestimonyFilters()">Clear filters</a>`:""}${csv}</span></div>` : `<div style="height:14px"></div>${all.some(t=>t.position_source==="inferred")?`<div class="src" style="margin:-6px 0 8px">* position inferred from the text of the letter.</div>`:""}<div class="csv-row">${csv}</div>`;
   return `${controls}
     <div style="display:flex;flex-direction:column;gap:12px">
       ${visible.length ? visible.map(t=>testimonyItem(t, t.mine ? t.text : (texts[t.id] ?? null), {clamp:true})).join("") : `<div class="empty">No testimony matches those filters.</div>`}
@@ -1546,7 +1600,7 @@ async function viewBill(ld, params=new URLSearchParams()){
     </div>`;
   }
   else if(tab==="lobbying"){
-    body = lobbyingPanel(lob, {sort: params.get("lsort")});
+    body = lobbyingPanel(lob, {sort: params.get("lsort"), csv: true});
   }
   else if(tab==="text"){
     const textLinks = [...docs.map(d=>({label:d.label, url:d.url})), ...amendments.filter(a=>a.url).map(a=>({label:`Amendment ${a.id}${a.status?` (${a.status})`:""}`, url:a.url}))];
@@ -1620,6 +1674,10 @@ async function viewTestimony(params){
   const lds = [...new Set(slice.map(t=>t.ld))];
   await Promise.all(lds.map(loadTexts));
   const removeTown = t => townList.filter(x=>x!==t).join(",");
+  const CAP = 10000;
+  const csv = csvButton("archive", ()=>({name:["testimony", st, com, dk?dk.key:"", townList.join("-"), q?"search-"+q:""],
+      cols:[...letterCols.slice(0,7), ["committee", t=>comName(t.committee_code)], ...letterCols.slice(7)], rows:all.slice(0,CAP)}),
+    all.length>CAP ? `Download CSV (first ${fmtN(CAP)})` : `Download CSV (${fmtN(all.length)})`);
   const nActive = (com?1:0) + (st?1:0) + (dk?1:0) + townList.length;
   return `
   <div class="page-head"><div class="wrap">
@@ -1656,6 +1714,7 @@ async function viewTestimony(params){
     </div>
     ${townSet?`<div class="src" style="margin:-4px 0 12px;color:var(--ink-2)">Filtered by the town people wrote on their testimony. Districts that split a town include the whole town.${dk?` ${esc(districtLabel(dk))}: ${dTowns.map(esc).join(", ")} · <a href="#/district/${dk.key}">District page →</a>`:""}</div>`:""}
     <div class="result-note"><span>${fmtN(all.length)} testimonies${all.some(t=>t.position_source==="inferred")?" · positions marked * are inferred from the text of the testimony":""}</span>${pages>1?`<span>Page ${page} of ${pages}</span>`:""}</div>
+    <div class="csv-row">${csv}${all.length>CAP?`<span class="src" style="margin:0">The download is capped at ${fmtN(CAP)} rows, in the order shown. Narrow the filters to get the rest.</span>`:""}</div>
     <div class="list">
       ${slice.length ? slice.map(t=>testimonyItem(t, (D.texts[t.ld]||{})[t.id] ?? null, {showBill:true, clamp:true})).join("") : `<div class="empty">No testimony matches those filters.</div>`}
     </div>
@@ -1805,6 +1864,10 @@ async function viewLegislator(id, params=new URLSearchParams()){
         <select onchange="updateParam('v', this.value, true)" aria-label="Filter by vote"><option value="">All votes (${fmtN(votes.length)})</option>${["yea","nay","absent"].map(k=>`<option value="${k}" ${vf===k?"selected":""}>${k==="absent"?"Absent / not voting":k[0].toUpperCase()+k.slice(1)} (${fmtN(votes.filter(v=>kind(v.vote)===k).length)})</option>`).join("")}</select>
         <select onchange="updateParam('vc', this.value, true)" aria-label="Filter by committee"><option value="">All committees</option>${vcoms.map(c=>`<option value="${esc(c)}" ${vc===c?"selected":""}>${esc(comName(c))}</option>`).join("")}</select>
         <span class="src" style="margin:0">${fmtN(list.length)} roll-call vote${list.length===1?"":"s"}</span>
+        ${list.length?csvButton("leg-votes", ()=>({name:[id, "votes", vf, vc, vq?"search-"+vq:""], rows:list, cols:[
+          ["legislator", ()=>legName(id)], ["date", v=>v.date], ["chamber", v=>({H:"House",S:"Senate"})[v.chamber]||v.chamber], ["ld", v=>v.ld], ["bill_title", v=>v.title],
+          ["motion", v=>plainMotion(v.motion)], ["motion_as_recorded", v=>v.motion], ["vote", v=>v.vote], ["yea", v=>v.yea], ["nay", v=>v.nay], ["result", v=>v.result],
+          ["meple_url", v=>`${SITE_URL}#/bill/${v.ld}?tab=votes`], ["roll_call_url", v=>v.url], ["bill_status_url", v=>billStatusUrl(v.ld)]]})):""}
       </div>
       ${comLine?`<p class="com-line" style="font-size:14.5px;margin:12px 0 4px"><b>Committee:</b> ${comLine}</p>`:""}
       ${explain?`<p style="font-size:14.5px;margin:12px 0 4px">${explain}</p>`:!list.length?`<p style="font-size:14.5px;color:var(--ink-2)">No votes match.</p>`:`<table class="plain votes-tbl"><tr><th>Date</th><th>Bill and motion</th><th>Vote</th></tr>
@@ -1953,7 +2016,8 @@ async function viewCommittee(code, params=new URLSearchParams()){
     body = `<div class="panel"><div class="filters">
         <select onchange="updateParam('o', this.value, true)" aria-label="Filter by outcome"><option value="">Any outcome (${fmtN(bills.length)})</option>${byOutcome.map(([k,l,cnt])=>`<option value="${k}" ${o===k?"selected":""}>${l} (${fmtN(cnt)})</option>`).join("")}</select>
         <select onchange="updateParam('sort', this.value, true)" aria-label="Sort"><option value="testimony">Most testimony</option><option value="hearing" ${s==="hearing"?"selected":""}>Hearing date (newest)</option><option value="lobbied" ${s==="lobbied"?"selected":""}>Most lobbied</option><option value="ld" ${s==="ld"?"selected":""}>LD number</option></select>
-        <span class="src" style="margin:0">${fmtN(list.length)} bill${list.length===1?"":"s"}</span></div>
+        <span class="src" style="margin:0">${fmtN(list.length)} bill${list.length===1?"":"s"}</span>
+        ${csvButton("committee-bills", ()=>({name:[code, "bills", o], cols:billCols, rows:list}))}</div>
       ${s==="lobbied"?`<div class="src" style="margin:0 0 10px;color:var(--ink-2)"><b>Most lobbied:</b> ${esc(LOBBY_NOTE)} Sorted by organizations, then monthly reports; never by pay.</div>`:""}
       ${list.slice(0,n).map(b=>billMini(b, b.hearing_date?`<span class="tcount">Hearing ${esc(b.hearing_date)}</span>`:"")).join("")}
       ${moreBtn("n", Math.min(n, list.length), list.length)}</div>`;
@@ -2121,6 +2185,7 @@ async function viewProfile(id, params){
         </div>
         <div class="panel">
           <h2>Testimony</h2>
+          <div class="csv-row">${csvButton("profile", ()=>({name:[p.id, "testimony"], cols:[["profile", ()=>p.name], ...letterCols.map(([h,f])=>[h, t=>f({...t, id:t.testimony_id, organization:t.organization||(p.type!=="official"?p.name:"")})])], rows:[...items].reverse()}), `Download CSV (${fmtN(items.length)})`)}</div>
           <table class="plain"><tr><th>Date</th><th>Bill</th><th>Position</th></tr>
           ${shown.map(t=>`<tr><td>${esc(t.date||"")}</td><td><a href="#/bill/${t.ld}${t.testimony_id?`?letter=${encodeURIComponent(t.testimony_id)}`:""}">LD ${t.ld}</a><div style="font-size:12.5px">${esc((t.bill_title||"").slice(0,90))}${(t.bill_title||"").length>90?"…":""}</div>${t.name&&p.type!=="official"?`<div style="font-size:12.5px;color:var(--ink-3)">${esc(t.name)}</div>`:""}</td><td>${stancePill(t.position, t.position_source)}${t.url?`<div style="font-size:12.5px;margin-top:4px"><a href="${esc(t.url)}" target="_blank" rel="noopener">PDF ↗</a></div>`:""}</td></tr>`).join("")}
           </table>
@@ -2179,6 +2244,7 @@ async function viewLobbying(params){
       ${bills.map(b=>`<tr><td style="white-space:normal"><a href="#/bill/${b.ld}">LD ${b.ld}</a> <span class="clamp2" style="font-size:13px;color:var(--ink-2)">${esc(b.title)}</span></td><td style="text-align:right">${fmtN(b.lobbying_clients)}</td><td style="text-align:right">${fmtN(b.lobbying_reports)}</td></tr>`).join("")}
       </table>
       <div class="src"><a href="#/bills?sort=lobbied">All ${fmtN(lobbied.length)} lobbied bills on the Bills page →</a></div>
+      <div class="csv-row">${csvButton("lob-bills", ()=>({name:["lobbied-bills"], cols:billCols, rows:[...lobbied].sort(byLobbied)}), `Download CSV (all ${fmtN(lobbied.length)} bills)`)}</div>
     </div>
     <div class="toolbar" style="margin-top:8px">
       <input type="search" placeholder="Search clients and lobbyists by name…" value="${esc(params.get("q")||"")}" oninput="updateParam('q', this.value)" aria-label="Search lobbying clients and lobbyists">
@@ -2188,13 +2254,16 @@ async function viewLobbying(params){
       ${clients.length?`<table class="plain"><tr><th>Client</th><th style="text-align:right">Bills lobbied</th><th style="text-align:right">Monthly reports</th></tr>
       ${clients.slice(0,nc).map(c=>{ const p = c.profile_id ? {id:c.profile_id} : null;
         return `<tr><td style="white-space:normal"><a href="#/lobbying/client/${esc(c.slug)}">${esc(c.client)}</a>${p?` <span style="font-size:12.5px;color:var(--ink-3)">· <a href="#/profile/${esc(p.id)}">testimony profile</a></span>`:""}</td><td style="text-align:right">${fmtN(c.bills)}</td><td style="text-align:right">${fmtN(c.reports)}</td></tr>`; }).join("")}
-      </table>${moreBtn("nc", Math.min(nc, clients.length), clients.length, LOBBY_TOP)}`:`<p style="font-size:14.5px;color:var(--ink-2)">No clients match.</p>`}
+      </table>${moreBtn("nc", Math.min(nc, clients.length), clients.length, LOBBY_TOP)}
+      <div class="csv-row">${csvButton("lob-clients", ()=>({name:["lobbying-clients", q?"search-"+q:""], rows:clients, cols:[["client", c=>c.client], ["bills_lobbied", c=>c.bills], ["monthly_reports", c=>c.reports],
+        ["meple_url", c=>`${SITE_URL}#/lobbying/client/${c.slug}`], ["testimony_profile_url", c=>c.profile_id?`${SITE_URL}#/profile/${c.profile_id}`:""], ["source", ()=>idx.source||ETHICS_SITE]]}), `Download CSV (${fmtN(clients.length)})`)}</div>`:`<p style="font-size:14.5px;color:var(--ink-2)">No clients match.</p>`}
     </div>
     <div class="panel" id="lob-lobbyists">
       <h2>${q?`Lobbyists matching “${esc(params.get("q").trim())}” · ${fmtN(lobbyists.length)}`:"Most active lobbyists"}</h2>
       ${lobbyists.length?`<table class="plain"><tr><th>Lobbyist</th><th style="text-align:right">Clients</th><th style="text-align:right">Bills</th><th style="text-align:right">Monthly reports</th></tr>
       ${lobbyists.slice(0,nl).map(l=>`<tr><td style="white-space:normal">${esc(l.lobbyist)}${l.firm?` <span style="font-size:12.5px;color:var(--ink-3)">· ${esc(l.firm)}</span>`:""}</td><td style="text-align:right">${fmtN(l.clients)}</td><td style="text-align:right">${fmtN(l.bills||0)}</td><td style="text-align:right">${fmtN(l.reports)}</td></tr>`).join("")}
-      </table>${moreBtn("nl", Math.min(nl, lobbyists.length), lobbyists.length, LOBBY_TOP)}`:`<p style="font-size:14.5px;color:var(--ink-2)">No lobbyists match.</p>`}
+      </table>${moreBtn("nl", Math.min(nl, lobbyists.length), lobbyists.length, LOBBY_TOP)}
+      <div class="csv-row">${csvButton("lob-lobbyists", ()=>({name:["lobbyists", q?"search-"+q:""], rows:lobbyists, cols:[["lobbyist", l=>l.lobbyist], ["clients", l=>l.clients], ["bills", l=>l.bills||0], ["monthly_reports", l=>l.reports], ["source", ()=>idx.source||ETHICS_SITE]]}), `Download CSV (${fmtN(lobbyists.length)})`)}</div>`:`<p style="font-size:14.5px;color:var(--ink-2)">No lobbyists match.</p>`}
       <div class="src">The monthly reports list the lobbyist who filed each one; they don't name the lobbyist's firm.</div>
     </div>
     <div class="src">Source: <a href="${esc(idx.source||ETHICS_SITE)}" target="_blank" rel="noopener">Maine Ethics Commission lobbyist disclosures ↗</a>. Lobbying years run December to November; reports here run from ${esc(fmtMonth(idx.first_period||"2024-12"))} to ${esc(fmtMonth(idx.last_period||"2026-10"))}.</div>
