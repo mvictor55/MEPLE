@@ -1104,12 +1104,17 @@ function mediaPanel(b){
   return `<div class="panel"><h2>Watch and read</h2>${items.map(i=>`<div style="font-size:14px;margin-bottom:6px">${i}</div>`).join("")}</div>`;
 }
 // "What didn't happen": sentences for bills with no roll calls or no testimony, built from the bill's own record.
+// A bill that died under Joint Rule 310 was reported out unanimously Ought Not to Pass: the journal lists these bills under
+// "has voted unanimously to report the following bills out Ought Not to Pass". Unanimous reports name no members, and
+// absent members may record their votes later, so "unanimous" never means every member voted. No other bill is called unanimous.
+const isJR310 = b => /joint rule 310\b/i.test(((b||{}).final_disposition||{}).label || (b||{}).status_label || "");
 function committeeVoteSentence(b){
   const v = [...(b.committee_actions||[])].reverse().find(a=>/^voted$/i.test(a.action||"") && a.result);
   if(!v) return "";
   const r = String(v.result).trim();
+  const un = isJR310(b) && /^ontp\b/i.test(r) ? "unanimously " : "";
   const what = /divided/i.test(r) ? "reached a divided report"
-    : /^ontp\b/i.test(r) ? "voted Ought Not to Pass"
+    : /^ontp\b/i.test(r) ? `voted ${un}Ought Not to Pass`
     : /^otp[- ]?am\b/i.test(r) ? "voted Ought to Pass as Amended"
     : /^otp\b/i.test(r) ? "voted Ought to Pass" : `voted ${r}`;
   return `The ${b.committee_name||comName(b.committee_code)} Committee ${what}${v.date?` on ${fmtDate(v.date)}`:""}.`;
@@ -1142,17 +1147,20 @@ function noTestimonySentence(hearingDate){
     : "No public hearing was held, so there is no written testimony.";
 }
 const fmtShort = (iso, withYear) => { const d = new Date(iso+"T12:00:00"); return isNaN(d) ? String(iso||"") : d.toLocaleDateString("en-US", withYear ? {month:"short", day:"numeric", year:"numeric"} : {month:"short", day:"numeric"}); };
-function committeeResultPlain(r){
+function committeeResultPlain(r, b){
   r = String(r||"").trim();
   if(/divided/i.test(r)) return "divided report";
-  return r.split("/").map(x=> /^ontp$/i.test(x) ? "Ought Not to Pass" : /^otp-?am$/i.test(x) ? "Ought to Pass as Amended" : /^otp$/i.test(x) ? "Ought to Pass" : /^ltw$/i.test(x) ? "Leave to Withdraw" : x).join(" / ");
+  const out = r.split("/").map(x=> /^ontp$/i.test(x) ? "Ought Not to Pass" : /^otp-?am$/i.test(x) ? "Ought to Pass as Amended" : /^otp$/i.test(x) ? "Ought to Pass" : /^ltw$/i.test(x) ? "Leave to Withdraw" : x).join(" / ");
+  return b && isJR310(b) && /^ontp$/i.test(r) ? `${out} (unanimous)` : out;
 }
+// "Ought Not To Pass" (as printed on the report) -> "Ought Not to Pass"
+const recPlain = s => String(s||"").replace(/\bTo\b/g,"to").replace(/\bAs Amended\b/g,"as Amended");
 // Every recorded action, oldest first, with runs of the same action in the same place collapsed
 // ("Unfinished Business ×6, Jun 16, 2025–Feb 3, 2026").
 function billActions(b){
   const ev = [];
   const cname = b.committee_name||comName(b.committee_code);
-  for(const a of (b.committee_actions||[])) ev.push({date:a.date, label:`${a.action}${a.result?`: ${committeeResultPlain(a.result)}`:""}`, where:`${cname} Committee`});
+  for(const a of (b.committee_actions||[])) ev.push({date:a.date, label:`${a.action}${a.result?`: ${committeeResultPlain(a.result, /^(voted|reported out)$/i.test(a.action||"")?b:null)}`:""}`, where:`${cname} Committee`});
   for(const a of (b.chamber_actions||[])) ev.push({date:a.date, label:a.action, where:a.chamber});
   ev.sort((x,y)=>String(x.date).localeCompare(String(y.date)));
   const runs = [];
@@ -1171,8 +1179,8 @@ function billMilestones(b, hearingDate){
   if(ref) ms.push({date:ref.date, label:`Referred to the ${cname} Committee`, where:ref.chamber});
   if(hearingDate) ms.push({date:hearingDate, label:"Public hearing", where:`${cname} Committee`});
   for(const a of (b.committee_actions||[])){
-    if(/^voted$/i.test(a.action||"")) ms.push({date:a.date, label:`Committee vote: ${committeeResultPlain(a.result)}`, where:`${cname} Committee`});
-    else if(/^reported out$/i.test(a.action||"")) ms.push({date:a.date, label:`Committee report: ${committeeResultPlain(a.result)}`, where:`${cname} Committee`});
+    if(/^voted$/i.test(a.action||"")) ms.push({date:a.date, label:`Committee vote: ${committeeResultPlain(a.result, b)}`, where:`${cname} Committee`});
+    else if(/^reported out$/i.test(a.action||"")) ms.push({date:a.date, label:`Committee report: ${committeeResultPlain(a.result, b)}`, where:`${cname} Committee`});
   }
   for(const r of (b.roll_calls||[])) ms.push({date:r.date, label:`Roll call: ${plainMotion(r.motion)} — ${r.yea}–${r.nay}${r.result?`, ${r.result.toLowerCase()}`:""}`, where:{H:"House",S:"Senate"}[r.chamber]||r.chamber, rc:r.id});
   const fd = b.final_disposition;
@@ -1324,7 +1332,7 @@ function billStatusStrip(b, hearingDate){
   const steps = [
     {k:"Referred", on:!!ref, note: ref ? fmtDate(ref.date) : "No referral recorded"},
     {k:"Public hearing", on:!!hearingDate, note: hearingDate ? fmtDate(hearingDate) : "No public hearing"},
-    {k:"Committee vote", on:!!vote, note: vote ? `${(r=>r.charAt(0).toUpperCase()+r.slice(1))(committeeResultPlain(vote.result))}, ${fmtDate(vote.date)}` : "No committee vote"},
+    {k:"Committee vote", on:!!vote, note: vote ? `${(r=>r.charAt(0).toUpperCase()+r.slice(1))(committeeResultPlain(vote.result, b))}, ${fmtDate(vote.date)}` : "No committee vote"},
     {k:"Floor votes", on:rolls.length>0, note: rolls.length ? `${fmtN(rolls.length)} roll call${rolls.length===1?"":"s"}, ${fmtShort(rolls[0].date, rolls.length===1 || rolls[0].date.slice(0,4)!==rolls[rolls.length-1].date.slice(0,4))}${rolls.length>1&&rolls[0].date!==rolls[rolls.length-1].date?`–${fmtShort(rolls[rolls.length-1].date, true)}`:""}` : diedInCommittee ? "No floor vote" : "No roll-call vote"},
     {k:"Final", on:!!fd.label, note: fd.label ? `${plainStatus(fd.label)}${fd.date?`, ${fmtDate(fd.date)}`:""}` : "Pending"},
   ];
@@ -1676,6 +1684,7 @@ async function viewLegislator(id, params=new URLSearchParams()){
     const list = votes.filter(v=>(!vf || kind(v.vote)===vf) && (!vc || (D.idxByLd[v.ld]||{}).committee_code===vc) &&
       (!vq || (ldq ? String(v.ld)===ldq : `ld ${v.ld} ${v.title||""} ${v.motion||""} ${plainMotion(v.motion)}`.toLowerCase().includes(vq))));
     const explain = ldq && !list.length ? await explainNoVote(l, Number(ldq), votes) : "";
+    const comLine = ldq ? await committeeReportLine(l, Number(ldq)) : "";
     const voteCls = v => ({yea:"support", nay:"oppose"})[kind(v)] || "neutral";
     const nv = Math.max(50, Number(params.get("n"))||50);
     body = `<div class="panel">
@@ -1685,6 +1694,7 @@ async function viewLegislator(id, params=new URLSearchParams()){
         <select onchange="updateParam('vc', this.value, true)" aria-label="Filter by committee"><option value="">All committees</option>${vcoms.map(c=>`<option value="${esc(c)}" ${vc===c?"selected":""}>${esc(comName(c))}</option>`).join("")}</select>
         <span class="src" style="margin:0">${fmtN(list.length)} roll-call vote${list.length===1?"":"s"}</span>
       </div>
+      ${comLine?`<p class="com-line" style="font-size:14.5px;margin:12px 0 4px"><b>Committee:</b> ${comLine}</p>`:""}
       ${explain?`<p style="font-size:14.5px;margin:12px 0 4px">${explain}</p>`:!list.length?`<p style="font-size:14.5px;color:var(--ink-2)">No votes match.</p>`:`<table class="plain votes-tbl"><tr><th>Date</th><th>Bill and motion</th><th>Vote</th></tr>
       ${list.slice(0,nv).map(v=>`<tr><td>${esc(v.date||"")}</td><td style="white-space:normal"><div class="m-date">${esc(v.date?fmtDate(v.date):"")}</div><a href="#/bill/${v.ld}">LD ${v.ld}</a> <span class="clamp2" style="font-size:12.5px;color:var(--ink-2)" title="${esc(v.title||"")}">${esc(v.title||"")}</span><div style="font-size:12.5px;color:var(--ink-3)" title="${esc(v.motion||"")}">${esc(plainMotion(v.motion))}${v.yea!=null?` · ${v.yea}–${v.nay}`:""}${v.result?` · ${esc(v.result)}`:""}</div></td><td><span class="stance-pill ${voteCls(v.vote)}">${esc(v.vote||"—")}</span></td></tr>`).join("")}
       </table>`}${moreBtn("n", Math.min(nv, list.length), list.length, 50)}</div>`;
@@ -1692,6 +1702,7 @@ async function viewLegislator(id, params=new URLSearchParams()){
   else if(tab==="committee"){
     body = `<div class="panel"><h2>Committee assignments</h2>${coms.length?coms.map(c=>`<div style="font-size:14.5px;margin-bottom:6px"><a href="#/committee/${esc(c.code)}">${esc(comName(c.code))}</a>${c.role?` <span style="color:var(--ink-3)">· ${esc(c.role)}</span>`:""}</div>`).join(""):`<p style="font-size:14px;color:var(--ink-2)">No current assignments.</p>`}</div>
       <div class="panel"><h2>Committee reports signed · ${fmtN(sigs.length)}</h2>
+      <p class="src" style="margin:-4px 0 10px">Lists divided reports, where the Legislature records who signed each report. Unanimous reports don't name members.</p>
       ${sigs.length?`<table class="plain"><tr><th>Bill</th><th>Report</th></tr>
       ${sigs.slice(0,n).map(s=>`<tr><td style="white-space:normal"><a href="#/bill/${s.ld}">LD ${s.ld}</a> <span class="clamp2" style="font-size:12.5px;color:var(--ink-2)">${esc(s.title||"")}</span></td><td style="white-space:normal">${esc(s.report||"")}${s.recommendation?` — ${esc(s.recommendation)}`:""}${s.signer_count?` <span style="color:var(--ink-3)">(${s.signer_count} signers)</span>`:""}</td></tr>`).join("")}
       </table>${moreBtn("n", Math.min(n, sigs.length), sigs.length)}`:`<p style="font-size:14px;color:var(--ink-2)">None recorded.</p>`}</div>`;
@@ -1762,6 +1773,20 @@ async function viewLegislator(id, params=new URLSearchParams()){
   </div>`;
 }
 
+// Votes tab search for one LD: the committee report this member signed, or, for a unanimous report from the member's
+// committee, a note that unanimous reports don't name members. Never attributes a unanimous vote to a named member.
+async function committeeReportLine(l, ld){
+  const row = D.idxByLd[ld]; if(!row) return "";
+  let b; try { b = await loadBill(ld); } catch(e){ return ""; }
+  const cn = comName(b.committee_code);
+  const acts = b.committee_actions||[];
+  const when = (acts.find(a=>/^reported out$/i.test(a.action||"")) || [...acts].reverse().find(a=>/^voted$/i.test(a.action||"")) || {}).date;
+  const signed = (b.committee_reports||[]).filter(r=>(r.signer_ids||[]).includes(l.id));
+  if(signed.length) return signed.map(r=>`<a href="#/bill/${ld}?tab=votes">Signed the ${esc(r.label||"committee report")}${r.recommendation?` — ${esc(recPlain(r.recommendation))}`:""}</a> (${esc(cn)}${when?`, ${esc(fmtDate(when))}`:""}).`).join(" ");
+  const onCom = (l.committees||[]).some(c=>(typeof c==="string"?c:c.code)===b.committee_code);
+  if(onCom && isJR310(b)) return `The <a href="#/bill/${ld}?tab=votes">${esc(cn)} Committee reported this bill unanimously</a>${when?` (${esc(fmtDate(when))})`:""}. Unanimous reports don't name members.`;
+  return "";
+}
 // Why a member has no roll-call vote on a bill, for the Votes tab search.
 async function explainNoVote(l, ld, votes){
   const row = D.idxByLd[ld];
