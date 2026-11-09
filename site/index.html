@@ -398,6 +398,49 @@
   .rc-party b{color:var(--ink)}
   .hist .btn{margin-top:4px}
   details.rc,.panel,#syn,.t-item{scroll-margin-top:76px}
+  /* bill page: header, tiles, tabs, status strip */
+  .bill-head{padding-top:28px}
+  .bill-head .bill-h1{font-family:var(--serif);font-size:27px;line-height:1.25;letter-spacing:-.01em;margin:6px 0 14px}
+  .bill-head .bd-meta{margin-bottom:14px}
+  .tiles.btiles{grid-template-columns:repeat(4,1fr);margin:0 0 8px}
+  a.tile.btile{color:inherit;text-decoration:none;display:block}
+  a.tile.btile:hover{border-color:var(--pine-mid);box-shadow:var(--shadow)}
+  .tile-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--neutral-soft);margin:4px 0 4px}
+  .tile-bar span{height:100%}
+  .bd-grid.bd-tab{padding-top:4px}
+  .bd-full{padding:4px 0 64px;max-width:900px}
+  ol.stands{list-style:none;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;counter-reset:st}
+  ol.stands li{border-top:4px solid var(--hairline-2);padding:8px 6px 2px 0;font-size:13px;color:var(--ink-3);line-height:1.35}
+  ol.stands li b{display:block;font-size:13.5px;color:var(--ink-2)}
+  ol.stands li.done{border-top-color:var(--pine-mid)}
+  ol.stands li.done span{color:var(--ink-2)}
+  ol.stands li.cur{border-top-color:var(--maple)}
+  ol.stands li.cur b{color:var(--ink)}
+  ol.stands li.skip span{font-style:italic}
+  .t-item.compact .t-body.clamp{-webkit-line-clamp:2}
+  .doc-all{display:none}
+  .syn-more{display:none;background:none;border:none;padding:0;color:var(--pine-mid);font-weight:600;font-size:13.5px;margin:-4px 0 10px}
+  .t-item.compact{padding:12px 16px}
+  @media(max-width:600px){
+    .bill-head{padding-top:16px}
+    .bill-head .bill-h1{font-size:21px;margin:4px 0 10px}
+    .bill-head .bd-meta{gap:4px 14px;font-size:13px}
+    .tiles.btiles{grid-template-columns:repeat(2,1fr) !important}
+    ol.stands{grid-template-columns:1fr;gap:0}
+    ol.stands li{border-top:none;border-left:4px solid var(--hairline-2);padding:4px 0 6px 10px;display:flex;gap:8px;align-items:baseline}
+    ol.stands li b{display:inline;min-width:108px}
+    ol.stands li.done{border-left-color:var(--pine-mid)} ol.stands li.cur{border-left-color:var(--maple)}
+    .syn-sum:not(.full){display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+    .syn-more{display:block}
+    .bd-tab aside .panel{padding:16px}
+    .bd-tab aside .doc-more,.bd-tab aside .side-note{display:none}
+    .bd-tab aside .doc-all{display:block}
+    .t-item.compact{padding:10px 12px}
+    .t-item.compact .t-foot{margin-top:4px}
+    .bd-tab .panel{margin-bottom:12px}
+    .t-item.compact .t-where-m{display:none}
+    .t-item.compact .t-head .who::after{content:""}
+  }
   @media(max-width:600px){
     .lob-who{display:block}
     .lob-who-col{display:none}
@@ -988,7 +1031,8 @@ function revealLetter(id){
   el.classList.add("flash");
   setTimeout(()=>el.classList.remove("flash"), 3000);
 }
-function showTheme(i){ pendingScroll = "testimony"; updateParam("theme", String(i), true); }
+// "N letters →" on a synthesis point opens the Testimony tab filtered to the letters that make it.
+function showTheme(i){ const ld = location.hash.split("?")[0].split("/")[2]; pendingScroll = "testimony"; location.hash = `#/bill/${ld}?tab=testimony&theme=${i}`; }
 const T_FIRST = 25, T_MORE = 50;
 function clearTestimonyFilters(){
   const [path, qs] = location.hash.slice(1).split("?");
@@ -1166,7 +1210,7 @@ function testimonyItem(t, text, opts={}){
     ? `<div class="t-body ${opts.clamp?"clamp":""}" id="${id}">${esc(lead)}</div>${opts.clamp&&lead!==text?`<div class="t-body" id="${id}-full" hidden>${esc(text)}</div>`:""}`
     : `<div class="t-body" style="color:var(--ink-3)">Text not yet extracted (likely a scanned PDF).${t.url?` <a href="${esc(t.url)}" target="_blank" rel="noopener">Open the official PDF →</a>`:""}</div>`;
   const toggle = `(function(btn){var a=document.getElementById('${id}'),f=document.getElementById('${id}-full');var open=btn.textContent==='Read more';if(f){a.hidden=open;f.hidden=!open;}else{a.classList.toggle('clamp',!open);}btn.textContent=open?'Show less':'Read more';btn.setAttribute('aria-label',(open?'Show less of the testimony from ':'Read more of the testimony from ')+btn.dataset.who);btn.setAttribute('aria-expanded',open);})(this)`;
-  return `<article class="t-item" id="letter-${esc(t.id)}">
+  return `<article class="t-item${opts.compact?" compact":""}" id="${opts.compact?"top":"letter"}-${esc(t.id)}">
     <div class="t-head">${stancePill(t.position, t.position_source)}<span class="who">${whoHtml}</span><span class="where">${esc(where)}</span></div>
     ${where?`<div class="t-where-m">${esc(where)}</div>`:""}
     ${body}
@@ -1175,7 +1219,7 @@ function testimonyItem(t, text, opts={}){
       ${text!=null && opts.clamp && text.length>200 ? `<button type="button" data-who="${esc(whoText)}" aria-label="Read more of the testimony from ${esc(whoText)}" aria-expanded="false" onclick="${toggle}">Read more</button>` : ""}
       ${!t.mine && t.ld ? `<button type="button" onclick="copyLetterLink(this, ${Number(t.ld)}, '${esc(String(t.id))}')">Copy link</button>` : ""}
       ${t.url ? `<a href="${esc(t.url)}" target="_blank" rel="noopener">PDF ↗</a>` : ""}
-      ${(t.shared_with||[]).length && !opts.showBill ? `<span>Also filed under ${t.shared_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}</span>` : ""}
+      ${(t.shared_with||[]).length && !opts.showBill && !opts.compact ? `<span>Also filed under ${t.shared_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}</span>` : ""}
     </div>
   </article>`;
 }
@@ -1186,7 +1230,7 @@ function synthesisPanel(syn, params){
   const groups = ["support","oppose","amend","neutral"].map(k=>[k, syn.themes.map((t,i)=>({...t,i})).filter(t=>t.stance===k)]).filter(([,ts])=>ts.length);
   return `<div class="panel syn" id="syn" style="border-color:#D8E5DE">
     <h2>What the testimony says</h2>
-    ${syn.summary?`<p class="summary" style="margin-bottom:8px">${esc(syn.summary)}</p>`:""}
+    ${syn.summary?`<p class="summary syn-sum" style="margin-bottom:8px">${esc(syn.summary)}</p><button class="syn-more" onclick="this.previousElementSibling.classList.add('full');this.remove()">Read the whole summary</button>`:""}
     <button class="btn ghost sm syn-points" onclick="document.getElementById('syn').classList.add('themes-open');this.remove()">Show the ${fmtN(syn.themes.length)} points made</button>
     <div class="theme-groups">
     <button class="btn ghost sm" onclick="var p=document.getElementById('syn');p.classList.toggle('open');this.textContent=p.classList.contains('open')?'Hide explanations':'Show explanations'">Show explanations</button>
@@ -1263,6 +1307,34 @@ function testimonyList(all, texts, params, syn){
     ${left>0?`<div style="margin-top:14px"><button class="btn ghost block" onclick="updateParam('tn', ${tn + T_MORE})">Show ${fmtN(Math.min(T_MORE, left))} more <span style="font-weight:400;color:var(--ink-3)">· ${fmtN(left)} remaining</span></button></div>`:""}`;
 }
 
+// Most relevant first: readable letters with a position on this bill, then readable letters without one,
+// then scans and letters filed under another bill that say nothing about this one.
+function relevantSort(texts){
+  const hasText = t => t.mine || texts[t.id]!=null;
+  const rank = t => hasText(t) && t.position ? 0 : (hasText(t) && !(t.shared_with||[]).length ? 1 : 2);
+  return (a,b)=>rank(a)-rank(b) || String(a.date||"").localeCompare(String(b.date||"")) || String(a.name||"").localeCompare(String(b.name||""));
+}
+// "Where it stands": Referred -> Public hearing -> Committee vote -> Floor votes -> Final, each with a date or a short absence note.
+function billStatusStrip(b, hearingDate){
+  const ref = (b.chamber_actions||[]).find(a=>/referred to the committee|reference to the committee/i.test(a.action||""));
+  const vote = [...(b.committee_actions||[])].reverse().find(a=>/^voted$/i.test(a.action||"") && a.result);
+  const rolls = (b.roll_calls||[]).filter(r=>r.date).sort((x,y)=>x.date.localeCompare(y.date));
+  const fd = b.final_disposition||{};
+  const diedInCommittee = /joint rule|leave to withdraw|withdraw/i.test(fd.label||"") && !rolls.length;
+  const steps = [
+    {k:"Referred", on:!!ref, note: ref ? fmtDate(ref.date) : "No referral recorded"},
+    {k:"Public hearing", on:!!hearingDate, note: hearingDate ? fmtDate(hearingDate) : "No public hearing"},
+    {k:"Committee vote", on:!!vote, note: vote ? `${(r=>r.charAt(0).toUpperCase()+r.slice(1))(committeeResultPlain(vote.result))}, ${fmtDate(vote.date)}` : "No committee vote"},
+    {k:"Floor votes", on:rolls.length>0, note: rolls.length ? `${fmtN(rolls.length)} roll call${rolls.length===1?"":"s"}, ${fmtShort(rolls[0].date, rolls.length===1 || rolls[0].date.slice(0,4)!==rolls[rolls.length-1].date.slice(0,4))}${rolls.length>1&&rolls[0].date!==rolls[rolls.length-1].date?`–${fmtShort(rolls[rolls.length-1].date, true)}`:""}` : diedInCommittee ? "No floor vote" : "No roll-call vote"},
+    {k:"Final", on:!!fd.label, note: fd.label ? `${plainStatus(fd.label)}${fd.date?`, ${fmtDate(fd.date)}`:""}` : "Pending"},
+  ];
+  let cur = -1; steps.forEach((s,i)=>{ if(s.on) cur = i; });
+  return `<ol class="stands">${steps.map((s,i)=>`<li class="${s.on?"done":"skip"}${i===cur?" cur":""}"${i===cur?' aria-current="step"':""}><b>${esc(s.k)}</b><span>${esc(s.note)}</span></li>`).join("")}</ol>`;
+}
+function billTile(href, n, label, extra=""){
+  return href ? `<a class="tile btile" href="${href}"><div class="n">${n}</div>${extra}<div class="l">${label}</div></a>`
+              : `<div class="tile btile"><div class="n">${n}</div>${extra}<div class="l">${label}</div></div>`;
+}
 async function viewBill(ld, params=new URLSearchParams()){
   const row = D.idxByLd[Number(ld)];
   if(!row) return `<div class="wrap"><div class="empty">Bill not found. <a href="#/bills">Back to bills</a></div></div>`;
@@ -1272,8 +1344,7 @@ async function viewBill(ld, params=new URLSearchParams()){
   const lob = lobIdx && (lobIdx.lds||[]).includes(row.ld) ? await loadOptional(`lobbying/LD${row.ld}.json`) : null;
   const synIdx = await loadOptional("synthesis/index.json");
   const syn = synIdx && (synIdx.lds||[]).includes(row.ld) ? await loadOptional(`synthesis/LD${row.ld}.json`) : null;
-  const filed = (b.testimony||[]).map(t=>({...t, ld:row.ld}));
-  const all = filed;
+  const all = (b.testimony||[]).map(t=>({...t, ld:row.ld}));
   const sum = b.summary||{};
   const paras = String(sum.text||"").split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean);
   const docs = b.documents||[];
@@ -1283,70 +1354,124 @@ async function viewBill(ld, params=new URLSearchParams()){
   const cos = b.cosponsor_ids||[];
   const sp = D.legById[b.sponsor_id];
   const hearingDate = (b.hearing&&b.hearing.date) || row.hearing_date;
+  const cname = b.committee_name||comName(b.committee_code);
+  const nOrgs = lob ? new Set((lob.reports||[]).map(r=>r.client||"—")).size : 0;
+  const c = positionCounts(all);
+
+  // Which tab: ?tab= wins; otherwise a deep link picks it (letter/filters -> Testimony, rc -> History & votes, theme -> Overview).
+  const TABS = ["overview","testimony","votes","lobbying","text"];
+  let tab = params.get("tab");
+  if(!TABS.includes(tab)){
+    tab = ["letter","tpos","tq","tsort","tn"].some(k=>params.get(k)) ? "testimony" : params.get("rc") ? "votes" : "overview";
+    if(tab!=="overview"){   // write the tab into the URL so later filter changes stay on it
+      params = new URLSearchParams(params); params.set("tab", tab);
+      history.replaceState(history.state, "", `#/bill/${b.ld}?${params.toString()}`);
+    }
+  }
+  if(tab==="lobbying" && !nOrgs) tab = "overview";
+  const base = `/bill/${b.ld}`;
+  const tabs = [["overview","Overview"],["testimony","Testimony",all.length],["votes","History & votes",rolls.length],
+                ...(nOrgs?[["lobbying","Lobbying",nOrgs]]:[]),["text","Text & summary"]];
+
   const linked = params.get("letter") ? all.find(t=>String(t.id)===params.get("letter")) : null;
-  if(params.get("rc") && rolls.some(r=>String(r.id)===params.get("rc"))) pendingScroll = "rc-" + params.get("rc");
   setTitle(`LD ${b.ld} · ${clampTitle(b.title, 80 - `LD ${b.ld} · `.length - " — MEPLE".length)}`);
   if(linked) pageTitle = `Testimony of ${linked.name||linked.organization||"a member of the public"} on LD ${b.ld} — MEPLE`;
-  return `
-  <div class="wrap">
-    <div class="bd-grid">
-      <div class="bd-main">
-        <div class="crumb"><a href="#/bills">Bills</a> / LD ${b.ld}</div>
-        <div class="ld">LD ${b.ld}${b.paper?` · ${esc(b.paper)}`:""} · ${esc(D.meta.legislature.toUpperCase())}</div>
-        <h1>${esc(b.title)}</h1>
-        <div class="bd-meta">
-          <span>${statusChip(b)}</span>
-          <span>Sponsor: <b>${legLink(b.sponsor_id)}</b>${sp?` (${esc(sp.party||"")}-${esc(sp.town||"")})`:""}</span>
-          <span>Committee: <b><a href="#/committee/${esc(b.committee_code)}">${esc(b.committee_name||comName(b.committee_code))}</a></b></span>
-          ${hearingDate?`<span>Public hearing: <b>${esc(fmtDate(hearingDate))}</b></span>`:""}
-          ${cos.length?`<details class="cos"><summary>${fmtN(cos.length)} cosponsor${cos.length===1?"":"s"}</summary><div style="margin-top:6px">${cos.map(legLink).join(", ")}</div></details>`:""}
-        </div>
-        ${all.length?`<div class="panel" style="padding:16px 20px">
-          <h2 style="margin-bottom:4px">Testimony at a glance · ${fmtN(all.length)} letters</h2>
-          ${stanceBar(all)}
-          ${all.length>=8 && !(syn&&(syn.themes||[]).length)?`<p style="font-size:14px;color:var(--ink-2);margin:8px 0 0">No written summary of the testimony yet.</p>`:""}
-          <div class="src"><a href="#testimony" onclick="event.preventDefault();document.getElementById('testimony').scrollIntoView({behavior:'smooth'})">Read the testimony ↓</a></div>
-        </div>`:`<div class="panel" style="padding:16px 20px">
-          <h2 style="margin-bottom:4px">Testimony at a glance</h2>
-          <p style="font-size:14.5px;color:var(--ink-2);margin:0">${esc(noTestimonySentence(hearingDate))}</p>
-        </div>`}
-        ${synthesisPanel(syn, params)}
-        <div class="panel" id="testimony">
-          <h2>Public testimony · ${fmtN(all.length)} on record</h2>
-          ${filed.length?`<div class="src" style="margin:0 0 6px"><span class="record-tag">Legislature's record</span> Written testimony filed with the ${esc(b.committee_name||comName(b.committee_code))} Committee${hearingDate?` for the ${esc(fmtDate(hearingDate))} public hearing`:""}.</div>`:""}
-          ${(b.heard_with||[]).length?`<div class="src" style="margin-bottom:6px">Heard with ${b.heard_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}: ${fmtN(filed.filter(t=>(t.shared_with||[]).length).length)} of these documents were also filed under those bills. Positions marked * are inferred for LD ${b.ld} only, and left blank when a document states no position on this bill.</div>`:""}
-          ${all.length?testimonyList(all, texts, params, syn):`<p style="font-size:14.5px;color:var(--ink-2)">${esc(noTestimonySentence(hearingDate))}</p>`}
-        </div>
-        <div class="panel">
-          <h2>History and votes</h2>
-          ${historyList(b, hearingDate)}
-          ${reports.length?`<h3 class="subh">Committee report${reports.length>1?"s":""}</h3>
-            ${reports.map(r=>`<div style="font-size:14px;margin-bottom:10px"><b>${esc(r.label||"Report")}${r.recommendation?` — ${esc(r.recommendation)}`:""}</b>${r.signer_ids&&r.signer_ids.length?`<div style="color:var(--ink-2);margin-top:3px">${r.signer_ids.map(legLink).join(", ")}</div>`:(r.signers&&r.signers.length?`<div style="color:var(--ink-2);margin-top:3px">${r.signers.map(esc).join(", ")}</div>`:"")}</div>`).join("")}`:""}
-          ${rolls.length?rollCallList(b, params.get("rc")):`<h3 class="subh">Votes</h3><p style="font-size:14.5px;margin:0">${esc(noVotesSentence(b))}</p>`}
-          ${amendments.length?`<h3 class="subh">Amendments</h3><table class="plain"><tr><th>Amendment</th><th>Status</th></tr>
-            ${amendments.map(a=>`<tr><td>${a.url?`<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.id)}</a>`:esc(a.id)}</td><td style="white-space:normal">${esc(a.status||"")}${a.sponsor?` · ${esc(a.sponsor)}`:""}${a.fiscal_note_url?` · <a href="${esc(a.fiscal_note_url)}" target="_blank" rel="noopener">fiscal note</a>`:""}</td></tr>`).join("")}
-          </table>`:""}
-        </div>
-        ${lobbyingPanel(lob)}
-        <div class="panel summary-more" id="bill-summary">
-          <h2>${sum.official?"Summary from the bill text":"Summary"}</h2>
-          ${paras.length?`<p class="summary">${esc(paras[0])}</p>${paras.length>1?`<div class="rest">${paras.slice(1).map(p=>`<p class="summary" style="margin-top:10px">${esc(p)}</p>`).join("")}</div>
-            <button class="btn ghost sm" style="margin-top:10px" onclick="var p=document.getElementById('bill-summary');p.classList.toggle('open');this.textContent=p.classList.contains('open')?'Show less':'Read full summary'">Read full summary</button>`:""}`:`<p class="summary">No summary available.</p>`}
-          ${sum.source?`<div class="src">Source: ${esc(sum.source)}${sum.official?" (Office of the Revisor of Statutes)":""}</div>`:""}
-        </div>
+  if(tab==="votes" && params.get("rc") && rolls.some(r=>String(r.id)===params.get("rc"))) pendingScroll = "rc-" + params.get("rc");
+  if(tab==="overview" && params.get("theme")!=null && syn) pendingScroll = "syn";
+
+  // ---- always visible
+  const unknown = c.unknown||0;
+  const tot = c.support + c.neutral + c.oppose;
+  const miniBar = tot ? `<div class="tile-bar" role="img" aria-label="${c.support} support, ${c.neutral} neither, ${c.oppose} oppose">${[["support","var(--support)"],["neutral","var(--neutral)"],["oppose","var(--oppose)"]].filter(([k])=>c[k]).map(([k,col])=>`<span style="width:${Math.max(2,c[k]/tot*100)}%;background:${col}"></span>`).join("")}</div>` : `<div class="tile-bar empty"></div>`;
+  const head = `
+    <div class="crumb"><a href="#/bills">Bills</a> / LD ${b.ld}</div>
+    <div class="ld">LD ${b.ld}${b.paper?` · ${esc(b.paper)}`:""} · ${esc(D.meta.legislature.toUpperCase())}</div>
+    <h1 class="bill-h1">${esc(b.title)}</h1>
+    <div class="bd-meta">
+      <span>${statusChip(b)}</span>
+      <span>Sponsor: <b>${legLink(b.sponsor_id)}</b>${sp?` (${esc(sp.party||"")}-${esc(sp.town||"")})`:""}</span>
+      <span>Committee: <b><a href="#/committee/${esc(b.committee_code)}">${esc(cname)}</a></b></span>
+      <span>${hearingDate?`Public hearing: <b>${esc(fmtDate(hearingDate))}</b>`:"No public hearing"}</span>
+      ${cos.length?`<details class="cos"><summary>${fmtN(cos.length)} cosponsor${cos.length===1?"":"s"}</summary><div style="margin-top:6px">${cos.map(legLink).join(", ")}</div></details>`:""}
+    </div>
+    ${(b.heard_with||[]).length?`<div class="src" style="margin:-10px 0 12px">Heard with ${b.heard_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}</div>`:""}
+    <div class="tiles btiles">
+      ${billTile(`#${base}?tab=testimony`, fmtN(all.length), `letter${all.length===1?"":"s"}${unknown?` · ${fmtN(unknown)} no position`:""}`, miniBar)}
+      ${billTile(`#${base}?tab=votes`, fmtN(rolls.length), `roll-call vote${rolls.length===1?"":"s"}`)}
+      ${billTile(nOrgs?`#${base}?tab=lobbying`:null, fmtN(nOrgs), `organization${nOrgs===1?"":"s"} lobbied`)}
+      ${billTile(`#${base}?tab=votes`, fmtN(amendments.length), `amendment${amendments.length===1?"":"s"}`)}
+    </div>
+    ${tabsNav(base, tabs, tab)}`;
+
+  // ---- tab bodies
+  let body = "", aside = "";
+  if(tab==="testimony"){
+    body = `<div class="panel" id="testimony">
+      <h2>Public testimony · ${fmtN(all.length)} on record</h2>
+      ${all.length?`<div class="src" style="margin:0 0 6px"><span class="record-tag">Legislature's record</span> Written testimony filed with the ${esc(cname)} Committee${hearingDate?` for the ${esc(fmtDate(hearingDate))} public hearing`:""}.</div>`:""}
+      ${(b.heard_with||[]).length?`<div class="src" style="margin-bottom:6px">Heard with ${b.heard_with.map(n=>`<a href="#/bill/${n}">LD ${n}</a>`).join(", ")}: ${fmtN(all.filter(t=>(t.shared_with||[]).length).length)} of these documents were also filed under those bills. Positions marked * are inferred for LD ${b.ld} only, and left blank when a document states no position on this bill.</div>`:""}
+      ${all.length?testimonyList(all, texts, params, syn):`<p style="font-size:14.5px;color:var(--ink-2)">${esc(noTestimonySentence(hearingDate))}</p>`}
+    </div>`;
+  }
+  else if(tab==="votes"){
+    body = `<div class="panel">
+      <h2>History</h2>
+      ${historyList(b, hearingDate)}
+      ${reports.length?`<h3 class="subh">Committee report${reports.length>1?"s":""}</h3>
+        ${reports.map(r=>`<div style="font-size:14px;margin-bottom:10px"><b>${esc(r.label||"Report")}${r.recommendation?` — ${esc(r.recommendation)}`:""}</b>${r.signer_ids&&r.signer_ids.length?`<div style="color:var(--ink-2);margin-top:3px">${r.signer_ids.map(legLink).join(", ")}</div>`:(r.signers&&r.signers.length?`<div style="color:var(--ink-2);margin-top:3px">${r.signers.map(esc).join(", ")}</div>`:"")}</div>`).join("")}`:""}
+      ${rolls.length?rollCallList(b, params.get("rc")):`<h3 class="subh">Votes</h3><p style="font-size:14.5px;margin:0">${esc(noVotesSentence(b))}</p>`}
+      ${amendments.length?`<h3 class="subh">Amendments · ${fmtN(amendments.length)}</h3><table class="plain"><tr><th>Amendment</th><th>Status</th></tr>
+        ${amendments.map(a=>`<tr><td>${a.url?`<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.id)}</a>`:esc(a.id)}</td><td style="white-space:normal">${esc(a.status||"")}${a.sponsor?` · ${esc(a.sponsor)}`:""}${a.fiscal_note_url?` · <a href="${esc(a.fiscal_note_url)}" target="_blank" rel="noopener">fiscal note</a>`:""}</td></tr>`).join("")}
+      </table>`:""}
+    </div>`;
+  }
+  else if(tab==="lobbying"){
+    body = lobbyingPanel(lob);
+  }
+  else if(tab==="text"){
+    const textLinks = [...docs.map(d=>({label:d.label, url:d.url})), ...amendments.filter(a=>a.url).map(a=>({label:`Amendment ${a.id}${a.status?` (${a.status})`:""}`, url:a.url}))];
+    body = `<div class="panel">
+        <h2>${sum.official?"Summary from the bill text":"Summary"}</h2>
+        ${paras.length?paras.map((p,i)=>`<p class="summary"${i?' style="margin-top:10px"':""}>${esc(p)}</p>`).join(""):`<p class="summary">No summary available.</p>`}
+        ${sum.source?`<div class="src">Source: ${esc(sum.source)}${sum.official?" (Office of the Revisor of Statutes)":""}</div>`:""}
       </div>
-      <aside>
+      <div class="panel"><h2>Bill text and amendments</h2>
+        ${textLinks.length?textLinks.map(d=>`<div style="font-size:14px;margin-bottom:6px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.label)} ↗</a></div>`).join(""):`<p style="font-size:14px;color:var(--ink-2)">No documents linked.</p>`}
+      </div>
+      <div class="panel"><h2>Fiscal status</h2><p style="font-size:14.5px">${esc(b.fiscal_status||"Not recorded")}</p></div>
+      ${(b.sources||[]).length?`<div class="panel"><h2>Sources</h2>${b.sources.map(s=>`<div style="font-size:13px;margin-bottom:6px;word-break:break-all"><a href="${esc(s)}" target="_blank" rel="noopener">${esc(s.replace(/^https?:\/\//,""))}</a></div>`).join("")}</div>`:""}`;
+  }
+  else {
+    const top = [...all].sort(relevantSort(texts)).slice(0,5);
+    body = `
+      <div class="panel" style="padding:16px 20px">
+        <h2 style="margin-bottom:4px">Testimony at a glance${all.length?` · ${fmtN(all.length)} letter${all.length===1?"":"s"}`:""}</h2>
+        ${all.length?stanceBar(all):`<p style="font-size:14.5px;color:var(--ink-2);margin:0">${esc(noTestimonySentence(hearingDate))}</p>`}
+      </div>
+      ${all.length?(syn&&(syn.themes||[]).length?synthesisPanel(syn, params):`<div class="panel" style="padding:16px 20px"><h2 style="margin-bottom:4px">What the testimony says</h2><p style="font-size:14.5px;color:var(--ink-2);margin:0">No written summary of the testimony yet.</p></div>`):""}
+      <div class="panel"><h2>Where it stands</h2>${billStatusStrip(b, hearingDate)}
+        <div class="src"><a href="#${base}?tab=votes">Full history and votes →</a></div></div>
+      ${top.length?`<div class="panel"><h2>From the testimony</h2>
+        <div style="display:flex;flex-direction:column;gap:10px">${top.map(t=>testimonyItem(t, texts[t.id] ?? null, {clamp:true, compact:true})).join("")}</div>
+        <div class="src" style="font-size:14px;margin-top:12px"><a href="#${base}?tab=testimony">See all ${fmtN(all.length)} letter${all.length===1?"":"s"} →</a></div></div>`:""}`;
+    aside = `<aside>
         <div class="panel">
           <h2>Add your voice</h2>
           <a class="btn primary block" href="${LEG_TESTIFY}" target="_blank" rel="noopener">Testify on the Legislature's site ↗</a>
-          <div class="side-note">The Legislature's online form sends written testimony to the ${esc(b.committee_name||comName(b.committee_code))} Committee. Submitting through MEPLE is planned for the 133rd Legislature.</div>
+          <div class="side-note">The Legislature's online form sends written testimony to the ${esc(cname)} Committee. Submitting through MEPLE is planned for the 133rd Legislature.</div>
         </div>
         ${mediaPanel(b)}
-        ${docs.length?`<div class="panel"><h2>Documents</h2>${docs.map(d=>`<div style="font-size:14px;margin-bottom:6px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.label)} ↗</a></div>`).join("")}</div>`:""}
+        ${docs.length?`<div class="panel"><h2>Documents</h2>${docs.map((d,i)=>`<div class="${i?"doc-more":""}" style="font-size:14px;margin-bottom:6px"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.label)} ↗</a></div>`).join("")}${docs.length>1?`<div class="doc-all" style="font-size:14px"><a href="#${base}?tab=text">All ${fmtN(docs.length)} documents →</a></div>`:""}</div>`:""}
         ${(b.tags||[]).length?`<div class="panel"><h2>Topics</h2><div style="display:flex;gap:8px;flex-wrap:wrap">
           ${b.tags.map(t=>`<a class="chip died" href="#/bills?q=${encodeURIComponent(t)}">${esc(t)}</a>`).join("")}</div></div>`:""}
-        ${(b.sources||[]).length?`<div class="panel"><h2>Sources</h2>${b.sources.map(s=>`<div style="font-size:13px;margin-bottom:6px;word-break:break-all"><a href="${esc(s)}" target="_blank" rel="noopener">${esc(s.replace(/^https?:\/\//,""))}</a></div>`).join("")}</div>`:""}
-      </aside>
+      </aside>`;
+  }
+  return `
+  <div class="wrap">
+    <div class="bill-head">${head}</div>
+    <div class="${aside?"bd-grid bd-tab":"bd-full"}">
+      <div class="bd-main">${body}</div>
+      ${aside}
     </div>
   </div>`;
 }
