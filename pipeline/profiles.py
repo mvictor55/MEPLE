@@ -254,7 +254,7 @@ NICKNAMES = {"josh": "joshua", "jeff": "jeffrey", "phil": "philip", "dan": "dani
 _CRED = r"(md|m d|do|d o|esq|phd|ph d|rn|dds|dmd|lcsw|mph|jd|np|pa c|cna|lpn|msw)"
 
 def _person_parts(name: str):
-    s = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode()
+    s = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().replace("'", "")   # D'Alessandro = DAlessandro
     s = re.sub(r"\(.*?\)|\"[^\"]*\"", " ", s)                      # "(corrected)", "(Maine Treasurer)", "Coralie \"Cokie\" Giles"
     s = re.sub(r"^\s*(dr|mr|mrs|ms|rev|hon)\.?\s+", "", s, flags=re.I)
     w = re.sub(r"[^a-z ]+", " ", s.lower()).split()
